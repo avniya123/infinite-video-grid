@@ -1,5 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
+import { useTranslation } from 'react-i18next';
 import { Upload, Monitor, Heart, User, Bell, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -19,6 +20,7 @@ import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export const Header = () => {
+  const { t } = useTranslation();
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState<string>('/placeholder.svg');
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
@@ -44,14 +46,14 @@ export const Header = () => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size should be less than 5MB');
+        toast.error(t('toast.imageSizeError'));
         return;
       }
 
       const reader = new FileReader();
       reader.onloadend = () => {
         setProfileImage(reader.result as string);
-        toast.success('Profile image updated successfully');
+        toast.success(t('toast.profileImageUpdated'));
       };
       reader.readAsDataURL(file);
     }
@@ -64,10 +66,10 @@ export const Header = () => {
   const handleLogout = async () => {
     try {
       await supabase.auth.signOut();
-      toast.success('Logged out successfully');
+      toast.success(t('toast.loggedOut'));
       navigate('/');
     } catch (error: any) {
-      toast.error(error.message || 'Failed to log out');
+      toast.error(error.message || t('toast.signOutError'));
     }
   };
 
@@ -96,7 +98,7 @@ export const Header = () => {
                     className="hidden sm:flex items-center gap-2 h-9 rounded-lg hover:bg-muted/50 transition-all"
                   >
                     <Upload className="w-4 h-4" />
-                    <span className="hidden lg:inline">Upload</span>
+                    <span className="hidden lg:inline">{t('header.upload')}</span>
                   </Button>
                   <input
                     ref={fileInputRef}
@@ -154,12 +156,12 @@ export const Header = () => {
                   <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuItem onClick={() => setProfileDrawerOpen(true)}>
                       <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
+                      <span>{t('header.profile')}</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
+                      <span>{t('header.logout')}</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
@@ -168,7 +170,7 @@ export const Header = () => {
                   onClick={() => setAuthDrawerOpen(true)}
                   className="h-9 px-6 rounded-lg bg-success hover:bg-success/90 text-success-foreground font-medium shadow-sm hover:shadow-md transition-all"
                 >
-                  Sign In
+                  {t('header.signIn')}
                 </Button>
               )}
             </div>
