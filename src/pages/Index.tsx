@@ -69,13 +69,13 @@ const Index = () => {
 
   const handlePlayVideo = (video: VideoItem) => {
     toast.success(`Playing: ${video.title}`, {
-      description: 'Video player would open here',
+      description: video.videoUrl ? `Video file: ${video.videoUrl}` : 'Video player would open here',
     });
   };
 
   const handleVideoClick = (video: VideoItem) => {
-    toast.info(`Opening details for: ${video.title}`, {
-      description: 'Detail page would open here',
+    toast.info(`Video Details: ${video.title}`, {
+      description: `Duration: ${video.duration} • ${video.orientation} • Price: $${video.price}`,
     });
   };
 
@@ -85,7 +85,7 @@ const Index = () => {
       <header className="max-w-7xl mx-auto px-4 py-6">
         <h1 className="text-3xl font-bold text-foreground">Video Gallery</h1>
         <p className="text-sm text-muted-foreground mt-1">
-          Hover cards for animation • Auto-load as you scroll • Replace mock API with your endpoint
+          Professional stock video footage with real thumbnails • Infinite scroll • Click to preview
         </p>
       </header>
 

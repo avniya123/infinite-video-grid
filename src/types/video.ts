@@ -8,5 +8,6 @@ export interface VideoItem {
   orientation: 'Landscape' | 'Portrait' | 'Square';
   trending: boolean;
   image: string;
+  videoUrl?: string;
   aspectRatio?: number;
 }
