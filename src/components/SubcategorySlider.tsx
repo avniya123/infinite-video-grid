@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 
 interface SubcategorySliderProps {
   category: string;
+  selectedSubcategory: string | null;
+  onSubcategorySelect: (subcategory: string | null) => void;
 }
 
 const subcategoryData: Record<string, string[]> = {
@@ -88,7 +90,7 @@ const subcategoryData: Record<string, string[]> = {
   ],
 };
 
-export const SubcategorySlider = ({ category }: SubcategorySliderProps) => {
+export const SubcategorySlider = ({ category, selectedSubcategory, onSubcategorySelect }: SubcategorySliderProps) => {
   const [scrollPosition, setScrollPosition] = useState(0);
   const subcategories = subcategoryData[category] || [];
   
@@ -128,8 +130,13 @@ export const SubcategorySlider = ({ category }: SubcategorySliderProps) => {
             {subcategories.map((subcategory) => (
               <Badge
                 key={subcategory}
-                variant="outline"
-                className="px-4 py-2 cursor-pointer whitespace-nowrap border-primary/20 hover:bg-primary hover:text-primary-foreground transition-all"
+                variant={selectedSubcategory === subcategory ? "default" : "outline"}
+                onClick={() => onSubcategorySelect(selectedSubcategory === subcategory ? null : subcategory)}
+                className={`px-4 py-2 cursor-pointer whitespace-nowrap transition-all ${
+                  selectedSubcategory === subcategory
+                    ? 'bg-primary text-primary-foreground border-primary'
+                    : 'border-primary/20 hover:bg-primary hover:text-primary-foreground'
+                }`}
               >
                 {subcategory}
               </Badge>

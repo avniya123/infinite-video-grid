@@ -38,6 +38,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
   const [selectedDurations, setSelectedDurations] = useState<DurationFilter[]>([]);
   const [selectedAspectRatios, setSelectedAspectRatios] = useState<AspectRatioFilter[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRangeFilter[]>([]);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
 
@@ -89,6 +90,10 @@ export const useVideoFilters = (videos: VideoItem[]) => {
         const query = searchQuery.toLowerCase().trim();
         return video.title.toLowerCase().includes(query);
       })
+      .filter(video => {
+        if (!selectedSubcategory) return true;
+        return video.title.toLowerCase().includes(selectedSubcategory.toLowerCase());
+      })
       .sort((a, b) => {
         switch (sortBy) {
           case 'price-low':
@@ -102,7 +107,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
             return b.id - a.id;
         }
       });
-  }, [videos, selectedCategories, selectedDurations, selectedAspectRatios, selectedPriceRanges, searchQuery, sortBy, filterByDuration]);
+  }, [videos, selectedCategories, selectedDurations, selectedAspectRatios, selectedPriceRanges, selectedSubcategory, searchQuery, sortBy, filterByDuration]);
 
   // Toggle handlers
   const handleCategoryToggle = useCallback((category: VideoCategory) => {
@@ -127,6 +132,10 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     setSelectedPriceRanges(prev => 
       prev.includes(priceRange) ? prev.filter(p => p !== priceRange) : [...prev, priceRange]
     );
+  }, []);
+
+  const handleSubcategorySelect = useCallback((subcategory: string | null) => {
+    setSelectedSubcategory(subcategory);
   }, []);
 
   // Select/Clear all handlers
@@ -168,6 +177,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     setSelectedDurations([]);
     setSelectedAspectRatios([]);
     setSelectedPriceRanges([]);
+    setSelectedSubcategory(null);
     setSearchQuery('');
     toast.success('All filters cleared');
   }, []);
@@ -176,6 +186,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     selectedDurations.length > 0 || 
     selectedAspectRatios.length > 0 || 
     selectedPriceRanges.length > 0 || 
+    selectedSubcategory !== null ||
     searchQuery !== '';
 
   return {
@@ -184,6 +195,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     selectedDurations,
     selectedAspectRatios,
     selectedPriceRanges,
+    selectedSubcategory,
     searchQuery,
     sortBy,
     filteredVideos,
@@ -196,6 +208,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     handleDurationToggle,
     handleAspectRatioToggle,
     handlePriceRangeToggle,
+    handleSubcategorySelect,
     // Bulk handlers
     handleSelectAllCategories,
     handleClearCategories,

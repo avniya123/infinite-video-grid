@@ -63,6 +63,7 @@ const Index = () => {
     selectedDurations,
     selectedAspectRatios,
     selectedPriceRanges,
+    selectedSubcategory,
     searchQuery,
     sortBy,
     filteredVideos,
@@ -73,6 +74,7 @@ const Index = () => {
     handleDurationToggle,
     handleAspectRatioToggle,
     handlePriceRangeToggle,
+    handleSubcategorySelect,
     handleSelectAllCategories,
     handleClearCategories,
     handleSelectAllDurations,
@@ -191,7 +193,10 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
-      <Header />
+      <Header 
+        selectedSubcategory={selectedSubcategory}
+        onSubcategorySelect={handleSubcategorySelect}
+      />
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
