@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Chrome, AlertCircle, Facebook, Twitter, Github, Eye, EyeOff } from 'lucide-react';
+import { X, Chrome, AlertCircle, Facebook, Twitter, Github, Eye, EyeOff, Loader2 } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -60,6 +60,15 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
+  // Location lookup state
+  const [locationData, setLocationData] = useState<{
+    city: string;
+    state: string;
+    country: string;
+    district?: string;
+  } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+
   // Load remember me preference on mount
   useEffect(() => {
     const savedRememberMe = localStorage.getItem('rememberMe');
@@ -83,6 +92,33 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
     // Clear error for this field
     if (signupErrors[name as keyof typeof signupErrors]) {
       setSignupErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+
+    // Trigger location lookup when pincode changes
+    if (name === 'pincode' && value.length >= 4) {
+      lookupPincode(value);
+    } else if (name === 'pincode' && value.length < 4) {
+      setLocationData(null);
+    }
+  };
+
+  const lookupPincode = async (pincode: string) => {
+    setLocationLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('lookup-pincode', {
+        body: { pincode, countryCode: 'US' }
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        setLocationData(data);
+      }
+    } catch (error: any) {
+      console.error('Error looking up pincode:', error);
+      setLocationData(null);
+    } finally {
+      setLocationLoading(false);
     }
   };
 
@@ -670,6 +706,30 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                     className="h-11 rounded-xl"
                     required
                   />
+                  {locationLoading && (
+                    <p className="text-xs text-muted-foreground flex items-center gap-2">
+                      <Loader2 className="h-3 w-3 animate-spin" />
+                      Looking up location...
+                    </p>
+                  )}
+                  {locationData && !locationLoading && (
+                    <div className="text-xs text-muted-foreground space-y-1 p-2 bg-muted/30 rounded-md">
+                      <p className="flex items-center gap-1">
+                        <span className="font-medium">City:</span> {locationData.city}
+                      </p>
+                      {locationData.district && (
+                        <p className="flex items-center gap-1">
+                          <span className="font-medium">District:</span> {locationData.district}
+                        </p>
+                      )}
+                      <p className="flex items-center gap-1">
+                        <span className="font-medium">State:</span> {locationData.state}
+                      </p>
+                      <p className="flex items-center gap-1">
+                        <span className="font-medium">Country:</span> {locationData.country}
+                      </p>
+                    </div>
+                  )}
                 </div>
 
                 <Button

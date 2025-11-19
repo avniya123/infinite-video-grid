@@ -61,6 +61,15 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     loginAlerts: true,
   });
 
+  // Location lookup state
+  const [locationData, setLocationData] = useState<{
+    city: string;
+    state: string;
+    country: string;
+    district?: string;
+  } | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+
   useEffect(() => {
     if (open) {
       checkUser();
@@ -447,6 +456,30 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     />
                     {errors.pincode && (
                       <p className="text-sm text-destructive">{errors.pincode}</p>
+                    )}
+                    {locationLoading && (
+                      <p className="text-xs text-muted-foreground flex items-center gap-2">
+                        <Loader2 className="h-3 w-3 animate-spin" />
+                        Looking up location...
+                      </p>
+                    )}
+                    {locationData && !locationLoading && (
+                      <div className="text-xs text-muted-foreground space-y-1 p-2 bg-muted/30 rounded-md">
+                        <p className="flex items-center gap-1">
+                          <span className="font-medium">City:</span> {locationData.city}
+                        </p>
+                        {locationData.district && (
+                          <p className="flex items-center gap-1">
+                            <span className="font-medium">District:</span> {locationData.district}
+                          </p>
+                        )}
+                        <p className="flex items-center gap-1">
+                          <span className="font-medium">State:</span> {locationData.state}
+                        </p>
+                        <p className="flex items-center gap-1">
+                          <span className="font-medium">Country:</span> {locationData.country}
+                        </p>
+                      </div>
                     )}
                   </div>
 

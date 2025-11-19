@@ -1,1 +1,4 @@
 project_id = "aofjpnitqijesdtgiood"
+
+[functions.lookup-pincode]
+verify_jwt = false
