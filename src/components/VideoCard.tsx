@@ -93,18 +93,18 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   };
 
   const handleMouseEnter = () => {
-    // Only start video preview if card is in view and video is loaded
-    if (!isInView || !videoLoaded) return;
+    // Only start video preview if card is in view
+    if (!isInView) return;
     
     setIsHovering(true);
-    // Start playing video after 500ms hover
+    // Start playing video immediately on hover
     hoverTimerRef.current = setTimeout(() => {
-      if (videoRef.current && videoLoaded) {
+      if (videoRef.current) {
         setShowVideo(true);
         setIsBuffering(true);
         videoRef.current.play().catch(err => console.log('Play failed:', err));
       }
-    }, 500);
+    }, 150);
   };
 
   const handleMouseLeave = () => {
@@ -172,7 +172,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               loop
               muted
               playsInline
-              preload="none"
+              preload="metadata"
               onLoadedData={() => setVideoLoaded(true)}
               onWaiting={() => setIsBuffering(true)}
               onCanPlay={() => setIsBuffering(false)}
