@@ -1,4 +1,4 @@
-import { useState, useMemo, useCallback, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { toast } from 'sonner';
 
@@ -6,21 +6,6 @@ type DurationFilter = 'Teaser' | 'Trailer' | 'Gimbel' | 'Document';
 type AspectRatioFilter = '16:9' | '9:16' | '1:1' | '4:3' | '3:4' | '21:9' | '9:21' | '2:3' | '3:2';
 type PriceRangeFilter = 'Under $50' | '$50-$100' | '$100-$200' | 'Over $200';
 type SortOption = 'newest' | 'price-low' | 'price-high' | 'popular';
-
-// Mapping from header categories to video categories
-const headerCategoryMapping: Record<string, VideoCategory[]> = {
-  'Personal Celebrations': ['Lifestyle', 'Nature'],
-  'Festival Celebrations': ['Lifestyle', 'Urban'],
-  'National & Public Holidays': ['Urban', 'Lifestyle'],
-  'Corporate & Office': ['Business'],
-  'Entertainment & Showbiz': ['Lifestyle', 'Urban'],
-  'Sports & Competition': ['Lifestyle'],
-  'Environmental & Nature': ['Nature'],
-  'Corporate Events': ['Business', 'Urban'],
-  'Marketing & Advertising': ['Business'],
-  'Professional Services': ['Business'],
-  'E-commerce': ['Business', 'Urban'],
-};
 
 export const aspectRatioFilters: { value: AspectRatioFilter; label: string; category: 'Landscape' | 'Portrait' | 'Square' }[] = [
   { value: '16:9', label: 'Landscape 16:9', category: 'Landscape' },
@@ -48,27 +33,13 @@ export const priceRangeFilters: { value: PriceRangeFilter; label: string; range:
   { value: 'Over $200', label: 'Over $200', range: [200, Infinity] },
 ];
 
-export const useVideoFilters = (videos: VideoItem[], headerCategories: string[] = []) => {
+export const useVideoFilters = (videos: VideoItem[]) => {
   const [selectedCategories, setSelectedCategories] = useState<VideoCategory[]>([]);
   const [selectedDurations, setSelectedDurations] = useState<DurationFilter[]>([]);
   const [selectedAspectRatios, setSelectedAspectRatios] = useState<AspectRatioFilter[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRangeFilter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
-
-  // Convert header categories to video categories
-  const mappedHeaderCategories = useMemo(() => {
-    if (headerCategories.length === 0) return [];
-    
-    const mapped = new Set<VideoCategory>();
-    headerCategories.forEach(headerCat => {
-      const videoCats = headerCategoryMapping[headerCat];
-      if (videoCats) {
-        videoCats.forEach(cat => mapped.add(cat));
-      }
-    });
-    return Array.from(mapped);
-  }, [headerCategories]);
 
   // Parse video duration from "MM:SS" to seconds
   const parseDuration = useCallback((durationStr: string): number => {
@@ -96,16 +67,7 @@ export const useVideoFilters = (videos: VideoItem[], headerCategories: string[] 
   // Memoized filtered and sorted videos
   const filteredVideos = useMemo(() => {
     return videos
-      .filter(video => {
-        // Combine sidebar categories and header categories
-        const hasNoFilters = selectedCategories.length === 0 && mappedHeaderCategories.length === 0;
-        if (hasNoFilters) return true;
-        
-        const matchesSidebarCategory = selectedCategories.length === 0 || selectedCategories.includes(video.category);
-        const matchesHeaderCategory = mappedHeaderCategories.length === 0 || mappedHeaderCategories.includes(video.category);
-        
-        return matchesSidebarCategory && matchesHeaderCategory;
-      })
+      .filter(video => selectedCategories.length === 0 || selectedCategories.includes(video.category))
       .filter(filterByDuration)
       .filter(video => {
         if (selectedAspectRatios.length === 0) return true;
@@ -140,7 +102,7 @@ export const useVideoFilters = (videos: VideoItem[], headerCategories: string[] 
             return b.id - a.id;
         }
       });
-  }, [videos, selectedCategories, mappedHeaderCategories, selectedDurations, selectedAspectRatios, selectedPriceRanges, searchQuery, sortBy, filterByDuration]);
+  }, [videos, selectedCategories, selectedDurations, selectedAspectRatios, selectedPriceRanges, searchQuery, sortBy, filterByDuration]);
 
   // Toggle handlers
   const handleCategoryToggle = useCallback((category: VideoCategory) => {
