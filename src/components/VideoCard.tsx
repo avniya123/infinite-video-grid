@@ -5,6 +5,7 @@ import { Play, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
+import { VideoTimeline } from '@/components/VideoTimeline';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -222,6 +223,14 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               </div>
             </div>
           </div>
+
+          {/* Video Timeline with Thumbnails */}
+          {video.videoUrl && (
+            <VideoTimeline 
+              videoUrl={video.videoUrl} 
+              isVisible={isHovering && !showVideo}
+            />
+          )}
         </div>
       </AspectRatio>
     </article>
