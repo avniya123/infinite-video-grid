@@ -6,6 +6,7 @@ import { ThemeToggle } from '@/components/ThemeToggle';
 import { FilterChips } from '@/components/FilterChips';
 import { FilterDropdowns } from '@/components/FilterDropdowns';
 import { ScrollToTop } from '@/components/ScrollToTop';
+import { ShareButton } from '@/components/ShareButton';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
@@ -318,7 +319,7 @@ const Index = () => {
             {filteredVideos.map((video, index) => (
               <div 
                 key={video.id} 
-                className="flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
+                className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
                 style={{ animationDelay: `${index * 0.05}s` }}
                 onClick={() => handleVideoClick(video)}
               >
@@ -339,15 +340,31 @@ const Index = () => {
                     Play
                   </Button>
                 </div>
-                <div className="flex-1">
-                  <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
-                  <p className="text-sm text-muted-foreground mb-2">
-                    {video.duration} • {video.category} • {video.orientation}
-                  </p>
-                  <div className="flex items-center gap-2">
-                    <span className="text-xl font-bold text-primary">{video.price}</span>
-                    <span className="text-sm text-muted-foreground line-through">{video.mrp}</span>
+                <div className="flex-1 flex flex-col">
+                  <div className="flex items-start justify-between mb-2">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
+                      <p className="text-sm text-muted-foreground mb-2">
+                        {video.duration} • {video.category} • {video.orientation} • {video.resolution}
+                      </p>
+                    </div>
+                    {/* Share Button - visible on hover */}
+                    <div 
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <ShareButton video={video} variant="outline" size="icon" />
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2 mt-auto">
+                    <span className="text-xl font-bold text-primary">${video.price}</span>
+                    <span className="text-sm text-muted-foreground line-through">${video.mrp}</span>
                     <span className="text-sm text-discount font-semibold">{video.discount}</span>
+                    {video.trending && (
+                      <span className="ml-2 px-2 py-0.5 bg-trending text-trending-foreground text-xs font-semibold rounded">
+                        TRENDING
+                      </span>
+                    )}
                   </div>
                 </div>
               </div>
