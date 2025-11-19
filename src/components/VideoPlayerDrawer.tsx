@@ -24,20 +24,40 @@ import {
 import { Slider } from '@/components/ui/slider';
 import { Download, Settings, RotateCcw, Play, Clock, Maximize2, Tag, TrendingUp, X } from 'lucide-react';
 import { toast } from 'sonner';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { ShareButton } from '@/components/ShareButton';
 
 interface VideoPlayerDrawerProps {
   video: VideoItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  startTime?: number;
 }
 
-export function VideoPlayerDrawer({ video, open, onOpenChange }: VideoPlayerDrawerProps) {
+export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: VideoPlayerDrawerProps) {
   const [brightness, setBrightness] = useState(100);
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  
+  // Seek to start time when video loads
+  useEffect(() => {
+    if (videoRef.current && startTime > 0) {
+      const handleLoadedMetadata = () => {
+        if (videoRef.current && video?.videoUrl) {
+          const duration = videoRef.current.duration;
+          videoRef.current.currentTime = duration * startTime;
+        }
+      };
+      
+      videoRef.current.addEventListener('loadedmetadata', handleLoadedMetadata);
+      
+      return () => {
+        videoRef.current?.removeEventListener('loadedmetadata', handleLoadedMetadata);
+      };
+    }
+  }, [startTime, video?.videoUrl]);
   
   if (!video) return null;
 
@@ -66,6 +86,7 @@ export function VideoPlayerDrawer({ video, open, onOpenChange }: VideoPlayerDraw
         <div className="relative bg-black">
           <AspectRatio ratio={16 / 9} className="bg-black">
             <video
+              ref={videoRef}
               key={video.videoUrl}
               controls
               autoPlay

@@ -4,9 +4,10 @@ import { generateVideoThumbnails, getThumbnailIndexFromPosition } from '@/utils/
 interface VideoTimelineProps {
   videoUrl: string;
   isVisible: boolean;
+  onSeek?: (position: number) => void;
 }
 
-export function VideoTimeline({ videoUrl, isVisible }: VideoTimelineProps) {
+export function VideoTimeline({ videoUrl, isVisible, onSeek }: VideoTimelineProps) {
   const [thumbnails, setThumbnails] = useState<string[]>([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [hoverPosition, setHoverPosition] = useState(0);
@@ -40,6 +41,17 @@ export function VideoTimeline({ videoUrl, isVisible }: VideoTimelineProps) {
     setCurrentIndex(Math.min(index, thumbnails.length - 1));
   };
 
+  const handleClick = (e: React.MouseEvent<HTMLDivElement>) => {
+    e.stopPropagation();
+    if (!timelineRef.current || !onSeek) return;
+    
+    const rect = timelineRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const position = Math.max(0, Math.min(1, x / rect.width));
+    
+    onSeek(position);
+  };
+
   if (!isVisible || loading) return null;
 
   return (
@@ -69,6 +81,7 @@ export function VideoTimeline({ videoUrl, isVisible }: VideoTimelineProps) {
         ref={timelineRef}
         className="h-1 bg-white/30 backdrop-blur-sm rounded-full cursor-pointer overflow-hidden"
         onMouseMove={handleMouseMove}
+        onClick={handleClick}
       >
         {/* Progress indicator */}
         <div

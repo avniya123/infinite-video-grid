@@ -44,6 +44,7 @@ const Index = () => {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
+  const [videoStartTime, setVideoStartTime] = useState(0);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Use custom filter hook
@@ -129,9 +130,17 @@ const Index = () => {
   }, [loading, finished, loadNextPage]);
 
   // Event handlers
-  const handlePlayVideo = useCallback((video: VideoItem) => {
+  const handlePlayVideo = useCallback((video: VideoItem, seekTime?: number) => {
     setSelectedVideo(video);
+    setVideoStartTime(seekTime || 0);
     setDrawerOpen(true);
+  }, []);
+
+  const handleDrawerChange = useCallback((open: boolean) => {
+    setDrawerOpen(open);
+    if (!open) {
+      setVideoStartTime(0); // Reset seek time when closing
+    }
   }, []);
 
   const handleVideoClick = useCallback((video: VideoItem) => {
@@ -407,7 +416,8 @@ const Index = () => {
       <VideoPlayerDrawer
         video={selectedVideo}
         open={drawerOpen}
-        onOpenChange={setDrawerOpen}
+        onOpenChange={handleDrawerChange}
+        startTime={videoStartTime}
       />
 
       <ScrollToTop />
