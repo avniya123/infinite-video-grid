@@ -105,16 +105,18 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
               </div>
             </div>
             
-            <div className="flex items-start gap-3 shrink-0">
-              {/* Price Section - Vertically Stacked */}
-              <div className="text-right space-y-1">
+            <div className="flex flex-col items-end gap-3 shrink-0">
+              {/* Price Section */}
+              <div className="text-right">
                 <div className="text-lg font-bold text-foreground">₹ {video.price}</div>
-                <div className="text-xs text-muted-foreground line-through">MRP: ₹ {video.mrp}</div>
-                <div className="text-xs text-destructive font-medium">{video.discount} Off</div>
+                <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                  <span className="text-xs text-muted-foreground line-through">MRP: ₹ {video.mrp}</span>
+                  <span className="text-xs text-destructive font-medium">( {video.discount} Off )</span>
+                </div>
               </div>
               
               {/* Action Buttons */}
-              <div className="flex flex-col gap-2">
+              <div className="flex gap-2">
                 <Button size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
                   <ShoppingCart className="h-3.5 w-3.5" />
                   Share Cart
