@@ -66,15 +66,15 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="bottom" className="h-[90vh] overflow-y-auto">
-        <SheetHeader>
-          <SheetTitle>Video Variations</SheetTitle>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
+        <SheetHeader className="p-6 pb-4 border-b">
+          <SheetTitle className="text-xl">Video Variations</SheetTitle>
           <SheetDescription>
             Explore different versions and formats of this video
           </SheetDescription>
         </SheetHeader>
 
-        <div className="space-y-6 pb-6">
+        <div className="p-6 space-y-6 pb-6">
           {/* Video Player */}
           {currentVideo && (
             <VideoPlayer
