@@ -1,25 +1,19 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useCallback } from 'react';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+import { ThemeToggle } from '@/components/ThemeToggle';
+import { FilterChips } from '@/components/FilterChips';
+import { FilterDropdowns } from '@/components/FilterDropdowns';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
-import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, Clock, Search, ChevronDown, X, Filter, DollarSign, Maximize, ArrowUpDown } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { useVideoFilters } from '@/hooks/useVideoFilters';
 
 const PAGE_SIZE = 8;
-
-type DurationFilter = 'All' | 'Teaser' | 'Trailer' | 'Gimbel' | 'Document';
-type AspectRatioFilter = '16:9' | '9:16' | '1:1' | '4:3' | '3:4' | '21:9' | '9:21' | '2:3' | '3:2';
-type PriceRangeFilter = 'Under $50' | '$50-$100' | '$100-$200' | 'Over $200';
-type SortOption = 'newest' | 'price-low' | 'price-high' | 'popular';
 
 const categories: { value: VideoCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'All', label: 'All Videos', icon: null },
@@ -29,65 +23,17 @@ const categories: { value: VideoCategory; label: string; icon: React.ReactNode }
   { value: 'Lifestyle', label: 'Lifestyle', icon: <Users className="w-4 h-4" /> },
 ];
 
-const durationFilters: { value: DurationFilter; label: string; range: string }[] = [
-  { value: 'Teaser', label: 'Teaser', range: '0-1 min' },
-  { value: 'Trailer', label: 'Trailer', range: '1-3 min' },
-  { value: 'Gimbel', label: 'Gimbel', range: '3-5 min' },
-  { value: 'Document', label: 'Document', range: '5+ min' },
-];
-
-const aspectRatioFilters: { value: AspectRatioFilter; label: string; category: 'Landscape' | 'Portrait' | 'Square' }[] = [
-  { value: '16:9', label: 'Landscape 16:9', category: 'Landscape' },
-  { value: '21:9', label: 'Ultrawide 21:9', category: 'Landscape' },
-  { value: '4:3', label: 'Standard 4:3', category: 'Landscape' },
-  { value: '3:2', label: 'Classic 3:2', category: 'Landscape' },
-  { value: '9:16', label: 'Portrait 9:16', category: 'Portrait' },
-  { value: '9:21', label: 'Tall 9:21', category: 'Portrait' },
-  { value: '3:4', label: 'Portrait 3:4', category: 'Portrait' },
-  { value: '2:3', label: 'Portrait 2:3', category: 'Portrait' },
-  { value: '1:1', label: 'Square 1:1', category: 'Square' },
-];
-
-const priceRangeFilters: { value: PriceRangeFilter; label: string; range: [number, number] }[] = [
-  { value: 'Under $50', label: 'Under $50', range: [0, 50] },
-  { value: '$50-$100', label: '$50 - $100', range: [50, 100] },
-  { value: '$100-$200', label: '$100 - $200', range: [100, 200] },
-  { value: 'Over $200', label: 'Over $200', range: [200, Infinity] },
-];
-
-const sortOptions: { value: SortOption; label: string }[] = [
+const sortOptions: { value: string; label: string }[] = [
   { value: 'newest', label: 'Newest First' },
   { value: 'popular', label: 'Most Popular' },
   { value: 'price-low', label: 'Price: Low to High' },
   { value: 'price-high', label: 'Price: High to Low' },
 ];
 
-const AspectRatioIcon = ({ ratio }: { ratio: string }) => {
-  const ratioStyles: Record<string, { width: string; height: string }> = {
-    '16:9': { width: '32px', height: '18px' },
-    '21:9': { width: '32px', height: '13px' },
-    '4:3': { width: '28px', height: '21px' },
-    '3:2': { width: '30px', height: '20px' },
-    '9:16': { width: '18px', height: '32px' },
-    '9:21': { width: '13px', height: '32px' },
-    '3:4': { width: '21px', height: '28px' },
-    '2:3': { width: '20px', height: '30px' },
-    '1:1': { width: '24px', height: '24px' },
-  };
-
-  const style = ratioStyles[ratio] || { width: '24px', height: '24px' };
-
-  return (
-    <div 
-      className="border-2 border-primary rounded-sm bg-primary/10 flex-shrink-0"
-      style={style}
-    />
-  );
-};
-
 type ViewMode = 'masonry' | 'grid' | 'list';
 
 const Index = () => {
+  // State
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [loading, setLoading] = useState(false);
@@ -95,16 +41,38 @@ const Index = () => {
   const [total, setTotal] = useState<number | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedCategories, setSelectedCategories] = useState<VideoCategory[]>([]);
-  const [selectedDurations, setSelectedDurations] = useState<DurationFilter[]>([]);
-  const [selectedAspectRatios, setSelectedAspectRatios] = useState<AspectRatioFilter[]>([]);
-  const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRangeFilter[]>([]);
-  const [searchQuery, setSearchQuery] = useState('');
-  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const loadNextPage = async () => {
+  // Use custom filter hook
+  const {
+    selectedCategories,
+    selectedDurations,
+    selectedAspectRatios,
+    selectedPriceRanges,
+    searchQuery,
+    sortBy,
+    filteredVideos,
+    hasActiveFilters,
+    setSearchQuery,
+    setSortBy,
+    handleCategoryToggle,
+    handleDurationToggle,
+    handleAspectRatioToggle,
+    handlePriceRangeToggle,
+    handleSelectAllCategories,
+    handleClearCategories,
+    handleSelectAllDurations,
+    handleClearDurations,
+    handleSelectAllAspectRatios,
+    handleClearAspectRatios,
+    handleSelectAllPriceRanges,
+    handleClearPriceRanges,
+    handleResetFilters,
+  } = useVideoFilters(videos);
+
+  // Load next page of videos
+  const loadNextPage = useCallback(async () => {
     if (loading || finished) return;
 
     setLoading(true);
@@ -120,7 +88,6 @@ const Index = () => {
       setTotal(result.total);
       setCurrentPage(prev => prev + 1);
 
-      // Check if we've loaded everything
       if (result.total && videos.length + result.items.length >= result.total) {
         setFinished(true);
       }
@@ -130,12 +97,14 @@ const Index = () => {
     } finally {
       setLoading(false);
     }
-  };
+  }, [loading, finished, currentPage, videos.length]);
 
+  // Initial load
   useEffect(() => {
     loadNextPage();
-  }, []);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Infinite scroll observer
   useEffect(() => {
     if (!sentinelRef.current) return;
 
@@ -155,173 +124,22 @@ const Index = () => {
     observer.observe(sentinelRef.current);
 
     return () => observer.disconnect();
-  }, [loading, finished, currentPage]);
+  }, [loading, finished, loadNextPage]);
 
-  const handlePlayVideo = (video: VideoItem) => {
+  // Event handlers
+  const handlePlayVideo = useCallback((video: VideoItem) => {
     setSelectedVideo(video);
     setDrawerOpen(true);
-  };
+  }, []);
 
-  const handleVideoClick = (video: VideoItem) => {
-    toast.info(`Video Details: ${video.title}`, {
-      description: `Duration: ${video.duration} • ${video.orientation} • Price: $${video.price}`,
+  const handleVideoClick = useCallback((video: VideoItem) => {
+    toast.info(`${video.title}`, {
+      description: `${video.duration} • ${video.category} • ${video.price}`,
     });
-  };
-
-  const handleCategoryToggle = (category: VideoCategory) => {
-    setSelectedCategories(prev => {
-      if (prev.includes(category)) {
-        return prev.filter(c => c !== category);
-      } else {
-        return [...prev, category];
-      }
-    });
-  };
-
-  const handleSelectAllCategories = () => {
-    const allCategories = categories.filter(cat => cat.value !== 'All').map(cat => cat.value);
-    setSelectedCategories(allCategories);
-  };
-
-  const handleClearCategories = () => {
-    setSelectedCategories([]);
-  };
-
-  const handleDurationToggle = (duration: DurationFilter) => {
-    setSelectedDurations(prev => {
-      if (prev.includes(duration)) {
-        return prev.filter(d => d !== duration);
-      } else {
-        return [...prev, duration];
-      }
-    });
-  };
-
-  const handleSelectAllDurations = () => {
-    const allDurations = durationFilters.filter(filter => filter.value !== 'All').map(filter => filter.value);
-    setSelectedDurations(allDurations);
-  };
-
-  const handleClearDurations = () => {
-    setSelectedDurations([]);
-  };
-
-  const handleAspectRatioToggle = (ratio: AspectRatioFilter) => {
-    setSelectedAspectRatios(prev => {
-      if (prev.includes(ratio)) {
-        return prev.filter(r => r !== ratio);
-      } else {
-        return [...prev, ratio];
-      }
-    });
-  };
-
-  const handleSelectAllAspectRatios = () => {
-    const allRatios = aspectRatioFilters.map(r => r.value);
-    setSelectedAspectRatios(allRatios);
-  };
-
-  const handleClearAspectRatios = () => {
-    setSelectedAspectRatios([]);
-  };
-
-  const handlePriceRangeToggle = (priceRange: PriceRangeFilter) => {
-    setSelectedPriceRanges(prev => {
-      if (prev.includes(priceRange)) {
-        return prev.filter(p => p !== priceRange);
-      } else {
-        return [...prev, priceRange];
-      }
-    });
-  };
-
-  const handleSelectAllPriceRanges = () => {
-    const allRanges = priceRangeFilters.map(p => p.value);
-    setSelectedPriceRanges(allRanges);
-  };
-
-  const handleClearPriceRanges = () => {
-    setSelectedPriceRanges([]);
-  };
-
-  const parseDuration = (durationStr: string): number => {
-    // Parse "MM:SS" format to total seconds
-    const [minutes, seconds] = durationStr.split(':').map(Number);
-    return minutes * 60 + seconds;
-  };
-
-  const filterByDuration = (video: VideoItem): boolean => {
-    if (selectedDurations.length === 0) return true;
-    
-    const durationInSeconds = parseDuration(video.duration);
-    
-    return selectedDurations.some(duration => {
-      switch (duration) {
-        case 'Teaser': // 0-1 min
-          return durationInSeconds <= 60;
-        case 'Trailer': // 1-3 min
-          return durationInSeconds > 60 && durationInSeconds <= 180;
-        case 'Gimbel': // 3-5 min
-          return durationInSeconds > 180 && durationInSeconds <= 300;
-        case 'Document': // 5+ min
-          return durationInSeconds > 300;
-        default:
-          return true;
-      }
-    });
-  };
-
-  const filteredVideos = videos
-    .filter(video => selectedCategories.length === 0 || selectedCategories.includes(video.category))
-    .filter(filterByDuration)
-    .filter(video => {
-      if (selectedAspectRatios.length === 0) return true;
-      // Map selected aspect ratios to their orientation categories
-      const selectedOrientations = selectedAspectRatios.map(ratio => 
-        aspectRatioFilters.find(f => f.value === ratio)?.category
-      );
-      return selectedOrientations.includes(video.orientation);
-    })
-    .filter(video => {
-      if (selectedPriceRanges.length === 0) return true;
-      const price = parseFloat(video.price.replace('$', ''));
-      return selectedPriceRanges.some(range => {
-        const [min, max] = priceRangeFilters.find(f => f.value === range)!.range;
-        return price >= min && price < max;
-      });
-    })
-    .filter(video => {
-      if (!searchQuery.trim()) return true;
-      const query = searchQuery.toLowerCase().trim();
-      return video.title.toLowerCase().includes(query);
-    })
-    .sort((a, b) => {
-      switch (sortBy) {
-        case 'price-low':
-          return parseFloat(a.price.replace('$', '')) - parseFloat(b.price.replace('$', ''));
-        case 'price-high':
-          return parseFloat(b.price.replace('$', '')) - parseFloat(a.price.replace('$', ''));
-        case 'popular':
-          return b.trending ? 1 : -1;
-        case 'newest':
-        default:
-          return b.id - a.id;
-      }
-    });
-
-  const handleResetFilters = () => {
-    setSelectedCategories([]);
-    setSelectedDurations([]);
-    setSelectedAspectRatios([]);
-    setSelectedPriceRanges([]);
-    setSearchQuery('');
-    toast.success('All filters cleared');
-  };
-
-  const hasActiveFilters = selectedCategories.length > 0 || selectedDurations.length > 0 || selectedAspectRatios.length > 0 || selectedPriceRanges.length > 0 || searchQuery !== '';
+  }, []);
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
       <header className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Title and Search Row */}
@@ -343,9 +161,12 @@ const Index = () => {
                 placeholder="Search videos by title..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
-                className="pl-10 pr-4 h-9 w-full"
+                className="pl-10 pr-4 h-9 w-full transition-all duration-200 focus:ring-2"
               />
             </div>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
 
             {/* Reset Filters Button */}
             {hasActiveFilters && (
@@ -353,7 +174,7 @@ const Index = () => {
                 variant="outline"
                 size="sm"
                 onClick={handleResetFilters}
-                className="h-9 whitespace-nowrap"
+                className="h-9 whitespace-nowrap transition-all duration-200 hover:scale-105"
               >
                 <X className="w-4 h-4 mr-2" />
                 Reset
@@ -394,352 +215,44 @@ const Index = () => {
         </div>
 
         {/* Filter Dropdowns */}
-        <div className="flex gap-3 items-center flex-wrap">
-          {/* Sort Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
-                <ArrowUpDown className="w-4 h-4 mr-2" />
-                {sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort'}
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
-              <DropdownMenuLabel className="font-semibold">Sort By</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              {sortOptions.map((option) => (
-                <DropdownMenuItem
-                  key={option.value}
-                  onClick={() => setSortBy(option.value)}
-                  className={`cursor-pointer ${sortBy === option.value ? 'bg-accent' : ''}`}
-                >
-                  <span>{option.label}</span>
-                  {sortBy === option.value && <span className="ml-auto">✓</span>}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Category Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
-                <Filter className="w-4 h-4 mr-2" />
-                Categories
-                {selectedCategories.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
-                    {selectedCategories.length}
-                  </Badge>
-                )}
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
-              <DropdownMenuLabel className="font-semibold">Filter by Category</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              {/* Quick Actions */}
-              <div className="flex gap-1 px-2 py-1.5">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleSelectAllCategories}
-                >
-                  Select All
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleClearCategories}
-                >
-                  Clear
-                </Button>
-              </div>
-              <DropdownMenuSeparator />
-              
-              {categories.filter(cat => cat.value !== 'All').map((category) => (
-                <DropdownMenuCheckboxItem
-                  key={category.value}
-                  checked={selectedCategories.includes(category.value)}
-                  onCheckedChange={() => handleCategoryToggle(category.value)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  {category.icon}
-                  <span>{category.label}</span>
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Duration Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
-                <Clock className="w-4 h-4 mr-2" />
-                Duration
-                {selectedDurations.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
-                    {selectedDurations.length}
-                  </Badge>
-                )}
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
-              <DropdownMenuLabel className="font-semibold">Filter by Duration</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              {/* Quick Actions */}
-              <div className="flex gap-1 px-2 py-1.5">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleSelectAllDurations}
-                >
-                  Select All
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleClearDurations}
-                >
-                  Clear
-                </Button>
-              </div>
-              <DropdownMenuSeparator />
-              
-              {durationFilters.filter(filter => filter.value !== 'All').map((filter) => (
-                <DropdownMenuCheckboxItem
-                  key={filter.value}
-                  checked={selectedDurations.includes(filter.value)}
-                  onCheckedChange={() => handleDurationToggle(filter.value)}
-                  className="flex items-center justify-between cursor-pointer"
-                >
-                  <span>{filter.label}</span>
-                  <span className="text-xs text-muted-foreground">{filter.range}</span>
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Aspect Ratio Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
-                <Maximize className="w-4 h-4 mr-2" />
-                Aspect Ratio
-                {selectedAspectRatios.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
-                    {selectedAspectRatios.length}
-                  </Badge>
-                )}
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-72 bg-background/95 backdrop-blur-sm border-2">
-              <DropdownMenuLabel className="font-semibold">Filter by Aspect Ratio</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              {/* Quick Actions */}
-              <div className="flex gap-1 px-2 py-1.5">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleSelectAllAspectRatios}
-                >
-                  Select All
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleClearAspectRatios}
-                >
-                  Clear
-                </Button>
-              </div>
-              <DropdownMenuSeparator />
-              
-              {/* Grouped by Orientation */}
-              {['Landscape', 'Portrait', 'Square'].map((orientation) => {
-                const ratiosInGroup = aspectRatioFilters.filter(f => f.category === orientation);
-                return (
-                  <Collapsible key={orientation} defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-accent rounded text-sm font-medium transition-all duration-200 ease-in-out">
-                      <span>{orientation}</span>
-                      <ChevronDown className="w-4 h-4 transition-transform duration-300 ease-in-out data-[state=open]:rotate-180" />
-                    </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-1 px-2 pb-2 overflow-hidden transition-all duration-300 ease-in-out data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
-                      {ratiosInGroup.map((filter) => (
-                        <DropdownMenuCheckboxItem
-                          key={filter.value}
-                          checked={selectedAspectRatios.includes(filter.value)}
-                          onCheckedChange={() => handleAspectRatioToggle(filter.value)}
-                          className="flex items-center gap-3 cursor-pointer py-2 transition-all duration-200 hover:scale-[1.02]"
-                        >
-                          <AspectRatioIcon ratio={filter.value} />
-                          <span className="flex-1">{filter.label}</span>
-                        </DropdownMenuCheckboxItem>
-                      ))}
-                    </CollapsibleContent>
-                  </Collapsible>
-                );
-              })}
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Price Filter */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
-                <DollarSign className="w-4 h-4 mr-2" />
-                Price
-                {selectedPriceRanges.length > 0 && (
-                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
-                    {selectedPriceRanges.length}
-                  </Badge>
-                )}
-                <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
-              <DropdownMenuLabel className="font-semibold">Filter by Price Range</DropdownMenuLabel>
-              <DropdownMenuSeparator />
-              
-              {/* Quick Actions */}
-              <div className="flex gap-1 px-2 py-1.5">
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleSelectAllPriceRanges}
-                >
-                  Select All
-                </Button>
-                <Button 
-                  variant="ghost" 
-                  size="sm" 
-                  className="h-7 flex-1 text-xs"
-                  onClick={handleClearPriceRanges}
-                >
-                  Clear
-                </Button>
-              </div>
-              <DropdownMenuSeparator />
-              
-              {priceRangeFilters.map((filter) => (
-                <DropdownMenuCheckboxItem
-                  key={filter.value}
-                  checked={selectedPriceRanges.includes(filter.value)}
-                  onCheckedChange={() => handlePriceRangeToggle(filter.value)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <span>{filter.label}</span>
-                </DropdownMenuCheckboxItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <FilterDropdowns
+          sortBy={sortBy}
+          sortOptions={sortOptions}
+          selectedCategories={selectedCategories}
+          selectedDurations={selectedDurations}
+          selectedAspectRatios={selectedAspectRatios}
+          selectedPriceRanges={selectedPriceRanges}
+          categories={categories}
+          onSortChange={(value) => setSortBy(value as any)}
+          onCategoryToggle={handleCategoryToggle}
+          onDurationToggle={handleDurationToggle}
+          onAspectRatioToggle={handleAspectRatioToggle}
+          onPriceRangeToggle={handlePriceRangeToggle}
+          onSelectAllCategories={() => handleSelectAllCategories(categories)}
+          onClearCategories={handleClearCategories}
+          onSelectAllDurations={handleSelectAllDurations}
+          onClearDurations={handleClearDurations}
+          onSelectAllAspectRatios={handleSelectAllAspectRatios}
+          onClearAspectRatios={handleClearAspectRatios}
+          onSelectAllPriceRanges={handleSelectAllPriceRanges}
+          onClearPriceRanges={handleClearPriceRanges}
+        />
 
         {/* Active Filters Chips */}
         {hasActiveFilters && (
-          <div className="flex flex-wrap gap-2 items-center animate-fade-in">
-            <span className="text-sm text-muted-foreground font-medium">Filters:</span>
-            
-            {/* Category Chips */}
-            {selectedCategories.map((category) => (
-              <Badge 
-                key={category} 
-                variant="secondary" 
-                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
-              >
-                <span className="text-xs font-medium">{categories.find(c => c.value === category)?.label}</span>
-                <button
-                  onClick={() => handleCategoryToggle(category)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
-                  aria-label={`Remove ${category} filter`}
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
-            ))}
-
-            {/* Duration Chips */}
-            {selectedDurations.map((duration) => (
-              <Badge 
-                key={duration} 
-                variant="secondary" 
-                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
-              >
-                <span className="text-xs font-medium">{durationFilters.find(d => d.value === duration)?.label}</span>
-                <button
-                  onClick={() => handleDurationToggle(duration)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
-                  aria-label={`Remove ${duration} filter`}
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
-            ))}
-
-            {/* Aspect Ratio Chips */}
-            {selectedAspectRatios.map((ratio) => (
-              <Badge 
-                key={ratio} 
-                variant="secondary" 
-                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
-              >
-                <span className="text-xs font-medium">{aspectRatioFilters.find(r => r.value === ratio)?.label}</span>
-                <button
-                  onClick={() => handleAspectRatioToggle(ratio)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
-                  aria-label={`Remove ${ratio} filter`}
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
-            ))}
-
-            {/* Price Range Chips */}
-            {selectedPriceRanges.map((price) => (
-              <Badge 
-                key={price} 
-                variant="secondary" 
-                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
-              >
-                <span className="text-xs font-medium">{price}</span>
-                <button
-                  onClick={() => handlePriceRangeToggle(price)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
-                  aria-label={`Remove ${price} filter`}
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
-            ))}
-
-            {/* Search Query Chip */}
-            {searchQuery && (
-              <Badge 
-                variant="secondary" 
-                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
-              >
-                <span className="text-xs font-medium">Search: "{searchQuery}"</span>
-                <button
-                  onClick={() => setSearchQuery('')}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
-                  aria-label="Clear search"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              </Badge>
-            )}
-          </div>
+          <FilterChips
+            selectedCategories={selectedCategories}
+            selectedDurations={selectedDurations}
+            selectedAspectRatios={selectedAspectRatios}
+            selectedPriceRanges={selectedPriceRanges}
+            searchQuery={searchQuery}
+            categories={categories}
+            onCategoryToggle={handleCategoryToggle}
+            onDurationToggle={handleDurationToggle}
+            onAspectRatioToggle={handleAspectRatioToggle}
+            onPriceRangeToggle={handlePriceRangeToggle}
+            onClearSearch={() => setSearchQuery('')}
+          />
         )}
 
         {/* Results Count */}
@@ -757,7 +270,7 @@ const Index = () => {
         {/* Masonry Layout */}
         {viewMode === 'masonry' && (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 [column-fill:balance]">
-            {filteredVideos.map((video, index) => (
+            {filteredVideos.map((video) => (
               <VideoCard
                 key={video.id}
                 video={video}
@@ -799,73 +312,42 @@ const Index = () => {
             {filteredVideos.map((video, index) => (
               <div 
                 key={video.id} 
-                className="flex gap-4 bg-card p-4 rounded-none shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow animate-fade-in"
+                className="flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
                 style={{ animationDelay: `${index * 0.05}s` }}
+                onClick={() => handleVideoClick(video)}
               >
                 <div className="relative w-64 flex-shrink-0">
                   <img
                     src={video.image}
                     alt={video.title}
-                    className="w-full h-36 object-cover"
-                    loading="lazy"
+                    className="w-full h-40 object-cover rounded-lg"
                   />
-                  <div 
-                    className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 cursor-pointer"
-                    onClick={() => handlePlayVideo(video)}
+                  <Button
+                    size="sm"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handlePlayVideo(video);
+                    }}
+                    className="absolute bottom-2 right-2 transition-all duration-200 hover:scale-110"
                   >
-                    <div className="w-12 h-12 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg hover:scale-110 transition-transform">
-                      <div className="w-0 h-0 border-l-8 border-l-primary border-t-6 border-t-transparent border-b-6 border-b-transparent ml-1" />
-                    </div>
-                  </div>
+                    Play
+                  </Button>
                 </div>
-                <div className="flex-1 flex flex-col justify-between">
-                  <div>
-                    <h3 className="text-lg font-semibold text-foreground mb-2">{video.title}</h3>
-                    <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                      <span className="px-2 py-1 bg-muted rounded text-xs">{video.orientation}</span>
-                      <span className="flex items-center gap-1">⏱ {video.duration}</span>
-                      {video.trending && (
-                        <span className="px-2 py-1 bg-trending text-trending-foreground rounded text-xs font-semibold">TRENDING</span>
-                      )}
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-2xl font-bold text-foreground">${video.price}</span>
-                      <span className="text-sm line-through text-muted-foreground">MRP ${video.mrp}</span>
-                      <span className="text-sm text-discount-foreground font-bold">{video.discount}</span>
-                    </div>
-                    <Button 
-                      variant="default" 
-                      size="sm"
-                      onClick={() => handleVideoClick(video)}
-                    >
-                      View Details
-                    </Button>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
+                  <p className="text-sm text-muted-foreground mb-2">
+                    {video.duration} • {video.category} • {video.orientation}
+                  </p>
+                  <div className="flex items-center gap-2">
+                    <span className="text-xl font-bold text-primary">{video.price}</span>
+                    <span className="text-sm text-muted-foreground line-through">{video.mrp}</span>
+                    <span className="text-sm text-discount font-semibold">{video.discount}</span>
                   </div>
                 </div>
               </div>
             ))}
             {loading && Array.from({ length: 2 }).map((_, i) => (
-              <div key={`skeleton-list-${i}`} className="flex gap-4 bg-card p-4 rounded-none shadow-[var(--shadow-card)] animate-pulse">
-                <div className="w-64 h-36 bg-muted flex-shrink-0" />
-                <div className="flex-1 flex flex-col justify-between">
-                  <div>
-                    <div className="h-5 w-3/4 bg-muted mb-2 rounded" />
-                    <div className="flex items-center gap-3">
-                      <div className="h-6 w-16 bg-muted rounded" />
-                      <div className="h-6 w-16 bg-muted rounded" />
-                    </div>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <div className="h-8 w-20 bg-muted rounded" />
-                      <div className="h-5 w-16 bg-muted rounded" />
-                    </div>
-                    <div className="h-9 w-28 bg-muted rounded" />
-                  </div>
-                </div>
-              </div>
+              <VideoCardSkeleton key={`skeleton-list-${i}`} />
             ))}
           </div>
         )}
@@ -882,7 +364,7 @@ const Index = () => {
 
         {/* End Message */}
         {finished && (
-          <div className="py-8 text-center text-muted-foreground">
+          <div className="py-8 text-center text-muted-foreground animate-fade-in">
             {filteredVideos.length > 0 ? (
               <>
                 <p className="font-medium">No more videos</p>
