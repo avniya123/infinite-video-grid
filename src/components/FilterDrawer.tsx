@@ -5,7 +5,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { VideoCategory } from '@/types/video';
+import { MainCategory } from '@/types/video';
 import { aspectRatioFilters, durationFilters, priceRangeFilters } from '@/hooks/useVideoFilters';
 
 const AspectRatioIcon = ({ ratio }: { ratio: string }) => {
@@ -31,18 +31,65 @@ const AspectRatioIcon = ({ ratio }: { ratio: string }) => {
   );
 };
 
+// Main categories with subcategories
+const mainCategories: { category: MainCategory; subcategories: string[] }[] = [
+  {
+    category: 'Personal Celebrations',
+    subcategories: ['Birthday', 'Engagement', 'Anniversary', 'Wedding', 'Baby Shower', 'Graduation', 'Retirement', 'House Warming'],
+  },
+  {
+    category: 'Festival Celebrations',
+    subcategories: ['Diwali', 'Christmas', 'Eid', 'Holi', 'New Year', 'Easter', 'Thanksgiving', 'Halloween'],
+  },
+  {
+    category: 'National & Public Holidays',
+    subcategories: ['Independence Day', 'Republic Day', 'Gandhi Jayanti', 'Labor Day', 'Memorial Day'],
+  },
+  {
+    category: 'Corporate & Office',
+    subcategories: ['Team Building', 'Office Party', 'Product Launch', 'Conference', 'Seminar'],
+  },
+  {
+    category: 'Entertainment & Showbiz',
+    subcategories: ['Movie Premiere', 'Concert', 'Award Show', 'Fashion Show', 'Theater'],
+  },
+  {
+    category: 'Sports & Competition',
+    subcategories: ['Cricket', 'Football', 'Olympics', 'Marathon', 'Tournament'],
+  },
+  {
+    category: 'Environmental & Nature',
+    subcategories: ['Earth Day', 'World Environment Day', 'Tree Plantation', 'Beach Cleanup'],
+  },
+  {
+    category: 'Corporate Events',
+    subcategories: ['AGM', 'Board Meeting', 'Investor Meet', 'Town Hall'],
+  },
+  {
+    category: 'Marketing & Advertising',
+    subcategories: ['Campaign Launch', 'Brand Activation', 'Trade Show', 'Promotional Event'],
+  },
+  {
+    category: 'Professional Services',
+    subcategories: ['Workshop', 'Training', 'Consultation', 'Networking'],
+  },
+  {
+    category: 'E-commerce',
+    subcategories: ['Sale Event', 'Product Demo', 'Flash Sale', 'Customer Appreciation'],
+  },
+];
+
 interface FilterDrawerProps {
-  selectedCategories: VideoCategory[];
+  selectedMainCategory: string | null;
+  selectedSubcategory: string | null;
   selectedDurations: string[];
   selectedAspectRatios: string[];
   selectedPriceRanges: string[];
-  categories: { value: VideoCategory; label: string; icon: React.ReactNode }[];
-  onCategoryToggle: (category: VideoCategory) => void;
+  onMainCategorySelect: (category: string | null) => void;
+  onSubcategorySelect: (subcategory: string | null) => void;
   onDurationToggle: (duration: string) => void;
   onAspectRatioToggle: (ratio: string) => void;
   onPriceRangeToggle: (price: string) => void;
-  onSelectAllCategories: () => void;
-  onClearCategories: () => void;
   onSelectAllDurations: () => void;
   onClearDurations: () => void;
   onSelectAllAspectRatios: () => void;
@@ -54,17 +101,16 @@ interface FilterDrawerProps {
 }
 
 export const FilterDrawer = ({
-  selectedCategories,
+  selectedMainCategory,
+  selectedSubcategory,
   selectedDurations,
   selectedAspectRatios,
   selectedPriceRanges,
-  categories,
-  onCategoryToggle,
+  onMainCategorySelect,
+  onSubcategorySelect,
   onDurationToggle,
   onAspectRatioToggle,
   onPriceRangeToggle,
-  onSelectAllCategories,
-  onClearCategories,
   onSelectAllDurations,
   onClearDurations,
   onSelectAllAspectRatios,
@@ -75,7 +121,8 @@ export const FilterDrawer = ({
   hasActiveFilters,
 }: FilterDrawerProps) => {
   const activeFiltersCount = 
-    selectedCategories.filter(c => c !== 'All').length +
+    (selectedMainCategory ? 1 : 0) +
+    (selectedSubcategory ? 1 : 0) +
     selectedDurations.length +
     selectedAspectRatios.length +
     selectedPriceRanges.length;
@@ -96,7 +143,7 @@ export const FilterDrawer = ({
       <SheetContent side="right" className="w-full sm:max-w-2xl p-0">
         <SheetHeader className="space-y-4 p-6 pb-4 border-b">
           <SheetDescription className="sr-only">
-            Filter videos by categories, duration, aspect ratio, and price range
+            Filter videos by categories, subcategories, duration, aspect ratio, and price range
           </SheetDescription>
           <div className="flex items-center justify-between">
             <SheetTitle className="text-2xl">Filters</SheetTitle>
@@ -107,233 +154,214 @@ export const FilterDrawer = ({
                 onClick={onResetFilters}
                 className="text-destructive hover:text-destructive hover:bg-destructive/10"
               >
-                Reset All
+                <X className="w-4 h-4 mr-1" />
+                Clear All
               </Button>
             )}
           </div>
         </SheetHeader>
-
-        <ScrollArea className="h-[calc(100vh-120px)] pr-4">
-          <div className="space-y-8 p-6">
+        
+        <ScrollArea className="h-[calc(100vh-120px)]">
+          <div className="p-6 space-y-8">
             {/* Categories Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Categories</h3>
-                <div className="flex gap-2">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onSelectAllCategories}
-                    className="h-8 text-xs"
-                  >
-                    Select All
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClearCategories}
-                    className="h-8 text-xs"
-                  >
-                    Clear
-                  </Button>
-                </div>
               </div>
-              <div className="space-y-3">
-                {categories.map((category) => (
-                  <div key={category.value} className="flex items-center space-x-3">
-                    <Checkbox
-                      id={`category-${category.value}`}
-                      checked={selectedCategories.includes(category.value)}
-                      onCheckedChange={() => onCategoryToggle(category.value)}
-                    />
-                    <Label
-                      htmlFor={`category-${category.value}`}
-                      className="flex items-center gap-2 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {category.icon}
-                      {category.label}
-                    </Label>
+              <div className="space-y-4">
+                {mainCategories.map(({ category, subcategories }) => (
+                  <div key={category} className="space-y-3">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id={`category-${category}`}
+                        checked={selectedMainCategory === category}
+                        onCheckedChange={(checked) => {
+                          onMainCategorySelect(checked ? category : null);
+                        }}
+                        className="rounded-md"
+                      />
+                      <Label 
+                        htmlFor={`category-${category}`}
+                        className="text-sm font-medium cursor-pointer hover:text-primary transition-colors"
+                      >
+                        {category}
+                      </Label>
+                    </div>
+                    
+                    {/* Subcategories */}
+                    {selectedMainCategory === category && (
+                      <div className="ml-8 space-y-2 animate-fade-in">
+                        {subcategories.map((subcategory) => (
+                          <div key={subcategory} className="flex items-center gap-3">
+                            <Checkbox
+                              id={`subcategory-${subcategory}`}
+                              checked={selectedSubcategory === subcategory}
+                              onCheckedChange={(checked) => {
+                                onSubcategorySelect(checked ? subcategory : null);
+                              }}
+                              className="rounded-md"
+                            />
+                            <Label 
+                              htmlFor={`subcategory-${subcategory}`}
+                              className="text-sm cursor-pointer hover:text-primary transition-colors"
+                            >
+                              {subcategory}
+                            </Label>
+                          </div>
+                        ))}
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
             </div>
 
-            <Separator />
+            <Separator className="my-6" />
 
             {/* Duration Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Duration</h3>
                 <div className="flex gap-2">
+                  {selectedDurations.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onClearDurations}
+                      className="h-7 text-xs"
+                    >
+                      Clear
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={onSelectAllDurations}
-                    className="h-8 text-xs"
+                    className="h-7 text-xs"
                   >
                     Select All
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClearDurations}
-                    className="h-8 text-xs"
-                  >
-                    Clear
                   </Button>
                 </div>
               </div>
               <div className="space-y-3">
                 {durationFilters.map((duration) => (
-                  <div key={duration.value} className="flex items-center space-x-3">
-                    <Checkbox
-                      id={`duration-${duration.value}`}
-                      checked={selectedDurations.includes(duration.value)}
-                      onCheckedChange={() => onDurationToggle(duration.value)}
-                    />
-                    <Label
-                      htmlFor={`duration-${duration.value}`}
-                      className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      {duration.label}
-                    </Label>
+                  <div key={duration.value} className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <Checkbox
+                        id={`duration-${duration.value}`}
+                        checked={selectedDurations.includes(duration.value)}
+                        onCheckedChange={() => onDurationToggle(duration.value)}
+                        className="rounded-md"
+                      />
+                      <Label 
+                        htmlFor={`duration-${duration.value}`}
+                        className="text-sm cursor-pointer hover:text-primary transition-colors"
+                      >
+                        {duration.label}
+                      </Label>
+                    </div>
+                    <span className="text-xs text-muted-foreground">{duration.range}</span>
                   </div>
                 ))}
               </div>
             </div>
 
-            <Separator />
+            <Separator className="my-6" />
 
             {/* Aspect Ratio Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Aspect Ratio</h3>
                 <div className="flex gap-2">
+                  {selectedAspectRatios.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onClearAspectRatios}
+                      className="h-7 text-xs"
+                    >
+                      Clear
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={onSelectAllAspectRatios}
-                    className="h-8 text-xs"
+                    className="h-7 text-xs"
                   >
                     Select All
                   </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClearAspectRatios}
-                    className="h-8 text-xs"
-                  >
-                    Clear
-                  </Button>
                 </div>
               </div>
-
-              {/* Landscape */}
-              <div className="space-y-3">
-                <p className="text-sm font-medium text-muted-foreground">Landscape</p>
-                {aspectRatioFilters
-                  .filter(r => r.category === 'Landscape')
-                  .map((ratio) => (
-                    <div key={ratio.value} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={`ratio-${ratio.value}`}
-                        checked={selectedAspectRatios.includes(ratio.value)}
-                        onCheckedChange={() => onAspectRatioToggle(ratio.value)}
-                      />
-                      <Label
-                        htmlFor={`ratio-${ratio.value}`}
-                        className="flex items-center gap-2 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        <AspectRatioIcon ratio={ratio.value} />
-                        {ratio.value}
-                      </Label>
-                    </div>
-                  ))}
-              </div>
-
-              {/* Portrait */}
-              <div className="space-y-3 pt-2">
-                <p className="text-sm font-medium text-muted-foreground">Portrait</p>
-                {aspectRatioFilters
-                  .filter(r => r.category === 'Portrait')
-                  .map((ratio) => (
-                    <div key={ratio.value} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={`ratio-${ratio.value}`}
-                        checked={selectedAspectRatios.includes(ratio.value)}
-                        onCheckedChange={() => onAspectRatioToggle(ratio.value)}
-                      />
-                      <Label
-                        htmlFor={`ratio-${ratio.value}`}
-                        className="flex items-center gap-2 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        <AspectRatioIcon ratio={ratio.value} />
-                        {ratio.value}
-                      </Label>
-                    </div>
-                  ))}
-              </div>
-
-              {/* Square */}
-              <div className="space-y-3 pt-2">
-                <p className="text-sm font-medium text-muted-foreground">Square</p>
-                {aspectRatioFilters
-                  .filter(r => r.category === 'Square')
-                  .map((ratio) => (
-                    <div key={ratio.value} className="flex items-center space-x-3">
-                      <Checkbox
-                        id={`ratio-${ratio.value}`}
-                        checked={selectedAspectRatios.includes(ratio.value)}
-                        onCheckedChange={() => onAspectRatioToggle(ratio.value)}
-                      />
-                      <Label
-                        htmlFor={`ratio-${ratio.value}`}
-                        className="flex items-center gap-2 cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                      >
-                        <AspectRatioIcon ratio={ratio.value} />
-                        {ratio.value}
-                      </Label>
-                    </div>
-                  ))}
-              </div>
+              
+              {/* Group by category */}
+              {['Landscape', 'Portrait', 'Square'].map(category => (
+                <div key={category} className="space-y-3">
+                  <h4 className="text-sm font-medium text-muted-foreground">{category}</h4>
+                  <div className="space-y-3 pl-2">
+                    {aspectRatioFilters
+                      .filter(ratio => ratio.category === category)
+                      .map((ratio) => (
+                        <div key={ratio.value} className="flex items-center gap-3">
+                          <Checkbox
+                            id={`ratio-${ratio.value}`}
+                            checked={selectedAspectRatios.includes(ratio.value)}
+                            onCheckedChange={() => onAspectRatioToggle(ratio.value)}
+                            className="rounded-md"
+                          />
+                          <Label 
+                            htmlFor={`ratio-${ratio.value}`}
+                            className="flex items-center gap-3 text-sm cursor-pointer hover:text-primary transition-colors"
+                          >
+                            <AspectRatioIcon ratio={ratio.value} />
+                            {ratio.label}
+                          </Label>
+                        </div>
+                      ))}
+                  </div>
+                </div>
+              ))}
             </div>
 
-            <Separator />
+            <Separator className="my-6" />
 
             {/* Price Range Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-semibold">Price Range</h3>
                 <div className="flex gap-2">
+                  {selectedPriceRanges.length > 0 && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={onClearPriceRanges}
+                      className="h-7 text-xs"
+                    >
+                      Clear
+                    </Button>
+                  )}
                   <Button
                     variant="ghost"
                     size="sm"
                     onClick={onSelectAllPriceRanges}
-                    className="h-8 text-xs"
+                    className="h-7 text-xs"
                   >
                     Select All
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={onClearPriceRanges}
-                    className="h-8 text-xs"
-                  >
-                    Clear
                   </Button>
                 </div>
               </div>
               <div className="space-y-3">
                 {priceRangeFilters.map((price) => (
-                  <div key={price.value} className="flex items-center space-x-3">
+                  <div key={price.value} className="flex items-center gap-3">
                     <Checkbox
                       id={`price-${price.value}`}
                       checked={selectedPriceRanges.includes(price.value)}
                       onCheckedChange={() => onPriceRangeToggle(price.value)}
+                      className="rounded-md"
                     />
-                    <Label
+                    <Label 
                       htmlFor={`price-${price.value}`}
-                      className="cursor-pointer text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                      className="text-sm cursor-pointer hover:text-primary transition-colors"
                     >
                       {price.label}
                     </Label>

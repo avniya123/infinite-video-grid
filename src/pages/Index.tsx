@@ -8,14 +8,13 @@ import { FilterChips } from '@/components/FilterChips';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { VariationsDrawer } from '@/components/VariationsDrawer';
 import { AuthDrawer } from '@/components/AuthDrawer';
-import { ArrowUpDown, ChevronDown } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, List, Columns3, Search, X } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { ShareButton } from '@/components/ShareButton';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
-import { Leaf, Briefcase, Building2, Users, List, Columns3, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -23,14 +22,6 @@ import { useVideoFilters } from '@/hooks/useVideoFilters';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 const PAGE_SIZE = 8;
-
-const categories: { value: VideoCategory; label: string; icon: React.ReactNode }[] = [
-  { value: 'All', label: 'All Videos', icon: null },
-  { value: 'Nature', label: 'Nature', icon: <Leaf className="w-4 h-4" /> },
-  { value: 'Business', label: 'Business', icon: <Briefcase className="w-4 h-4" /> },
-  { value: 'Urban', label: 'Urban', icon: <Building2 className="w-4 h-4" /> },
-  { value: 'Lifestyle', label: 'Lifestyle', icon: <Users className="w-4 h-4" /> },
-];
 
 const sortOptions: { value: string; label: string }[] = [
   { value: 'newest', label: 'Newest First' },
@@ -302,17 +293,16 @@ const Index = () => {
 
           {/* Filter Drawer */}
           <FilterDrawer
-            selectedCategories={selectedCategories}
+            selectedMainCategory={selectedMainCategory}
+            selectedSubcategory={selectedSubcategory}
             selectedDurations={selectedDurations}
             selectedAspectRatios={selectedAspectRatios}
             selectedPriceRanges={selectedPriceRanges}
-            categories={categories}
-            onCategoryToggle={handleCategoryToggle}
+            onMainCategorySelect={handleMainCategorySelect}
+            onSubcategorySelect={handleSubcategorySelect}
             onDurationToggle={handleDurationToggle}
             onAspectRatioToggle={handleAspectRatioToggle}
             onPriceRangeToggle={handlePriceRangeToggle}
-            onSelectAllCategories={() => handleSelectAllCategories(categories)}
-            onClearCategories={handleClearCategories}
             onSelectAllDurations={handleSelectAllDurations}
             onClearDurations={handleClearDurations}
             onSelectAllAspectRatios={handleSelectAllAspectRatios}
@@ -327,13 +317,14 @@ const Index = () => {
         {/* Active Filters Chips */}
         {hasActiveFilters && (
           <FilterChips
-            selectedCategories={selectedCategories}
+            selectedMainCategory={selectedMainCategory}
+            selectedSubcategory={selectedSubcategory}
             selectedDurations={selectedDurations}
             selectedAspectRatios={selectedAspectRatios}
             selectedPriceRanges={selectedPriceRanges}
             searchQuery={searchQuery}
-            categories={categories}
-            onCategoryToggle={handleCategoryToggle}
+            onMainCategorySelect={handleMainCategorySelect}
+            onSubcategorySelect={handleSubcategorySelect}
             onDurationToggle={handleDurationToggle}
             onAspectRatioToggle={handleAspectRatioToggle}
             onPriceRangeToggle={handlePriceRangeToggle}
