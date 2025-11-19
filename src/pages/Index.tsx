@@ -7,9 +7,11 @@ import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock, Search, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 
 const PAGE_SIZE = 8;
 
@@ -43,6 +45,7 @@ const Index = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory>('All');
   const [selectedDuration, setSelectedDuration] = useState<DurationFilter>('All');
+  const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [compareMode, setCompareMode] = useState(false);
   const [selectedForCompare, setSelectedForCompare] = useState<VideoItem[]>([]);
@@ -169,7 +172,12 @@ const Index = () => {
 
   const filteredVideos = videos
     .filter(video => selectedCategory === 'All' || video.category === selectedCategory)
-    .filter(filterByDuration);
+    .filter(filterByDuration)
+    .filter(video => {
+      if (!searchQuery.trim()) return true;
+      const query = searchQuery.toLowerCase().trim();
+      return video.title.toLowerCase().includes(query);
+    });
 
   const handleSelectForCompare = (video: VideoItem) => {
     setSelectedForCompare(prev => {
@@ -210,12 +218,24 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        <div className="flex items-center justify-between">
-          <div>
+        <div className="flex items-center justify-between gap-4">
+          <div className="flex-1">
             <h1 className="text-3xl font-bold text-foreground">Video Gallery</h1>
             <p className="text-sm text-muted-foreground mt-1">
               Professional stock video footage with real thumbnails • Infinite scroll • Click to preview
             </p>
+          </div>
+          
+          {/* Search Bar */}
+          <div className="relative w-full max-w-sm">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Search videos by title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
+              className="pl-10 pr-4 h-9"
+            />
           </div>
           
           <div className="flex items-center gap-2">
