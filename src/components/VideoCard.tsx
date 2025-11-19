@@ -154,7 +154,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           <img
             src={video.image}
             alt={video.title}
-            className={`w-full h-full object-cover transition-opacity duration-300 ${imageLoaded && !showVideo ? 'opacity-100' : 'opacity-0'}`}
+            className={`w-full h-full object-cover transition-all duration-500 ease-out ${imageLoaded && !showVideo ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
             onLoad={() => setImageLoaded(true)}
             loading="lazy"
           />
@@ -164,7 +164,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             <video
               ref={videoRef}
               src={video.videoUrl}
-              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`w-full h-full object-cover absolute inset-0 transition-all duration-500 ease-out ${showVideo ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
               style={{
                 objectFit: 'cover',
                 WebkitMaskImage: '-webkit-radial-gradient(white, black)',
@@ -183,7 +183,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
           {/* Buffering Shimmer Overlay */}
           {showVideo && isBuffering && (
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-20">
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-20 transition-opacity duration-300">
               <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             </div>
           )}
@@ -217,16 +217,14 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           </div>
 
           {/* Play Button - hide when video is playing */}
-          {!showVideo && (
-            <div 
-              className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
-              onClick={handlePlayClick}
-            >
-              <div className="w-8 h-8 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
-                <Play className="w-3.5 h-3.5 text-primary ml-0.5" fill="currentColor" />
-              </div>
+          <div 
+            className={`absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10 transition-all duration-300 ease-out ${showVideo ? 'opacity-0 scale-75 pointer-events-none' : 'opacity-100 scale-100'}`}
+            onClick={handlePlayClick}
+          >
+            <div className="w-8 h-8 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+              <Play className="w-3.5 h-3.5 text-primary ml-0.5" fill="currentColor" />
             </div>
-          )}
+          </div>
 
           {/* Bottom Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
