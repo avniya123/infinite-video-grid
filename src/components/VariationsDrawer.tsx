@@ -92,40 +92,40 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
           )}
 
           {/* Video Info */}
-          <div className="space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1">
-                <h3 className="text-sm font-medium text-foreground">{currentVideo?.title || video.title}</h3>
-                <div className="flex items-center gap-2 flex-wrap mt-2">
-                  <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
-                    {video.duration}
-                  </Badge>
-                  <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
-                    {video.resolution}
-                  </Badge>
-                </div>
+          <div className="flex items-start justify-between gap-6">
+            <div className="flex-1 space-y-2">
+              <h3 className="text-sm font-medium text-foreground">{currentVideo?.title || video.title}</h3>
+              <div className="flex items-center gap-2 flex-wrap">
+                <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
+                  {video.duration}
+                </Badge>
+                <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
+                  {video.resolution}
+                </Badge>
               </div>
-              <div className="text-right shrink-0">
-                <div className="flex items-baseline gap-2">
-                  <div className="text-lg font-bold text-foreground">₹ {video.price}</div>
-                </div>
+            </div>
+            
+            <div className="flex flex-col items-end gap-3 shrink-0">
+              {/* Price Section */}
+              <div className="text-right">
+                <div className="text-lg font-bold text-foreground">₹ {video.price}</div>
                 <div className="flex items-center justify-end gap-1.5 mt-0.5">
                   <span className="text-xs text-muted-foreground line-through">MRP: ₹ {video.mrp}</span>
                   <span className="text-xs text-destructive font-medium">( {video.discount} Off )</span>
                 </div>
               </div>
-            </div>
-
-            {/* Action Buttons */}
-            <div className="flex gap-3 pt-2">
-              <Button className="flex-1 bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
-                <ShoppingCart className="h-4 w-4" />
-                Share Cart
-              </Button>
-              <Button className="flex-1 gap-2">
-                <Edit className="h-4 w-4" />
-                Edit Template
-              </Button>
+              
+              {/* Action Buttons */}
+              <div className="flex gap-2">
+                <Button size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
+                  <ShoppingCart className="h-3.5 w-3.5" />
+                  Share Cart
+                </Button>
+                <Button size="sm" variant="outline" className="gap-2">
+                  <Edit className="h-3.5 w-3.5" />
+                  Edit
+                </Button>
+              </div>
             </div>
           </div>
 
