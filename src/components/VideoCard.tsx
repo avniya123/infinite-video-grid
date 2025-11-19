@@ -215,7 +215,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {/* Variations Count Badge */}
           {variationsCount > 0 && (
             <Badge className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10" style={{ top: video.trending ? '3.5rem' : '0.75rem' }}>
-              01 / {String(variationsCount).padStart(2, '0')}
+              01/{String(variationsCount).padStart(2, '0')}
             </Badge>
           )}
 
