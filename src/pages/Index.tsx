@@ -565,17 +565,17 @@ const Index = () => {
                 const ratiosInGroup = aspectRatioFilters.filter(f => f.category === orientation);
                 return (
                   <Collapsible key={orientation} defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-accent rounded text-sm font-medium">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-accent rounded text-sm font-medium transition-colors">
                       <span>{orientation}</span>
-                      <ChevronDown className="w-4 h-4 transition-transform" />
+                      <ChevronDown className="w-4 h-4 transition-transform duration-200 data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-1 px-2 pb-2">
+                    <CollapsibleContent className="space-y-1 px-2 pb-2 animate-accordion-down data-[state=closed]:animate-accordion-up">
                       {ratiosInGroup.map((filter) => (
                         <DropdownMenuCheckboxItem
                           key={filter.value}
                           checked={selectedAspectRatios.includes(filter.value)}
                           onCheckedChange={() => handleAspectRatioToggle(filter.value)}
-                          className="flex items-center gap-3 cursor-pointer py-2"
+                          className="flex items-center gap-3 cursor-pointer py-2 transition-colors"
                         >
                           <AspectRatioIcon ratio={filter.value} />
                           <span className="flex-1">{filter.label}</span>
@@ -639,6 +639,106 @@ const Index = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+        </div>
+
+        {/* Active Filters Chips */}
+        {hasActiveFilters && (
+          <div className="flex flex-wrap gap-2 items-center animate-fade-in">
+            <span className="text-sm text-muted-foreground font-medium">Active Filters:</span>
+            
+            {/* Category Chips */}
+            {selectedCategories.map((category) => (
+              <Badge 
+                key={category} 
+                variant="secondary" 
+                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+              >
+                <span className="text-xs">{categories.find(c => c.value === category)?.label}</span>
+                <button
+                  onClick={() => handleCategoryToggle(category)}
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+
+            {/* Duration Chips */}
+            {selectedDurations.map((duration) => (
+              <Badge 
+                key={duration} 
+                variant="secondary" 
+                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+              >
+                <span className="text-xs">{durationFilters.find(d => d.value === duration)?.label}</span>
+                <button
+                  onClick={() => handleDurationToggle(duration)}
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+
+            {/* Aspect Ratio Chips */}
+            {selectedAspectRatios.map((ratio) => (
+              <Badge 
+                key={ratio} 
+                variant="secondary" 
+                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+              >
+                <span className="text-xs">{aspectRatioFilters.find(r => r.value === ratio)?.label}</span>
+                <button
+                  onClick={() => handleAspectRatioToggle(ratio)}
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+
+            {/* Price Range Chips */}
+            {selectedPriceRanges.map((price) => (
+              <Badge 
+                key={price} 
+                variant="secondary" 
+                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+              >
+                <span className="text-xs">{price}</span>
+                <button
+                  onClick={() => handlePriceRangeToggle(price)}
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            ))}
+
+            {/* Search Query Chip */}
+            {searchQuery && (
+              <Badge 
+                variant="secondary" 
+                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+              >
+                <span className="text-xs">Search: "{searchQuery}"</span>
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                >
+                  <X className="w-3 h-3" />
+                </button>
+              </Badge>
+            )}
+          </div>
+        )}
+
+        {/* Results Count */}
+        <div className="flex items-center justify-between">
+          <p className="text-sm text-muted-foreground animate-fade-in">
+            Showing <span className="font-semibold text-foreground">{filteredVideos.length}</span> 
+            {total && ` of ${total}`} videos
+            {hasActiveFilters && ' with filters applied'}
+          </p>
         </div>
       </header>
 
