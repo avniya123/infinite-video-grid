@@ -303,17 +303,6 @@ const Index = () => {
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pb-8">
-        {/* Gallery Section Header */}
-        <div className="mb-8 animate-fade-in">
-          <div className="flex items-center gap-3 mb-4">
-            <div className="w-1 h-8 bg-primary rounded-full" />
-            <h2 className="text-2xl font-bold text-foreground">Video Gallery</h2>
-          </div>
-          <p className="text-muted-foreground ml-7">
-            Browse our collection of professional stock videos with high-quality thumbnails and detailed captions
-          </p>
-        </div>
-
         {/* Masonry Layout */}
         {viewMode === 'masonry' && (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 [column-fill:balance]">

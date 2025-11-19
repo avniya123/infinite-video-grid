@@ -228,17 +228,12 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Bottom Overlay - Enhanced Caption Area */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 py-4">
-            {/* Caption/Title */}
-            <div className="mb-2">
-              <p className="text-[10px] uppercase tracking-wider text-white/60 font-medium mb-1">
-                Caption
-              </p>
-              <h3 className="text-sm font-semibold text-white line-clamp-2 leading-tight">
-                {video.title}
-              </h3>
-            </div>
+          {/* Bottom Overlay */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
+            {/* Title */}
+            <h3 className="text-sm font-semibold text-white line-clamp-2 mb-2">
+              {video.title}
+            </h3>
 
             {/* Metadata Row */}
             <div className="flex items-center justify-between text-xs">
