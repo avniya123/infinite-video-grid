@@ -1,5 +1,6 @@
 export type VideoCategory = 'All' | 'Nature' | 'Business' | 'Urban' | 'Lifestyle';
 export type VideoResolution = 'HD' | '4K' | '8K';
+export type MainCategory = 'Personal Celebrations' | 'Festival Celebrations' | 'National & Public Holidays' | 'Corporate & Office' | 'Entertainment & Showbiz' | 'Sports & Competition' | 'Environmental & Nature' | 'Corporate Events' | 'Marketing & Advertising' | 'Professional Services' | 'E-commerce';
 
 export interface VideoItem {
   id: number;
@@ -15,4 +16,6 @@ export interface VideoItem {
   aspectRatio?: number;
   category: VideoCategory;
   resolution: VideoResolution;
+  mainCategory: MainCategory;
+  subcategory: string;
 }

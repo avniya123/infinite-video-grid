@@ -39,10 +39,12 @@ const businessCategories = [
 
 interface HeaderProps {
   selectedSubcategory?: string | null;
+  selectedMainCategory?: string | null;
   onSubcategorySelect?: (subcategory: string | null) => void;
+  onMainCategorySelect?: (mainCategory: string | null) => void;
 }
 
-export const Header = ({ selectedSubcategory, onSubcategorySelect }: HeaderProps) => {
+export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategorySelect, onMainCategorySelect }: HeaderProps) => {
   const navigate = useNavigate();
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
@@ -74,7 +76,26 @@ export const Header = ({ selectedSubcategory, onSubcategorySelect }: HeaderProps
   };
 
   const selectCategory = (category: string) => {
-    setSelectedCategory(category);
+    // Toggle category selection
+    if (selectedCategory === category) {
+      setSelectedCategory(null);
+      if (onSubcategorySelect) {
+        onSubcategorySelect(null);
+      }
+      if (onMainCategorySelect) {
+        onMainCategorySelect(null);
+      }
+    } else {
+      setSelectedCategory(category);
+      // Clear subcategory selection when changing main category
+      if (onSubcategorySelect) {
+        onSubcategorySelect(null);
+      }
+      // Set main category for filtering
+      if (onMainCategorySelect) {
+        onMainCategorySelect(category);
+      }
+    }
   };
 
   return (

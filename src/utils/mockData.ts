@@ -1,4 +1,4 @@
-import { VideoItem, VideoResolution } from '@/types/video';
+import { VideoItem, VideoResolution, MainCategory } from '@/types/video';
 
 // Import real thumbnail images
 import video1 from '@/assets/thumbnails/video-1.jpg';
@@ -75,6 +75,26 @@ const videoResolutions: VideoResolution[] = [
   '4K', 'HD', '4K', '8K', 'HD', '4K', 'HD', '8K'
 ];
 
+// Main categories and subcategories mapping
+const mainCategoriesData: { mainCategory: MainCategory; subcategory: string }[] = [
+  { mainCategory: 'Personal Celebrations', subcategory: 'Birthday' },
+  { mainCategory: 'Personal Celebrations', subcategory: 'Engagement' },
+  { mainCategory: 'Personal Celebrations', subcategory: 'Anniversary' },
+  { mainCategory: 'Personal Celebrations', subcategory: 'Wedding' },
+  { mainCategory: 'Festival Celebrations', subcategory: 'Diwali' },
+  { mainCategory: 'Festival Celebrations', subcategory: 'Christmas' },
+  { mainCategory: 'Festival Celebrations', subcategory: 'Eid' },
+  { mainCategory: 'Festival Celebrations', subcategory: 'New Year' },
+  { mainCategory: 'National & Public Holidays', subcategory: 'Independence Day' },
+  { mainCategory: 'Corporate & Office', subcategory: 'Team Building' },
+  { mainCategory: 'Corporate & Office', subcategory: 'Office Party' },
+  { mainCategory: 'Entertainment & Showbiz', subcategory: 'Concert' },
+  { mainCategory: 'Sports & Competition', subcategory: 'Cricket' },
+  { mainCategory: 'Environmental & Nature', subcategory: 'Earth Day' },
+  { mainCategory: 'Corporate Events', subcategory: 'AGM' },
+  { mainCategory: 'Marketing & Advertising', subcategory: 'Campaign Launch' },
+];
+
 export function generateMockVideos(page: number, pageSize: number): { items: VideoItem[]; total: number } {
   const start = (page - 1) * pageSize;
   
@@ -91,6 +111,7 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
     const baseMrp = 149 + (id * 3);
     const discountPercent = Math.floor((1 - (basePrice / baseMrp)) * 100);
     const thumbnailIndex = (id - 1) % thumbnails.length;
+    const categoryData = mainCategoriesData[(id - 1) % mainCategoriesData.length];
     
     items.push({
       id,
@@ -107,6 +128,8 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
                    (['Landscape', 'Portrait', 'Square'] as const)[id % 3] === 'Portrait' ? 9/16 : 1,
       category: videoCategories[(id - 1) % videoCategories.length],
       resolution: videoResolutions[(id - 1) % videoResolutions.length],
+      mainCategory: categoryData.mainCategory,
+      subcategory: categoryData.subcategory,
     });
   }
   
