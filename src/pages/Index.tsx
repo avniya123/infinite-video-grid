@@ -188,19 +188,14 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 pb-8">
         {/* Masonry Layout */}
         {viewMode === 'masonry' && (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5">
+          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 [column-fill:balance]">
             {filteredVideos.map((video, index) => (
-              <div 
-                key={video.id} 
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <VideoCard
-                  video={video}
-                  onPlay={handlePlayVideo}
-                  onClick={handleVideoClick}
-                />
-              </div>
+              <VideoCard
+                key={video.id}
+                video={video}
+                onPlay={handlePlayVideo}
+                onClick={handleVideoClick}
+              />
             ))}
             {loading && Array.from({ length: 4 }).map((_, i) => (
               <VideoCardSkeleton key={`skeleton-masonry-${i}`} />
