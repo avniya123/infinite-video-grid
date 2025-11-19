@@ -1,4 +1,4 @@
-import { VideoItem } from '@/types/video';
+import { VideoItem, VideoResolution } from '@/types/video';
 
 // Import real thumbnail images
 import video1 from '@/assets/thumbnails/video-1.jpg';
@@ -57,6 +57,12 @@ const videoCategories = [
   'Business',   // Creative Art
 ] as const;
 
+// Video resolutions mapping
+const videoResolutions: VideoResolution[] = [
+  '4K', 'HD', '8K', '4K', 'HD', '4K', '8K', 'HD',
+  '4K', 'HD', '4K', '8K', 'HD', '4K', 'HD', '8K'
+];
+
 export function generateMockVideos(page: number, pageSize: number): { items: VideoItem[]; total: number } {
   const start = (page - 1) * pageSize;
   
@@ -86,6 +92,7 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
       image: thumbnails[thumbnailIndex],
       videoUrl: `/videos/sample-video-${id}.mp4`,
       category: videoCategories[(id - 1) % videoCategories.length],
+      resolution: videoResolutions[(id - 1) % videoResolutions.length],
     });
   }
   

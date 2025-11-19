@@ -2,12 +2,14 @@ import { useEffect, useRef, useState } from 'react';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+import { CompareDrawer } from '@/components/CompareDrawer';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3 } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 const PAGE_SIZE = 8;
 
@@ -31,6 +33,9 @@ const Index = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory>('All');
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
+  const [compareMode, setCompareMode] = useState(false);
+  const [selectedForCompare, setSelectedForCompare] = useState<VideoItem[]>([]);
+  const [compareDrawerOpen, setCompareDrawerOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadNextPage = async () => {
@@ -126,6 +131,41 @@ const Index = () => {
     ? videos 
     : videos.filter(video => video.category === selectedCategory);
 
+  const handleSelectForCompare = (video: VideoItem) => {
+    setSelectedForCompare(prev => {
+      const isAlreadySelected = prev.some(v => v.id === video.id);
+      
+      if (isAlreadySelected) {
+        return prev.filter(v => v.id !== video.id);
+      } else {
+        if (prev.length >= 4) {
+          toast.error('You can only compare up to 4 videos');
+          return prev;
+        }
+        return [...prev, video];
+      }
+    });
+  };
+
+  const handleRemoveFromCompare = (video: VideoItem) => {
+    setSelectedForCompare(prev => prev.filter(v => v.id !== video.id));
+  };
+
+  const handleToggleCompareMode = () => {
+    setCompareMode(!compareMode);
+    if (compareMode) {
+      setSelectedForCompare([]);
+    }
+  };
+
+  const handleOpenCompare = () => {
+    if (selectedForCompare.length < 2) {
+      toast.error('Select at least 2 videos to compare');
+      return;
+    }
+    setCompareDrawerOpen(true);
+  };
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -138,32 +178,61 @@ const Index = () => {
             </p>
           </div>
           
-          {/* View Mode Toggle */}
-          <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+          <div className="flex items-center gap-2">
+            {/* Compare Mode Toggle */}
             <Button
-              variant={viewMode === 'masonry' ? 'default' : 'ghost'}
+              variant={compareMode ? 'default' : 'outline'}
               size="sm"
-              onClick={() => setViewMode('masonry')}
-              className="h-8 px-3"
+              onClick={handleToggleCompareMode}
+              className="h-9"
             >
-              <Columns3 className="w-4 h-4" />
+              <GitCompare className="w-4 h-4 mr-2" />
+              Compare
+              {selectedForCompare.length > 0 && (
+                <Badge variant="secondary" className="ml-2">
+                  {selectedForCompare.length}
+                </Badge>
+              )}
             </Button>
-            <Button
-              variant={viewMode === 'grid' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('grid')}
-              className="h-8 px-3"
-            >
-              <LayoutGrid className="w-4 h-4" />
-            </Button>
-            <Button
-              variant={viewMode === 'list' ? 'default' : 'ghost'}
-              size="sm"
-              onClick={() => setViewMode('list')}
-              className="h-8 px-3"
-            >
-              <List className="w-4 h-4" />
-            </Button>
+
+            {compareMode && selectedForCompare.length >= 2 && (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleOpenCompare}
+                className="h-9"
+              >
+                View Comparison
+              </Button>
+            )}
+            
+            {/* View Mode Toggle */}
+            <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+              <Button
+                variant={viewMode === 'masonry' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('masonry')}
+                className="h-8 px-3"
+              >
+                <Columns3 className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'grid' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('grid')}
+                className="h-8 px-3"
+              >
+                <LayoutGrid className="w-4 h-4" />
+              </Button>
+              <Button
+                variant={viewMode === 'list' ? 'default' : 'ghost'}
+                size="sm"
+                onClick={() => setViewMode('list')}
+                className="h-8 px-3"
+              >
+                <List className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </div>
 
@@ -195,6 +264,8 @@ const Index = () => {
                 video={video}
                 onPlay={handlePlayVideo}
                 onClick={handleVideoClick}
+                isSelected={selectedForCompare.some(v => v.id === video.id)}
+                onSelect={compareMode ? handleSelectForCompare : undefined}
               />
             ))}
             {loading && Array.from({ length: 4 }).map((_, i) => (
@@ -216,6 +287,8 @@ const Index = () => {
                   video={video}
                   onPlay={handlePlayVideo}
                   onClick={handleVideoClick}
+                  isSelected={selectedForCompare.some(v => v.id === video.id)}
+                  onSelect={compareMode ? handleSelectForCompare : undefined}
                 />
               </div>
             ))}
@@ -335,6 +408,14 @@ const Index = () => {
         video={selectedVideo}
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
+      />
+
+      <CompareDrawer
+        videos={selectedForCompare}
+        open={compareDrawerOpen}
+        onClose={() => setCompareDrawerOpen(false)}
+        onRemove={handleRemoveFromCompare}
+        onPlayVideo={handlePlayVideo}
       />
     </div>
   );
