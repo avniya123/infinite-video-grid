@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
 interface ProgressiveImageProps {
@@ -7,6 +7,7 @@ interface ProgressiveImageProps {
   className?: string;
   blurDataURL?: string;
   onLoad?: () => void;
+  lazy?: boolean;
 }
 
 export const ProgressiveImage = ({ 
@@ -14,19 +15,53 @@ export const ProgressiveImage = ({
   alt, 
   className, 
   blurDataURL,
-  onLoad 
+  onLoad,
+  lazy = true
 }: ProgressiveImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
-  const [currentSrc, setCurrentSrc] = useState(blurDataURL || src);
+  const [isInView, setIsInView] = useState(!lazy);
+  const [currentSrc, setCurrentSrc] = useState(blurDataURL || '');
+  const imgRef = useRef<HTMLDivElement>(null);
 
+  // Intersection Observer for lazy loading
   useEffect(() => {
+    if (!lazy || isInView) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+            observer.disconnect();
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '200px', // Start loading 200px before entering viewport
+        threshold: 0.01,
+      }
+    );
+
+    if (imgRef.current) {
+      observer.observe(imgRef.current);
+    }
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [lazy, isInView]);
+
+  // Load image when in view
+  useEffect(() => {
+    if (!isInView || !src) return;
+
     setIsLoading(true);
     const img = new Image();
     img.src = src;
     
     img.onload = () => {
-      // Delay to ensure smooth transition
       setTimeout(() => {
         setCurrentSrc(src);
         setIsLoaded(true);
@@ -43,21 +78,23 @@ export const ProgressiveImage = ({
       img.onload = null;
       img.onerror = null;
     };
-  }, [src, onLoad]);
+  }, [src, onLoad, isInView]);
 
   return (
-    <div className={cn("relative overflow-hidden bg-muted/20", className)}>
+    <div ref={imgRef} className={cn("relative overflow-hidden bg-muted/20", className)}>
       {/* Main Image */}
-      <img
-        src={currentSrc}
-        alt={alt}
-        className={cn(
-          "w-full h-full object-cover transition-all duration-700 ease-out",
-          isLoaded 
-            ? "scale-100 blur-0 opacity-100" 
-            : "scale-110 blur-2xl opacity-60"
-        )}
-      />
+      {isInView && currentSrc && (
+        <img
+          src={currentSrc}
+          alt={alt}
+          className={cn(
+            "w-full h-full object-cover transition-all duration-700 ease-out",
+            isLoaded 
+              ? "blur-0 opacity-100" 
+              : "blur-2xl opacity-60"
+          )}
+        />
+      )}
       
       {/* Loading Shimmer Overlay */}
       {isLoading && (
