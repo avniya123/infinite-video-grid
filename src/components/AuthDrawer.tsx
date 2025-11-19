@@ -91,7 +91,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
       if (data.user) {
         toast.success('Welcome back!');
-        onOpenChange(false);
+        handleDrawerChange(false);
         navigate('/');
       }
     } catch (error: any) {
@@ -139,7 +139,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
       if (data.user) {
         toast.success('Account created successfully!');
-        onOpenChange(false);
+        handleDrawerChange(false);
         navigate('/profile');
       }
     } catch (error: any) {
@@ -189,28 +189,42 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
     }
   };
 
+  // Reset form when drawer closes
+  const handleDrawerChange = (isOpen: boolean) => {
+    if (!isOpen) {
+      // Reset all states when closing
+      setView('login');
+      setLoginData({ email: '', password: '' });
+      setLoginErrors({});
+      setSignupData({
+        fullName: '',
+        email: '',
+        phone: '',
+        dob: '',
+        password: '',
+        confirmPassword: '',
+        address: '',
+        pincode: '',
+      });
+      setSignupErrors({});
+      setForgotEmail('');
+      setLoading(false);
+    }
+    onOpenChange(isOpen);
+  };
+
   return (
-    <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 border-none">
+    <Sheet open={open} onOpenChange={handleDrawerChange}>
+      <SheetContent side="right" className="w-full sm:max-w-md p-0 border-none overflow-y-auto">
         <div className="h-full bg-card flex flex-col">
           {/* Header */}
-          <SheetHeader className="px-6 py-4 border-b border-border">
-            <div className="flex items-center justify-between">
-              <SheetTitle className="text-xl font-semibold">
-                {view === 'login' && 'Welcome Back'}
-                {view === 'signup' && 'Create Account'}
-                {view === 'forgot' && 'Forgot Password'}
-                {view === 'otp' && 'Verify Email'}
-              </SheetTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={() => onOpenChange(false)}
-                className="h-8 w-8 rounded-full"
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+          <SheetHeader className="px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
+            <SheetTitle className="text-xl font-semibold">
+              {view === 'login' && 'Welcome Back'}
+              {view === 'signup' && 'Create Account'}
+              {view === 'forgot' && 'Forgot Password'}
+              {view === 'otp' && 'Verify Email'}
+            </SheetTitle>
           </SheetHeader>
 
           {/* Content */}
@@ -479,7 +493,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
             {view === 'otp' && (
               <OTPVerification
                 email={forgotEmail}
-                onVerified={() => onOpenChange(false)}
+                onVerified={() => handleDrawerChange(false)}
                 onBack={() => setView('forgot')}
               />
             )}
