@@ -26,6 +26,7 @@ import { Download, Settings, RotateCcw, Play, Clock, Maximize2, Tag, TrendingUp,
 import { toast } from 'sonner';
 import { useState, useRef, useEffect } from 'react';
 import { ShareButton } from '@/components/ShareButton';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 interface VideoPlayerDrawerProps {
   video: VideoItem | null;
@@ -97,6 +98,27 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
     setSaturation(100);
     toast.success('Filters reset to default');
   };
+
+  const togglePlayPause = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  };
+
+  // Keyboard shortcuts for video player
+  useKeyboardShortcuts({
+    onEscape: () => {
+      if (open) {
+        onOpenChange(false);
+      }
+    },
+    onSpace: togglePlayPause,
+    enabled: open,
+  });
 
   const videoStyle = {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`
