@@ -1,15 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
 
-interface ProgressiveImageProps {
-  src: string;
-  alt: string;
-  className?: string;
-  blurDataURL?: string;
-  onLoad?: () => void;
-  lazy?: boolean;
-}
-
 export const ProgressiveImage = ({ 
   src, 
   alt, 
@@ -17,12 +8,12 @@ export const ProgressiveImage = ({
   blurDataURL,
   onLoad,
   lazy = true
-}: ProgressiveImageProps) => {
+}) => {
   const [isLoaded, setIsLoaded] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isInView, setIsInView] = useState(!lazy);
   const [currentSrc, setCurrentSrc] = useState(blurDataURL || '');
-  const imgRef = useRef<HTMLDivElement>(null);
+  const imgRef = useRef(null);
 
   // Intersection Observer for lazy loading
   useEffect(() => {
