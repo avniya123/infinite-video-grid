@@ -14,7 +14,11 @@ export const ThemeToggle = () => {
 
   if (!mounted) {
     return (
-      <Button variant="ghost" size="icon" className="h-9 w-9">
+      <Button 
+        variant="ghost" 
+        size="icon" 
+        className="h-9 w-9 rounded-lg bg-gray-100 hover:bg-gray-200 text-gray-700"
+      >
         <Sun className="h-4 w-4" />
       </Button>
     );
@@ -25,7 +29,11 @@ export const ThemeToggle = () => {
       variant="ghost"
       size="icon"
       onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-      className="h-9 w-9 transition-all duration-200 hover:scale-110"
+      className={`h-9 w-9 rounded-lg transition-all duration-200 hover:scale-110 ${
+        theme === 'dark' 
+          ? 'bg-gray-800 hover:bg-gray-700 text-white' 
+          : 'bg-gray-100 hover:bg-gray-200 text-gray-700'
+      }`}
       title={`Switch to ${theme === 'dark' ? 'light' : 'dark'} mode`}
     >
       {theme === 'dark' ? (
