@@ -7,15 +7,8 @@ import {
   PopoverTrigger,
 } from '@/components/ui/popover';
 import { toast } from 'sonner';
-import { VideoItem } from '@/types/video';
 
-interface ShareButtonProps {
-  video: VideoItem;
-  variant?: 'default' | 'ghost' | 'outline';
-  size?: 'default' | 'sm' | 'lg' | 'icon';
-}
-
-export function ShareButton({ video, variant = 'ghost', size = 'icon' }: ShareButtonProps) {
+export function ShareButton({ video, variant = 'ghost', size = 'icon' }) {
   const [isOpen, setIsOpen] = useState(false);
   const [copied, setCopied] = useState(false);
 
