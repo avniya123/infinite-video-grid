@@ -23,7 +23,7 @@ const AspectRatioIcon = ({ ratio }: { ratio: string }) => {
 
   return (
     <div 
-      className="border-2 border-primary rounded-sm bg-primary/10 flex-shrink-0"
+      className="border-2 border-gray-800 rounded-sm bg-gray-200 flex-shrink-0"
       style={style}
     />
   );
@@ -79,23 +79,23 @@ export const FilterDropdowns = ({
       {/* Sort Dropdown */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-10 border-2 hover:bg-accent transition-all duration-200">
+          <Button className="h-10 bg-gray-900 text-white hover:bg-gray-800 border-0 transition-all duration-200">
             <ArrowUpDown className="w-4 h-4 mr-2" />
             {sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort'}
             <ChevronDown className="w-4 h-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
-          <DropdownMenuLabel className="font-semibold">Sort By</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="start" className="w-56 bg-white border-gray-200 shadow-lg">
+          <DropdownMenuLabel className="font-semibold text-gray-900">Sort By</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-gray-200" />
           {sortOptions.map((option) => (
             <DropdownMenuItem
               key={option.value}
               onClick={() => onSortChange(option.value)}
-              className={`cursor-pointer transition-colors ${sortBy === option.value ? 'bg-accent' : ''}`}
+              className={`cursor-pointer text-gray-700 hover:bg-gray-100 transition-colors ${sortBy === option.value ? 'bg-gray-100 font-medium' : ''}`}
             >
               <span>{option.label}</span>
-              {sortBy === option.value && <span className="ml-auto">✓</span>}
+              {sortBy === option.value && <span className="ml-auto text-gray-900">✓</span>}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
@@ -104,37 +104,37 @@ export const FilterDropdowns = ({
       {/* Category Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-10 border-2 hover:bg-accent transition-all duration-200">
+          <Button className="h-10 bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 transition-all duration-200">
             <Filter className="w-4 h-4 mr-2" />
             Categories
             {selectedCategories.length > 0 && (
-              <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+              <Badge className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs bg-gray-200 text-gray-800 border-0">
                 {selectedCategories.length}
               </Badge>
             )}
             <ChevronDown className="w-4 h-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
-          <DropdownMenuLabel className="font-semibold">Filter by Category</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="start" className="w-56 bg-white border-gray-200 shadow-lg">
+          <DropdownMenuLabel className="font-semibold text-gray-900">Filter by Category</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-gray-200" />
           
           <div className="flex gap-1 px-2 py-1.5">
-            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs" onClick={onSelectAllCategories}>
+            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs text-gray-700 hover:bg-gray-100" onClick={onSelectAllCategories}>
               Select All
             </Button>
-            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs" onClick={onClearCategories}>
+            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs text-gray-700 hover:bg-gray-100" onClick={onClearCategories}>
               Clear
             </Button>
           </div>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-gray-200" />
           
           {categories.filter(cat => cat.value !== 'All').map((category) => (
             <DropdownMenuCheckboxItem
               key={category.value}
               checked={selectedCategories.includes(category.value)}
               onCheckedChange={() => onCategoryToggle(category.value)}
-              className="flex items-center gap-2 cursor-pointer transition-colors"
+              className="flex items-center gap-2 cursor-pointer text-gray-700 hover:bg-gray-100 transition-colors"
             >
               {category.icon}
               <span>{category.label}</span>
@@ -146,40 +146,40 @@ export const FilterDropdowns = ({
       {/* Duration Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-10 border-2 hover:bg-accent transition-all duration-200">
+          <Button className="h-10 bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 transition-all duration-200">
             <Clock className="w-4 h-4 mr-2" />
             Duration
             {selectedDurations.length > 0 && (
-              <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+              <Badge className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs bg-gray-200 text-gray-800 border-0">
                 {selectedDurations.length}
               </Badge>
             )}
             <ChevronDown className="w-4 h-4 ml-2" />
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
-          <DropdownMenuLabel className="font-semibold">Filter by Duration</DropdownMenuLabel>
-          <DropdownMenuSeparator />
+        <DropdownMenuContent align="start" className="w-56 bg-white border-gray-200 shadow-lg">
+          <DropdownMenuLabel className="font-semibold text-gray-900">Filter by Duration</DropdownMenuLabel>
+          <DropdownMenuSeparator className="bg-gray-200" />
           
           <div className="flex gap-1 px-2 py-1.5">
-            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs" onClick={onSelectAllDurations}>
+            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs text-gray-700 hover:bg-gray-100" onClick={onSelectAllDurations}>
               Select All
             </Button>
-            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs" onClick={onClearDurations}>
+            <Button variant="ghost" size="sm" className="h-7 flex-1 text-xs text-gray-700 hover:bg-gray-100" onClick={onClearDurations}>
               Clear
             </Button>
           </div>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="bg-gray-200" />
           
           {durationFilters.map((filter) => (
             <DropdownMenuCheckboxItem
               key={filter.value}
               checked={selectedDurations.includes(filter.value)}
               onCheckedChange={() => onDurationToggle(filter.value)}
-              className="flex items-center justify-between cursor-pointer transition-colors"
+              className="flex items-center justify-between cursor-pointer text-gray-700 hover:bg-gray-100 transition-colors"
             >
               <span>{filter.label}</span>
-              <span className="text-xs text-muted-foreground">{filter.range}</span>
+              <span className="text-xs text-gray-500">{filter.range}</span>
             </DropdownMenuCheckboxItem>
           ))}
         </DropdownMenuContent>
@@ -188,7 +188,7 @@ export const FilterDropdowns = ({
       {/* Aspect Ratio Filter */}
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="outline" className="h-10 border-2 hover:bg-accent transition-all duration-200">
+          <Button className="h-10 bg-white text-gray-700 hover:bg-gray-100 border border-gray-300 transition-all duration-200">
             <Maximize className="w-4 h-4 mr-2" />
             Aspect Ratio
             {selectedAspectRatios.length > 0 && (
