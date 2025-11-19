@@ -7,6 +7,8 @@ import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
+import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
+import { useState } from "react";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
@@ -16,9 +18,19 @@ interface VariationsDrawerProps {
 }
 
 export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }: VariationsDrawerProps) => {
-  const { data: variations, isLoading } = useVideoVariations(video?.id || 0);
+  const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
+  const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
 
   if (!video) return null;
+
+  const handleThumbnailGenerated = (variationId: string, thumbnailUrl: string) => {
+    setGeneratingIds(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(variationId);
+      return newSet;
+    });
+    refetch();
+  };
 
   const handleShare = async (variation: any) => {
     const shareData = {
@@ -136,12 +148,23 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }:
                   className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
                 >
                   {/* Thumbnail */}
-                  <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                  <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0 relative group">
                     <img
                       src={variation.thumbnail_url || video.image}
                       alt={variation.title}
                       className="w-full h-full object-cover"
                     />
+                    {!variation.thumbnail_url && (
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                        <GenerateThumbnailButton
+                          variationId={variation.id}
+                          videoTitle={video.title}
+                          variationTitle={variation.title}
+                          aspectRatio={variation.aspect_ratio}
+                          onGenerated={(url) => handleThumbnailGenerated(variation.id, url)}
+                        />
+                      </div>
+                    )}
                   </div>
 
                   {/* Variation Info */}
