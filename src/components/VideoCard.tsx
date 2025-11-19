@@ -3,6 +3,7 @@ import { Badge } from '@/components/ui/badge';
 import { Play, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { ShareButton } from '@/components/ShareButton';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -117,12 +118,20 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           </Badge>
         )}
 
-        {/* Price Badge */}
-        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
-          ${video.price}
-        </div>
-        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
-          ${video.price}
+        {/* Top Right Actions */}
+        <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+          {/* Price Badge */}
+          <div className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
+            ${video.price}
+          </div>
+          
+          {/* Share Button - visible on hover */}
+          <div 
+            className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <ShareButton video={video} variant="outline" size="icon" />
+          </div>
         </div>
 
         {/* Play Button - hide when video is playing */}

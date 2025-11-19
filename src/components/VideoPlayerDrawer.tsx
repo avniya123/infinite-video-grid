@@ -25,6 +25,7 @@ import { Slider } from '@/components/ui/slider';
 import { Download, Settings, RotateCcw } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState } from 'react';
+import { ShareButton } from '@/components/ShareButton';
 
 interface VideoPlayerDrawerProps {
   video: VideoItem | null;
@@ -72,6 +73,9 @@ export function VideoPlayerDrawer({ video, open, onOpenChange }: VideoPlayerDraw
             </div>
             
             <div className="flex items-center gap-2 ml-4">
+              {/* Share Button */}
+              <ShareButton video={video} variant="outline" size="sm" />
+              
               {/* Filters Button */}
               <Drawer open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <DrawerTrigger asChild>
