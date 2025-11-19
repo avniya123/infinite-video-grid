@@ -160,8 +160,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10"
               onClick={handlePlayClick}
             >
-              <div className="w-12 h-12 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
-                <Play className="w-5 h-5 text-primary ml-0.5" fill="currentColor" />
+              <div className="w-8 h-8 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+                <Play className="w-3.5 h-3.5 text-primary ml-0.5" fill="currentColor" />
               </div>
             </div>
           )}
