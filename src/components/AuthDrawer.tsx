@@ -23,7 +23,7 @@ interface AuthDrawerProps {
 
 export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   const navigate = useNavigate();
-  const [view, setView] = useState<'login' | 'signup' | 'forgot' | 'otp'>('login');
+  const [view, setView] = useState<'login' | 'signup' | 'forgot' | 'otp' | 'phone-login' | 'phone-otp'>('login');
   const [loading, setLoading] = useState(false);
   
   // Login state
@@ -48,6 +48,10 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   
   // Test OTP state (for dummy testing)
   const [testOTP, setTestOTP] = useState('');
+  
+  // Phone login state
+  const [phoneNumber, setPhoneNumber] = useState('');
+  const [phoneOTP, setPhoneOTP] = useState('');
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -201,6 +205,48 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
     }
   };
 
+  const handlePhoneLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast.error('Please enter a valid phone number');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      // Generate dummy OTP for testing
+      const dummyOTP = Math.floor(100000 + Math.random() * 900000).toString();
+      setTestOTP(dummyOTP);
+
+      toast.success(`Test OTP sent to ${phoneNumber}: ${dummyOTP}`, {
+        duration: 10000,
+      });
+      console.log('🔐 Phone Login Test OTP:', dummyOTP);
+
+      setView('phone-otp');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to send OTP');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handlePhoneOTPVerify = async (otp: string) => {
+    if (otp.length !== 6) {
+      toast.error('Please enter a valid 6-digit code');
+      return;
+    }
+
+    if (otp !== testOTP) {
+      toast.error('Invalid OTP code');
+      return;
+    }
+
+    toast.success('Phone verified! Please complete signup or login.');
+    setView('login');
+  };
+
   // Reset form when drawer closes
   const handleDrawerChange = (isOpen: boolean) => {
     if (!isOpen) {
@@ -221,6 +267,8 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
       setSignupErrors({});
       setForgotEmail('');
       setTestOTP('');
+      setPhoneNumber('');
+      setPhoneOTP('');
       setLoading(false);
     }
     onOpenChange(isOpen);
@@ -237,6 +285,8 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
               {view === 'signup' && 'Create Account'}
               {view === 'forgot' && 'Forgot Password'}
               {view === 'otp' && 'Verify Email'}
+              {view === 'phone-login' && 'Login with Phone'}
+              {view === 'phone-otp' && 'Verify Phone'}
             </SheetTitle>
           </SheetHeader>
 
@@ -512,6 +562,51 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                   navigate('/profile');
                 }}
                 onBack={() => setView('signup')}
+              />
+            )}
+
+            {/* Phone Login */}
+            {view === 'phone-login' && (
+              <div className="space-y-6">
+                <form onSubmit={handlePhoneLogin} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone Number</Label>
+                    <Input
+                      id="phone"
+                      type="tel"
+                      value={phoneNumber}
+                      onChange={(e) => setPhoneNumber(e.target.value)}
+                      placeholder="+1 (555) 000-0000"
+                      required
+                    />
+                  </div>
+
+                  <Button
+                    type="submit"
+                    className="w-full h-11 rounded-lg"
+                    disabled={loading}
+                  >
+                    {loading ? 'Sending OTP...' : 'Send OTP'}
+                  </Button>
+
+                  <button
+                    type="button"
+                    onClick={() => setView('login')}
+                    className="w-full text-sm text-muted-foreground hover:text-foreground"
+                  >
+                    ← Back to Login
+                  </button>
+                </form>
+              </div>
+            )}
+
+            {/* Phone OTP Verification */}
+            {view === 'phone-otp' && (
+              <OTPVerification
+                email={phoneNumber}
+                expectedOTP={testOTP}
+                onVerified={() => handlePhoneOTPVerify(testOTP)}
+                onBack={() => setView('phone-login')}
               />
             )}
           </div>
