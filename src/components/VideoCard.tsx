@@ -138,7 +138,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   return (
     <article 
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
+      className={`group relative overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
       onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -157,15 +157,14 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Progressive Image with Blur-up */}
-          {isInView && (
-            <ProgressiveImage
-              src={video.image}
-              alt={video.title}
-              className={`w-full h-full transition-all duration-500 ease-out ${showVideo ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
-              onLoad={() => setImageLoaded(true)}
-            />
-          )}
+          {/* Progressive Image with Blur-up and Lazy Loading */}
+          <ProgressiveImage
+            src={video.image}
+            alt={video.title}
+            className={`w-full h-full transition-opacity duration-500 ease-out ${showVideo ? 'opacity-0' : 'opacity-100'}`}
+            onLoad={() => setImageLoaded(true)}
+            lazy={true}
+          />
           
           {/* Placeholder before in view */}
           {!isInView && (

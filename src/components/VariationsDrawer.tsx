@@ -279,9 +279,12 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
 
           {/* Variations List */}
           <div className="space-y-3 pb-6">
-            <div className="flex items-center justify-between mb-4">
-              <h4 className="text-sm font-semibold">Available Variations ({variations?.length || 0})</h4>
-              <Badge variant="secondary" className="text-xs">
+            <div className="flex items-center justify-between mb-4 px-1">
+              <div className="space-y-1">
+                <h4 className="text-base font-semibold tracking-tight">Available Variations</h4>
+                <p className="text-xs text-muted-foreground">{variations?.length || 0} versions available</p>
+              </div>
+              <Badge variant="secondary" className="text-xs font-medium px-3">
                 {variations?.filter(v => v.thumbnail_url).length || 0} with thumbnails
               </Badge>
             </div>
@@ -312,22 +315,23 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                 return (
                   <div
                     key={variation.id}
-                    className={`flex items-start gap-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer ${
+                    className={`group flex items-start gap-4 p-4 rounded-lg border transition-all duration-300 cursor-pointer ${
                       isCurrentlyPlaying 
-                        ? 'bg-primary/10 border-primary ring-2 ring-primary/20 shadow-md' 
-                        : 'bg-card hover:bg-accent/50'
+                        ? 'bg-primary/5 border-primary shadow-sm' 
+                        : 'bg-card hover:bg-accent/30 hover:shadow-sm hover:border-accent'
                     }`}
                     onClick={() => handlePlayVariation(variation)}
                   >
                   {/* Thumbnail with Progressive Loading */}
-                  <div className="w-20 h-20 rounded-md overflow-hidden bg-muted flex-shrink-0 relative group">
+                  <div className="w-24 h-24 rounded-md overflow-hidden bg-muted/30 flex-shrink-0 relative">
                     <ProgressiveImage
                       src={variation.thumbnail_url || video.image}
                       alt={variation.title}
                       className="w-full h-full"
+                      lazy={true}
                     />
                     {!variation.thumbnail_url && (
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
+                      <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
                         <GenerateThumbnailButton
                           variationId={variation.id}
                           videoTitle={video.title}
@@ -338,39 +342,47 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                       </div>
                     )}
                     {/* Play overlay icon */}
-                    <div className={`absolute inset-0 flex items-center justify-center transition-all ${
+                    <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
                       isCurrentlyPlaying 
-                        ? 'bg-primary/50' 
-                        : 'bg-black/0 group-hover:bg-black/30'
+                        ? 'bg-primary/60' 
+                        : 'bg-black/0 group-hover:bg-black/40'
                     }`}>
                       {isCurrentlyPlaying ? (
-                        <Volume2 className="h-8 w-8 text-white animate-pulse" />
+                        <div className="flex flex-col items-center gap-1">
+                          <Volume2 className="h-6 w-6 text-white animate-pulse" />
+                          <span className="text-xs text-white font-medium">Playing</span>
+                        </div>
                       ) : (
-                        <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="white" />
+                        <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-all duration-300" fill="white" />
                       )}
                     </div>
                   </div>
 
                   {/* Variation Info */}
-                  <div className="flex-1 min-w-0 space-y-2">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <h5 className="font-semibold text-sm leading-tight">{variation.title}</h5>
+                  <div className="flex-1 min-w-0 space-y-3">
+                    <div className="space-y-1.5">
+                      <div className="flex items-start justify-between gap-2">
+                        <h5 className="font-semibold text-base leading-tight truncate flex-1">{variation.title}</h5>
                         {isCurrentlyPlaying && (
-                          <Badge variant="default" className="text-xs">Now Playing</Badge>
+                          <Badge variant="default" className="text-xs flex-shrink-0">
+                            <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1.5" />
+                            Playing
+                          </Badge>
                         )}
                       </div>
-                      <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
-                        <span className="px-2 py-0.5 bg-muted rounded font-medium">
+                      
+                      {/* Metadata Pills */}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="inline-flex items-center px-2.5 py-1 bg-muted/60 rounded-full text-xs font-medium">
                           {variation.duration}
                         </span>
                         {variation.aspect_ratio && (
-                          <span className="px-2 py-0.5 bg-muted rounded">
+                          <span className="inline-flex items-center px-2.5 py-1 bg-muted/60 rounded-full text-xs font-medium">
                             {variation.aspect_ratio}
                           </span>
                         )}
                         {variation.quality && (
-                          <Badge variant="outline" className="text-xs h-5">
+                          <Badge variant="secondary" className="text-xs px-2.5 py-1 font-semibold">
                             {variation.quality}
                           </Badge>
                         )}
@@ -379,43 +391,45 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                     
                     {/* Platforms */}
                     {variation.platforms && variation.platforms.length > 0 && (
-                      <div className="flex items-center gap-1.5 flex-wrap">
-                        <span className="text-xs text-muted-foreground">For:</span>
-                        {variation.platforms.map((platform) => (
-                          <Badge
-                            key={platform}
-                            variant="secondary"
-                            className="text-xs px-2 py-0 h-5"
-                          >
-                            {platform}
-                          </Badge>
-                        ))}
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs text-muted-foreground font-medium">Platforms:</span>
+                        <div className="flex gap-1.5 flex-wrap">
+                          {variation.platforms.map((platform) => (
+                            <Badge
+                              key={platform}
+                              variant="outline"
+                              className="text-xs px-2 py-0.5 font-medium"
+                            >
+                              {platform}
+                            </Badge>
+                          ))}
+                        </div>
                       </div>
                     )}
 
                     {/* Status indicators */}
-                    <div className="flex items-center gap-2 text-xs">
+                    <div className="flex items-center gap-3 text-xs">
                       {variation.video_url && (
-                        <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
-                          <span className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-400" />
-                          Video ready
+                        <span className="flex items-center gap-1.5 text-green-600 dark:text-green-400 font-medium">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-400 animate-pulse" />
+                          Ready
                         </span>
                       )}
                       {variation.thumbnail_url && (
-                        <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                        <span className="flex items-center gap-1.5 text-blue-600 dark:text-blue-400 font-medium">
                           <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
-                          Has thumbnail
+                          Thumbnail
                         </span>
                       )}
                     </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className="flex flex-col gap-2 flex-shrink-0">
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8"
+                      className="h-9 w-9 hover:bg-accent"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleShare(variation);
@@ -426,7 +440,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                     <Button
                       size="icon"
                       variant="ghost"
-                      className="h-8 w-8"
+                      className={`h-9 w-9 ${isCurrentlyPlaying ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
                       onClick={(e) => {
                         e.stopPropagation();
                         handlePlayVariation(variation);
@@ -439,10 +453,14 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                 );
               })
             ) : (
-              <div className="text-center py-12 text-muted-foreground space-y-2">
-                <div className="text-4xl mb-2">📹</div>
-                <p className="font-medium">No variations available</p>
-                <p className="text-sm">This video doesn't have any variations yet</p>
+              <div className="text-center py-16 px-4">
+                <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
+                  <Play className="h-8 w-8 text-muted-foreground" />
+                </div>
+                <h5 className="font-semibold text-base mb-2">No Variations Available</h5>
+                <p className="text-sm text-muted-foreground max-w-sm mx-auto">
+                  This video doesn't have any variations yet. Check back later for different formats and versions.
+                </p>
               </div>
             )}
           </div>
