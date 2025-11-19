@@ -133,41 +133,56 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
     // Trigger location lookup when pincode changes
     if (name === 'pincode' && value.length >= 4) {
-      lookupPincode(value);
+      lookupPincode(value).catch(err => {
+        console.error('Pincode lookup failed:', err);
+        setLocationError('Unable to verify pincode. Please continue with manual entry.');
+      });
     } else if (name === 'pincode' && value.length < 4) {
       setLocationData(null);
+      setLocationError('');
     }
   };
 
   const lookupPincode = async (pincode: string) => {
+    if (!pincode || pincode.length < 4) return;
+    
     setLocationLoading(true);
     setLocationError('');
+    setLocationData(null);
+    
     try {
       const { data, error } = await supabase.functions.invoke('lookup-pincode', {
         body: { pincode, countryCode: selectedCountry }
+      }).catch(err => {
+        // Catch network/invocation errors
+        console.error('Function invoke error:', err);
+        return { data: null, error: { message: 'Network error' } };
       });
 
       if (error) {
-        if (error.message?.includes('Pincode not found')) {
-          setLocationError('Pincode not found. Please check the pincode and country selection.');
-          setLocationData(null);
+        const errorMsg = error.message?.toLowerCase() || '';
+        if (errorMsg.includes('pincode not found') || errorMsg.includes('404')) {
+          setLocationError(`Pincode not found for ${selectedCountry}. Please check the pincode and country.`);
         } else {
-          throw error;
+          setLocationError('Unable to verify pincode. Please continue with manual entry.');
         }
         return;
       }
 
-      if (data && !data.error) {
+      if (data?.error) {
+        setLocationError(`Pincode not found for ${selectedCountry}. Please check the pincode and country.`);
+        return;
+      }
+
+      if (data?.city && data?.state && data?.country) {
         setLocationData(data);
         setLocationError('');
-      } else if (data?.error) {
-        setLocationError('Pincode not found. Please check the pincode and country selection.');
-        setLocationData(null);
+      } else {
+        setLocationError('Unable to verify pincode. Please continue with manual entry.');
       }
     } catch (error: any) {
       console.error('Error looking up pincode:', error);
       setLocationError('Unable to verify pincode. Please continue with manual entry.');
-      setLocationData(null);
     } finally {
       setLocationLoading(false);
     }
@@ -546,12 +561,12 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       </p>
                     )}
                     {locationError && !locationLoading && (
-                      <p className="text-xs text-amber-600 flex items-center gap-1">
-                        <AlertCircle className="h-3 w-3" />
-                        {locationError}
+                      <p className="text-xs text-amber-600 dark:text-amber-500 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3 flex-shrink-0" />
+                        <span>{locationError}</span>
                       </p>
                     )}
-                    {locationData && !locationLoading && (
+                    {locationData && !locationLoading && !locationError && (
                       <div className="text-xs text-muted-foreground space-y-1 p-2 bg-muted/30 rounded-md">
                         <p className="flex items-center gap-1">
                           <span className="font-medium">City:</span> {locationData.city}
