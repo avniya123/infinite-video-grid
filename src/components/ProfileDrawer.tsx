@@ -9,7 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Camera, Loader2, LogOut, User, Shield, Bell, Info, Key, Mail } from 'lucide-react';
+import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
@@ -48,16 +48,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     currentPassword: '',
     newPassword: '',
     confirmPassword: '',
-  });
-
-  // Notification preferences state
-  const [notifications, setNotifications] = useState({
-    emailNotifications: true,
-    pushNotifications: false,
-    weeklyDigest: true,
-    newFeatures: true,
-    marketingEmails: false,
-    securityAlerts: true,
   });
 
   // Security options state
@@ -256,14 +246,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
         toast.success('Security settings updated');
       }
       
-      return newState;
-    });
-  };
-
-  const handleNotificationToggle = (key: keyof typeof notifications) => {
-    setNotifications(prev => {
-      const newState = { ...prev, [key]: !prev[key] };
-      toast.success('Notification preferences updated');
       return newState;
     });
   };
@@ -584,90 +566,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       </>
                     )}
                   </Button>
-                </CardContent>
-              </Card>
-
-              {/* Notification Preferences */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Bell className="h-5 w-5 text-primary" />
-                    <CardTitle>Notification Preferences</CardTitle>
-                  </div>
-                  <CardDescription>Choose how you want to receive notifications</CardDescription>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="emailNotifications">Email Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive notifications via email</p>
-                    </div>
-                    <Switch
-                      id="emailNotifications"
-                      checked={notifications.emailNotifications}
-                      onCheckedChange={() => handleNotificationToggle('emailNotifications')}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="pushNotifications">Push Notifications</Label>
-                      <p className="text-sm text-muted-foreground">Receive push notifications in browser</p>
-                    </div>
-                    <Switch
-                      id="pushNotifications"
-                      checked={notifications.pushNotifications}
-                      onCheckedChange={() => handleNotificationToggle('pushNotifications')}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="marketingEmails">Marketing Emails</Label>
-                      <p className="text-sm text-muted-foreground">Receive marketing and promotional emails</p>
-                    </div>
-                    <Switch
-                      id="marketingEmails"
-                      checked={notifications.marketingEmails}
-                      onCheckedChange={() => handleNotificationToggle('marketingEmails')}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="securityAlerts">Security Alerts</Label>
-                      <p className="text-sm text-muted-foreground">Important security-related notifications</p>
-                    </div>
-                    <Switch
-                      id="securityAlerts"
-                      checked={notifications.securityAlerts}
-                      onCheckedChange={() => handleNotificationToggle('securityAlerts')}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="weeklyDigest">Weekly Digest</Label>
-                      <p className="text-sm text-muted-foreground">Get a summary of your activity</p>
-                    </div>
-                    <Switch
-                      id="weeklyDigest"
-                      checked={notifications.weeklyDigest}
-                      onCheckedChange={() => handleNotificationToggle('weeklyDigest')}
-                    />
-                  </div>
-                  <Separator />
-                  <div className="flex items-center justify-between">
-                    <div className="space-y-0.5">
-                      <Label htmlFor="newFeatures">New Features</Label>
-                      <p className="text-sm text-muted-foreground">Updates about new features and improvements</p>
-                    </div>
-                    <Switch
-                      id="newFeatures"
-                      checked={notifications.newFeatures}
-                      onCheckedChange={() => handleNotificationToggle('newFeatures')}
-                    />
-                  </div>
                 </CardContent>
               </Card>
 
