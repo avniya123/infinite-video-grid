@@ -7,6 +7,13 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -68,6 +75,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
     district?: string;
   } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('US');
 
   // Load remember me preference on mount
   useEffect(() => {
@@ -106,7 +114,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
     setLocationLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('lookup-pincode', {
-        body: { pincode, countryCode: 'US' }
+        body: { pincode, countryCode: selectedCountry }
       });
 
       if (error) throw error;
@@ -693,6 +701,29 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                     className="h-11 rounded-xl"
                     required
                   />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="country">Country</Label>
+                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                    <SelectTrigger className="h-11 rounded-xl">
+                      <SelectValue placeholder="Select country" />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background">
+                      <SelectItem value="US">United States 🇺🇸</SelectItem>
+                      <SelectItem value="IN">India 🇮🇳</SelectItem>
+                      <SelectItem value="GB">United Kingdom 🇬🇧</SelectItem>
+                      <SelectItem value="CA">Canada 🇨🇦</SelectItem>
+                      <SelectItem value="AU">Australia 🇦🇺</SelectItem>
+                      <SelectItem value="DE">Germany 🇩🇪</SelectItem>
+                      <SelectItem value="FR">France 🇫🇷</SelectItem>
+                      <SelectItem value="ES">Spain 🇪🇸</SelectItem>
+                      <SelectItem value="IT">Italy 🇮🇹</SelectItem>
+                      <SelectItem value="MX">Mexico 🇲🇽</SelectItem>
+                      <SelectItem value="BR">Brazil 🇧🇷</SelectItem>
+                      <SelectItem value="JP">Japan 🇯🇵</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
 
                 <div className="space-y-2">
