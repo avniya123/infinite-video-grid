@@ -9,6 +9,7 @@ import { VariationsDrawer } from '@/components/VariationsDrawer';
 import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
+import { AuthDrawer } from '@/components/AuthDrawer';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -28,6 +29,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [variationsOpen, setVariationsOpen] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -273,12 +275,18 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
         video={video}
         open={variationsOpen}
         onOpenChange={setVariationsOpen}
+        onRequestAuth={() => setAuthDrawerOpen(true)}
       />
 
       <VideoPlayerDrawer
         video={video}
         open={playerOpen}
         onOpenChange={setPlayerOpen}
+      />
+
+      <AuthDrawer 
+        open={authDrawerOpen} 
+        onOpenChange={setAuthDrawerOpen} 
       />
     </article>
   );

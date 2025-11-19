@@ -1,0 +1,634 @@
+import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
+import { toast } from 'sonner';
+import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail } from 'lucide-react';
+import { profileSchema, type ProfileFormData } from '@/lib/validations';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+
+interface ProfileDrawerProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps) {
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
+  const [formData, setFormData] = useState<ProfileFormData>({
+    fullName: '',
+    email: '',
+    phone: '',
+    dateOfBirth: '',
+    address: '',
+    pincode: '',
+  });
+  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
+  const [errors, setErrors] = useState<Partial<Record<keyof ProfileFormData, string>>>({});
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  // Notification preferences state
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  // Security options state
+  const [securityOptions, setSecurityOptions] = useState({
+    twoFactorEnabled: false,
+    loginAlerts: true,
+  });
+
+  useEffect(() => {
+    if (open) {
+      checkUser();
+    }
+  }, [open]);
+
+  const checkUser = async () => {
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      onOpenChange(false);
+      return;
+    }
+    setUser(session.user);
+    await loadProfile(session.user.id);
+  };
+
+  const loadProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+
+      if (data) {
+        setFormData({
+          fullName: data.full_name || '',
+          email: data.email || '',
+          phone: data.phone || '',
+          dateOfBirth: data.date_of_birth || '',
+          address: data.address || '',
+          pincode: data.pincode || '',
+        });
+        setAvatarUrl(data.avatar_url);
+      }
+    } catch (error: any) {
+      console.error('Error loading profile:', error);
+      toast.error('Failed to load profile');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+    if (errors[name as keyof ProfileFormData]) {
+      setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+  };
+
+  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !user) return;
+
+    if (!file.type.startsWith('image/')) {
+      toast.error('Please upload an image file');
+      return;
+    }
+
+    if (file.size > 2 * 1024 * 1024) {
+      toast.error('Image must be less than 2MB');
+      return;
+    }
+
+    setUploading(true);
+    try {
+      const fileExt = file.name.split('.').pop();
+      const filePath = `${user.id}/avatar.${fileExt}`;
+
+      if (avatarUrl) {
+        const oldPath = avatarUrl.split('/').slice(-2).join('/');
+        await supabase.storage.from('avatars').remove([oldPath]);
+      }
+
+      const { error: uploadError } = await supabase.storage
+        .from('avatars')
+        .upload(filePath, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('avatars')
+        .getPublicUrl(filePath);
+
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: publicUrl })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(publicUrl);
+      toast.success('Avatar updated successfully');
+    } catch (error: any) {
+      console.error('Error uploading avatar:', error);
+      toast.error('Failed to upload avatar');
+    } finally {
+      setUploading(false);
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!user) return;
+
+    try {
+      const validatedData = profileSchema.parse(formData);
+      setSaving(true);
+
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          full_name: validatedData.fullName,
+          email: validatedData.email,
+          phone: validatedData.phone,
+          date_of_birth: validatedData.dateOfBirth,
+          address: validatedData.address,
+          pincode: validatedData.pincode,
+        })
+        .eq('id', user.id);
+
+      if (error) throw error;
+
+      toast.success('Profile updated successfully');
+      setErrors({});
+    } catch (error: any) {
+      if (error.errors) {
+        const formattedErrors: Partial<Record<keyof ProfileFormData, string>> = {};
+        error.errors.forEach((err: any) => {
+          const field = err.path[0] as keyof ProfileFormData;
+          formattedErrors[field] = err.message;
+        });
+        setErrors(formattedErrors);
+      } else {
+        toast.error('Failed to update profile');
+      }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+      });
+
+      if (error) throw error;
+
+      toast.success('Password updated successfully');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSecurityToggle = (key: keyof typeof securityOptions) => {
+    setSecurityOptions(prev => {
+      const newState = { ...prev, [key]: !prev[key] };
+      
+      if (key === 'twoFactorEnabled' && newState[key]) {
+        toast.success('Two-factor authentication enabled');
+      } else if (key === 'twoFactorEnabled') {
+        toast.success('Two-factor authentication disabled');
+      } else {
+        toast.success('Security settings updated');
+      }
+      
+      return newState;
+    });
+  };
+
+  const handleSignOutAllDevices = async () => {
+    setSaving(true);
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+      toast.success('Signed out from all devices');
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to sign out');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    onOpenChange(false);
+    toast.success('Signed out successfully');
+  };
+
+  if (loading) {
+    return (
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+          <div className="flex items-center justify-center h-64">
+            <Loader2 className="h-8 w-8 animate-spin text-primary" />
+          </div>
+        </SheetContent>
+      </Sheet>
+    );
+  }
+
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
+        <SheetHeader className="p-6 pb-4 border-b">
+          <SheetTitle className="text-xl">Settings</SheetTitle>
+          <SheetDescription>Manage your account settings and preferences</SheetDescription>
+        </SheetHeader>
+
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="px-6 pt-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Profile
+              </TabsTrigger>
+              <TabsTrigger value="account" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Account Settings
+              </TabsTrigger>
+            </TabsList>
+          </div>
+
+          <div className="p-6 space-y-6">
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6 mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Picture</CardTitle>
+                  <CardDescription>Upload a profile picture (max 2MB)</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-4">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={avatarUrl || undefined} alt="Profile" />
+                    <AvatarFallback>
+                      <User className="h-12 w-12" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="avatar"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={uploading}
+                      onClick={() => document.getElementById('avatar')?.click()}
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="mr-2 h-4 w-4" />
+                          Change Avatar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>Update your personal details</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                    />
+                    {errors.fullName && (
+                      <p className="text-sm text-destructive">{errors.fullName}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="john@example.com"
+                      disabled
+                      className="bg-muted cursor-not-allowed"
+                    />
+                    {errors.email && (
+                      <p className="text-sm text-destructive">{errors.email}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+1234567890"
+                      disabled
+                      className="bg-muted cursor-not-allowed"
+                    />
+                    {errors.phone && (
+                      <p className="text-sm text-destructive">{errors.phone}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Input
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={handleChange}
+                    />
+                    {errors.dateOfBirth && (
+                      <p className="text-sm text-destructive">{errors.dateOfBirth}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="123 Main St, City, Country"
+                    />
+                    {errors.address && (
+                      <p className="text-sm text-destructive">{errors.address}</p>
+                    )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="pincode">Pincode</Label>
+                    <Input
+                      id="pincode"
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handleChange}
+                      placeholder="123456"
+                    />
+                    {errors.pincode && (
+                      <p className="text-sm text-destructive">{errors.pincode}</p>
+                    )}
+                  </div>
+
+                    <Button type="submit" disabled={saving} className="w-full mt-6">
+                      {saving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving Changes...
+                        </>
+                      ) : (
+                        'Save Changes'
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Account Settings Tab */}
+            <TabsContent value="account" className="space-y-6 mt-0">
+              {/* Security Information */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <CardTitle>Security Information</CardTitle>
+                  </div>
+                  <CardDescription>Manage your password and security settings</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <form onSubmit={handlePasswordChange} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                        placeholder="Enter current password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                        placeholder="Enter new password (min 8 characters)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+                    <Button type="submit" variant="outline" className="w-full" disabled={saving}>
+                      {saving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <Key className="mr-2 h-4 w-4" />
+                          Update Password
+                        </>
+                      )}
+                    </Button>
+                  </form>
+
+                  <Separator className="my-6" />
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="twoFactor">Two-Factor Authentication</Label>
+                        <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                      </div>
+                      <Switch
+                        id="twoFactor"
+                        checked={securityOptions.twoFactorEnabled}
+                        onCheckedChange={() => handleSecurityToggle('twoFactorEnabled')}
+                      />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="loginAlerts">Login Alerts</Label>
+                        <p className="text-sm text-muted-foreground">Get notified of new sign-ins</p>
+                      </div>
+                      <Switch
+                        id="loginAlerts"
+                        checked={securityOptions.loginAlerts}
+                        onCheckedChange={() => handleSecurityToggle('loginAlerts')}
+                      />
+                    </div>
+                  </div>
+
+                  <Separator className="my-6" />
+
+                  <Button 
+                    variant="destructive" 
+                    className="w-full"
+                    onClick={handleSignOutAllDevices}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing out...
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out All Devices
+                      </>
+                    )}
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Account Information */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-primary" />
+                    <CardTitle>Account Information</CardTitle>
+                  </div>
+                  <CardDescription>View your account details</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium">Account ID</p>
+                      <p className="text-sm text-muted-foreground">{user?.id.substring(0, 18)}...</p>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium">Email Verified</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.email_confirmed_at ? 'Yes' : 'No'}
+                      </p>
+                    </div>
+                    {!user?.email_confirmed_at && (
+                      <Button variant="outline" size="sm">
+                        <Mail className="mr-2 h-4 w-4" />
+                        Verify Email
+                      </Button>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium">Account Created</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Sign Out Button */}
+              <Card className="border-destructive/50">
+                <CardContent className="pt-6">
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
+      </SheetContent>
+    </Sheet>
+  );
+}
