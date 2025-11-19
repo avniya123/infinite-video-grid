@@ -45,6 +45,9 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
   // Forgot password state
   const [forgotEmail, setForgotEmail] = useState('');
+  
+  // Test OTP state (for dummy testing)
+  const [testOTP, setTestOTP] = useState('');
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -138,9 +141,18 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
       if (error) throw error;
 
       if (data.user) {
-        toast.success('Account created successfully!');
-        handleDrawerChange(false);
-        navigate('/profile');
+        // Generate dummy OTP for testing
+        const dummyOTP = Math.floor(100000 + Math.random() * 900000).toString();
+        setTestOTP(dummyOTP);
+        setForgotEmail(signupData.email);
+        
+        // Show the test OTP to the user
+        toast.success(`Account created! Test OTP: ${dummyOTP}`, {
+          duration: 10000,
+        });
+        console.log('🔐 Test OTP Code:', dummyOTP);
+        
+        setView('otp');
       }
     } catch (error: any) {
       toast.error(error.message || 'Failed to create account');
@@ -208,6 +220,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
       });
       setSignupErrors({});
       setForgotEmail('');
+      setTestOTP('');
       setLoading(false);
     }
     onOpenChange(isOpen);
@@ -493,8 +506,12 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
             {view === 'otp' && (
               <OTPVerification
                 email={forgotEmail}
-                onVerified={() => handleDrawerChange(false)}
-                onBack={() => setView('forgot')}
+                expectedOTP={testOTP}
+                onVerified={() => {
+                  handleDrawerChange(false);
+                  navigate('/profile');
+                }}
+                onBack={() => setView('signup')}
               />
             )}
           </div>
