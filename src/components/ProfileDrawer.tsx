@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Eye } from 'lucide-react';
+import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Eye, AlertCircle } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
@@ -77,6 +77,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
   } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('US');
+  const [locationError, setLocationError] = useState<string>('');
 
   useEffect(() => {
     if (open) {
@@ -140,18 +141,32 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
   const lookupPincode = async (pincode: string) => {
     setLocationLoading(true);
+    setLocationError('');
     try {
       const { data, error } = await supabase.functions.invoke('lookup-pincode', {
         body: { pincode, countryCode: selectedCountry }
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('Pincode not found')) {
+          setLocationError('Pincode not found. Please check the pincode and country selection.');
+          setLocationData(null);
+        } else {
+          throw error;
+        }
+        return;
+      }
 
-      if (data) {
+      if (data && !data.error) {
         setLocationData(data);
+        setLocationError('');
+      } else if (data?.error) {
+        setLocationError('Pincode not found. Please check the pincode and country selection.');
+        setLocationData(null);
       }
     } catch (error: any) {
       console.error('Error looking up pincode:', error);
+      setLocationError('Unable to verify pincode. Please continue with manual entry.');
       setLocationData(null);
     } finally {
       setLocationLoading(false);
@@ -482,11 +497,19 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
                   <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
-                    <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                    <Select value={selectedCountry} onValueChange={(value) => {
+                      setSelectedCountry(value);
+                      setLocationData(null);
+                      setLocationError('');
+                      // Re-lookup if pincode exists
+                      if (formData.pincode.length >= 4) {
+                        setTimeout(() => lookupPincode(formData.pincode), 100);
+                      }
+                    }}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select country" />
                       </SelectTrigger>
-                      <SelectContent className="bg-background">
+                      <SelectContent className="bg-background z-50">
                         <SelectItem value="US">United States 🇺🇸</SelectItem>
                         <SelectItem value="IN">India 🇮🇳</SelectItem>
                         <SelectItem value="GB">United Kingdom 🇬🇧</SelectItem>
@@ -501,6 +524,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                         <SelectItem value="JP">Japan 🇯🇵</SelectItem>
                       </SelectContent>
                     </Select>
+                    <p className="text-xs text-muted-foreground">Select your country before entering pincode</p>
                   </div>
 
                   <div className="space-y-2">
@@ -519,6 +543,12 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       <p className="text-xs text-muted-foreground flex items-center gap-2">
                         <Loader2 className="h-3 w-3 animate-spin" />
                         Looking up location...
+                      </p>
+                    )}
+                    {locationError && !locationLoading && (
+                      <p className="text-xs text-amber-600 flex items-center gap-1">
+                        <AlertCircle className="h-3 w-3" />
+                        {locationError}
                       </p>
                     )}
                     {locationData && !locationLoading && (

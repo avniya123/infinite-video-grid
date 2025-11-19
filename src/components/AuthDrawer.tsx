@@ -76,6 +76,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [selectedCountry, setSelectedCountry] = useState('US');
+  const [locationError, setLocationError] = useState<string>('');
 
   // Load remember me preference on mount
   useEffect(() => {
@@ -112,18 +113,32 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
   const lookupPincode = async (pincode: string) => {
     setLocationLoading(true);
+    setLocationError('');
     try {
       const { data, error } = await supabase.functions.invoke('lookup-pincode', {
         body: { pincode, countryCode: selectedCountry }
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('Pincode not found')) {
+          setLocationError('Pincode not found. Please check the pincode and country selection.');
+          setLocationData(null);
+        } else {
+          throw error;
+        }
+        return;
+      }
 
-      if (data) {
+      if (data && !data.error) {
         setLocationData(data);
+        setLocationError('');
+      } else if (data?.error) {
+        setLocationError('Pincode not found. Please check the pincode and country selection.');
+        setLocationData(null);
       }
     } catch (error: any) {
       console.error('Error looking up pincode:', error);
+      setLocationError('Unable to verify pincode. Please continue with manual entry.');
       setLocationData(null);
     } finally {
       setLocationLoading(false);
@@ -705,11 +720,19 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
                 <div className="space-y-2">
                   <Label htmlFor="country">Country</Label>
-                  <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                  <Select value={selectedCountry} onValueChange={(value) => {
+                    setSelectedCountry(value);
+                    setLocationData(null);
+                    setLocationError('');
+                    // Re-lookup if pincode exists
+                    if (signupData.pincode.length >= 4) {
+                      setTimeout(() => lookupPincode(signupData.pincode), 100);
+                    }
+                  }}>
                     <SelectTrigger className="h-11 rounded-xl">
                       <SelectValue placeholder="Select country" />
                     </SelectTrigger>
-                    <SelectContent className="bg-background">
+                    <SelectContent className="bg-background z-50">
                       <SelectItem value="US">United States 🇺🇸</SelectItem>
                       <SelectItem value="IN">India 🇮🇳</SelectItem>
                       <SelectItem value="GB">United Kingdom 🇬🇧</SelectItem>
@@ -724,6 +747,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                       <SelectItem value="JP">Japan 🇯🇵</SelectItem>
                     </SelectContent>
                   </Select>
+                  <p className="text-xs text-muted-foreground">Select your country before entering pincode</p>
                 </div>
 
                 <div className="space-y-2">
@@ -741,6 +765,12 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                     <p className="text-xs text-muted-foreground flex items-center gap-2">
                       <Loader2 className="h-3 w-3 animate-spin" />
                       Looking up location...
+                    </p>
+                  )}
+                  {locationError && !locationLoading && (
+                    <p className="text-xs text-amber-600 flex items-center gap-1">
+                      <AlertCircle className="h-3 w-3" />
+                      {locationError}
                     </p>
                   )}
                   {locationData && !locationLoading && (
