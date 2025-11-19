@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
+import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -33,6 +34,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
+  
+  const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
 
   // Calculate aspect ratio based on orientation
   const getAspectRatio = () => {
@@ -206,6 +209,13 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {video.trending && (
             <Badge className="absolute top-3 left-3 bg-trending text-trending-foreground font-semibold text-xs px-2 py-1 shadow-lg z-10">
               TRENDING
+            </Badge>
+          )}
+
+          {/* Variations Count Badge */}
+          {variationsCount > 0 && (
+            <Badge className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10" style={{ top: video.trending ? '3.5rem' : '0.75rem' }}>
+              01 / {String(variationsCount).padStart(2, '0')}
             </Badge>
           )}
 
