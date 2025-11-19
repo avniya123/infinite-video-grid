@@ -17,10 +17,14 @@ export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
     onPlay(video);
   };
 
+  const handleCardClick = () => {
+    onClick(video);
+  };
+
   return (
     <article 
       className="group relative overflow-hidden rounded-xl bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5"
-      onClick={() => onClick(video)}
+      onClick={handleCardClick}
     >
       <div className="relative">
         {/* Image */}
