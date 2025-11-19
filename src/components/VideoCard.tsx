@@ -112,12 +112,15 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
         {/* Trending Badge */}
         {video.trending && (
-          <Badge className="absolute top-3 right-3 bg-trending text-trending-foreground font-semibold text-xs px-2 py-1 shadow-lg z-10">
+          <Badge className="absolute top-3 left-3 bg-trending text-trending-foreground font-semibold text-xs px-2 py-1 shadow-lg z-10">
             TRENDING
           </Badge>
         )}
 
         {/* Price Badge */}
+        <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
+          ${video.price}
+        </div>
         <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
           ${video.price}
         </div>

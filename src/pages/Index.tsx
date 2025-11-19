@@ -7,11 +7,13 @@ import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
 const PAGE_SIZE = 8;
+
+type DurationFilter = 'All' | 'Teaser' | 'Trailer' | 'Gimbel' | 'Document';
 
 const categories: { value: VideoCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'All', label: 'All Videos', icon: null },
@@ -19,6 +21,14 @@ const categories: { value: VideoCategory; label: string; icon: React.ReactNode }
   { value: 'Business', label: 'Business', icon: <Briefcase className="w-4 h-4" /> },
   { value: 'Urban', label: 'Urban', icon: <Building2 className="w-4 h-4" /> },
   { value: 'Lifestyle', label: 'Lifestyle', icon: <Users className="w-4 h-4" /> },
+];
+
+const durationFilters: { value: DurationFilter; label: string; range: string }[] = [
+  { value: 'All', label: 'All Duration', range: '' },
+  { value: 'Teaser', label: 'Teaser', range: '0-1 min' },
+  { value: 'Trailer', label: 'Trailer', range: '1-3 min' },
+  { value: 'Gimbel', label: 'Gimbel', range: '3-5 min' },
+  { value: 'Document', label: 'Document', range: '5+ min' },
 ];
 
 type ViewMode = 'masonry' | 'grid' | 'list';
@@ -32,6 +42,7 @@ const Index = () => {
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedCategory, setSelectedCategory] = useState<VideoCategory>('All');
+  const [selectedDuration, setSelectedDuration] = useState<DurationFilter>('All');
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [compareMode, setCompareMode] = useState(false);
   const [selectedForCompare, setSelectedForCompare] = useState<VideoItem[]>([]);
@@ -127,9 +138,38 @@ const Index = () => {
     }
   };
 
-  const filteredVideos = selectedCategory === 'All' 
-    ? videos 
-    : videos.filter(video => video.category === selectedCategory);
+  const handleDurationChange = (duration: string) => {
+    setSelectedDuration(duration as DurationFilter);
+  };
+
+  const parseDuration = (durationStr: string): number => {
+    // Parse "MM:SS" format to total seconds
+    const [minutes, seconds] = durationStr.split(':').map(Number);
+    return minutes * 60 + seconds;
+  };
+
+  const filterByDuration = (video: VideoItem): boolean => {
+    if (selectedDuration === 'All') return true;
+    
+    const durationInSeconds = parseDuration(video.duration);
+    
+    switch (selectedDuration) {
+      case 'Teaser': // 0-1 min
+        return durationInSeconds <= 60;
+      case 'Trailer': // 1-3 min
+        return durationInSeconds > 60 && durationInSeconds <= 180;
+      case 'Gimbel': // 3-5 min
+        return durationInSeconds > 180 && durationInSeconds <= 300;
+      case 'Document': // 5+ min
+        return durationInSeconds > 300;
+      default:
+        return true;
+    }
+  };
+
+  const filteredVideos = videos
+    .filter(video => selectedCategory === 'All' || video.category === selectedCategory)
+    .filter(filterByDuration);
 
   const handleSelectForCompare = (video: VideoItem) => {
     setSelectedForCompare(prev => {
@@ -247,6 +287,27 @@ const Index = () => {
               >
                 {category.icon}
                 {category.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+        </Tabs>
+
+        {/* Duration Filter Tabs */}
+        <Tabs value={selectedDuration} onValueChange={handleDurationChange} className="w-full">
+          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
+            {durationFilters.map((filter) => (
+              <TabsTrigger 
+                key={filter.value} 
+                value={filter.value}
+                className="flex items-center gap-2 whitespace-nowrap"
+              >
+                <Clock className="w-4 h-4" />
+                <div className="flex flex-col items-start">
+                  <span>{filter.label}</span>
+                  {filter.range && (
+                    <span className="text-[10px] text-muted-foreground">{filter.range}</span>
+                  )}
+                </div>
               </TabsTrigger>
             ))}
           </TabsList>
