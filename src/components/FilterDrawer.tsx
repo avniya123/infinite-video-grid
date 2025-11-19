@@ -1,6 +1,6 @@
 import { Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -95,6 +95,9 @@ export const FilterDrawer = ({
       </SheetTrigger>
       <SheetContent side="right" className="w-full sm:max-w-md">
         <SheetHeader className="space-y-4">
+          <SheetDescription className="sr-only">
+            Filter videos by categories, duration, aspect ratio, and price range
+          </SheetDescription>
           <div className="flex items-center justify-between">
             <SheetTitle className="text-2xl">Filters</SheetTitle>
             {hasActiveFilters && (

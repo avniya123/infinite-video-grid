@@ -3,6 +3,7 @@ import {
   Sheet,
   SheetContent,
   SheetHeader,
+  SheetDescription,
 } from '@/components/ui/sheet';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
@@ -127,6 +128,10 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:w-[650px] md:w-[700px] p-0 overflow-y-auto">
+        <SheetHeader className="sr-only">
+          <h2>{video.title}</h2>
+          <SheetDescription>Video player with playback controls and filters</SheetDescription>
+        </SheetHeader>
         {/* Video Player Section */}
         <div className="relative bg-black">
           <AspectRatio ratio={16 / 9} className="bg-black">

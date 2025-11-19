@@ -1,4 +1,4 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
@@ -151,7 +151,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
       <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto p-0">
         <SheetHeader className="p-6 pb-4">
           <SheetTitle className="text-xl">Template Variations Details</SheetTitle>
-          <p className="text-sm text-muted-foreground">Template Variations list informations</p>
+          <SheetDescription className="text-sm text-muted-foreground">
+            Template Variations list informations
+          </SheetDescription>
         </SheetHeader>
 
         <div className="px-6 space-y-6">

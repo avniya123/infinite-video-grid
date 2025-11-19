@@ -1,5 +1,5 @@
 import { VideoItem } from '@/types/video';
-import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from '@/components/ui/sheet';
 import { Button } from '@/components/ui/button';
 import { X, Play } from 'lucide-react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -18,6 +18,9 @@ export function CompareDrawer({ videos, open, onClose, onRemove, onPlayVideo }: 
       <SheetContent side="bottom" className="h-[80vh] overflow-y-auto">
         <SheetHeader>
           <SheetTitle>Compare Videos ({videos.length}/4)</SheetTitle>
+          <SheetDescription>
+            Compare up to 4 videos side by side to find the perfect one for your needs
+          </SheetDescription>
         </SheetHeader>
         
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-6">
