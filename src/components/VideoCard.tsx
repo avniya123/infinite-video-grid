@@ -18,6 +18,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
+  const [videoLoaded, setVideoLoaded] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -39,6 +40,13 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   const aspectRatio = getAspectRatio();
 
+  // Preload video when component mounts
+  useEffect(() => {
+    if (videoRef.current && video.videoUrl) {
+      videoRef.current.load();
+    }
+  }, [video.videoUrl]);
+
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onPlay(video);
@@ -57,9 +65,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     setIsHovering(true);
     // Start playing video after 500ms hover
     hoverTimerRef.current = setTimeout(() => {
-      setShowVideo(true);
-      if (videoRef.current) {
-        videoRef.current.play();
+      if (videoRef.current && videoLoaded) {
+        setShowVideo(true);
+        videoRef.current.play().catch(err => console.log('Play failed:', err));
       }
     }, 500);
   };
@@ -115,16 +123,22 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           />
 
           {/* Video Preview on Hover */}
-          {showVideo && (
-            <video
-              ref={videoRef}
-              src={video.videoUrl}
-              className="w-full h-full object-cover absolute inset-0 transition-opacity duration-300"
-              loop
-              muted
-              playsInline
-            />
-          )}
+          <video
+            ref={videoRef}
+            src={video.videoUrl}
+            className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+            style={{
+              objectFit: 'cover',
+              // Hide all browser controls and indicators
+              WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+            }}
+            loop
+            muted
+            playsInline
+            preload="auto"
+            onLoadedData={() => setVideoLoaded(true)}
+            onError={(e) => console.log('Video load error:', e)}
+          />
           
           {/* Loading placeholder */}
           {!imageLoaded && !showVideo && (
