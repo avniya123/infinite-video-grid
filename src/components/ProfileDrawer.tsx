@@ -564,12 +564,9 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       </p>
                     )}
                     {locationData && !locationLoading && !locationError && (
-                      <div className="text-xs text-muted-foreground space-y-1 p-2 bg-muted/30 rounded-md">
+                      <div className="text-xs text-muted-foreground p-2 bg-muted/30 rounded-md">
                         <p className="flex items-center gap-1">
-                          {locationData.city}{locationData.district && `, ${locationData.district}`}
-                        </p>
-                        <p className="flex items-center gap-1">
-                          {locationData.state}, {locationData.country}
+                          {locationData.city}{locationData.district && `, ${locationData.district}`}, {locationData.state}, {locationData.country}
                         </p>
                       </div>
                     )}
