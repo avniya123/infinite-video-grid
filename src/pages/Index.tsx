@@ -5,6 +5,7 @@ import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FilterChips } from '@/components/FilterChips';
 import { FilterDropdowns } from '@/components/FilterDropdowns';
+import { ScrollToTop } from '@/components/ScrollToTop';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
@@ -270,13 +271,18 @@ const Index = () => {
         {/* Masonry Layout */}
         {viewMode === 'masonry' && (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 [column-fill:balance]">
-            {filteredVideos.map((video) => (
-              <VideoCard
+            {filteredVideos.map((video, index) => (
+              <div 
                 key={video.id}
-                video={video}
-                onPlay={handlePlayVideo}
-                onClick={handleVideoClick}
-              />
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <VideoCard
+                  video={video}
+                  onPlay={handlePlayVideo}
+                  onClick={handleVideoClick}
+                />
+              </div>
             ))}
             {loading && Array.from({ length: 4 }).map((_, i) => (
               <VideoCardSkeleton key={`skeleton-masonry-${i}`} />
@@ -386,6 +392,8 @@ const Index = () => {
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
       />
+
+      <ScrollToTop />
     </div>
   );
 };
