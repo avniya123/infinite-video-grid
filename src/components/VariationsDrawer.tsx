@@ -2,26 +2,72 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sh
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
-import { ShoppingCart, Edit, Share2, Play } from "lucide-react";
+import { ShoppingCart, Edit, Share2, Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { toast } from "sonner";
 import { Skeleton } from "@/components/ui/skeleton";
 import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
-import { useState } from "react";
+import { useState, useRef, useEffect } from "react";
+import { Progress } from "@/components/ui/progress";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onPlayVariation?: (variation: { video_url?: string; thumbnail_url?: string; title: string }) => void;
 }
 
-export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawerProps) => {
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
+  const [currentVideo, setCurrentVideo] = useState<{ url: string; title: string; thumbnail: string } | null>(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [isMuted, setIsMuted] = useState(false);
+  const [progress, setProgress] = useState(0);
+  const [isVideoLoading, setIsVideoLoading] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
 
   if (!video) return null;
+
+  useEffect(() => {
+    if (open) {
+      // Set initial video when drawer opens
+      setCurrentVideo({
+        url: video.videoUrl || '',
+        title: video.title,
+        thumbnail: video.image
+      });
+    }
+  }, [open, video]);
+
+  useEffect(() => {
+    const videoElement = videoRef.current;
+    if (!videoElement) return;
+
+    const handleTimeUpdate = () => {
+      const progress = (videoElement.currentTime / videoElement.duration) * 100;
+      setProgress(progress);
+    };
+
+    const handleLoadStart = () => setIsVideoLoading(true);
+    const handleCanPlay = () => setIsVideoLoading(false);
+    const handlePlay = () => setIsPlaying(true);
+    const handlePause = () => setIsPlaying(false);
+
+    videoElement.addEventListener('timeupdate', handleTimeUpdate);
+    videoElement.addEventListener('loadstart', handleLoadStart);
+    videoElement.addEventListener('canplay', handleCanPlay);
+    videoElement.addEventListener('play', handlePlay);
+    videoElement.addEventListener('pause', handlePause);
+
+    return () => {
+      videoElement.removeEventListener('timeupdate', handleTimeUpdate);
+      videoElement.removeEventListener('loadstart', handleLoadStart);
+      videoElement.removeEventListener('canplay', handleCanPlay);
+      videoElement.removeEventListener('play', handlePlay);
+      videoElement.removeEventListener('pause', handlePause);
+    };
+  }, [currentVideo]);
 
   const handleThumbnailGenerated = (variationId: string, thumbnailUrl: string) => {
     setGeneratingIds(prev => {
@@ -30,6 +76,33 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }:
       return newSet;
     });
     refetch();
+  };
+
+  const togglePlayPause = () => {
+    if (videoRef.current) {
+      if (isPlaying) {
+        videoRef.current.pause();
+      } else {
+        videoRef.current.play();
+      }
+    }
+  };
+
+  const toggleMute = () => {
+    if (videoRef.current) {
+      videoRef.current.muted = !isMuted;
+      setIsMuted(!isMuted);
+    }
+  };
+
+  const toggleFullscreen = () => {
+    if (videoRef.current) {
+      if (document.fullscreenElement) {
+        document.exitFullscreen();
+      } else {
+        videoRef.current.requestFullscreen();
+      }
+    }
   };
 
   const handleShare = async (variation: any) => {
@@ -55,17 +128,21 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }:
     }
   };
 
-  const handlePlay = (variation: any) => {
-    if (onPlayVariation) {
-      onPlayVariation({
-        video_url: variation.video_url || video.videoUrl,
-        thumbnail_url: variation.thumbnail_url || video.image,
-        title: `${video.title} - ${variation.title}`
-      });
-      onOpenChange(false);
-    } else {
-      toast.info("Playing " + variation.title);
-    }
+  const handlePlayVariation = (variation: any) => {
+    setCurrentVideo({
+      url: variation.video_url || video.videoUrl || '',
+      title: `${video.title} - ${variation.title}`,
+      thumbnail: variation.thumbnail_url || video.image
+    });
+    setProgress(0);
+    toast.success(`Now playing: ${variation.title}`);
+    
+    // Auto play after a short delay to ensure video is loaded
+    setTimeout(() => {
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 100);
   };
 
   return (
@@ -78,16 +155,91 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }:
 
         <div className="px-6 space-y-6">
           {/* Video Player */}
-          <div className="w-full rounded-lg overflow-hidden bg-muted">
+          <div className="w-full rounded-lg overflow-hidden bg-black relative group">
             <AspectRatio ratio={16 / 9}>
               <video
-                src={video.videoUrl}
-                poster={video.image}
-                controls
+                ref={videoRef}
+                src={currentVideo?.url}
+                poster={currentVideo?.thumbnail}
                 className="w-full h-full object-cover"
+                onClick={togglePlayPause}
               />
+              
+              {/* Loading Overlay */}
+              {isVideoLoading && (
+                <div className="absolute inset-0 flex items-center justify-center bg-black/50">
+                  <div className="animate-spin rounded-full h-12 w-12 border-4 border-primary border-t-transparent" />
+                </div>
+              )}
+
+              {/* Custom Controls Overlay */}
+              <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                {/* Center Play/Pause Button */}
+                <div className="absolute inset-0 flex items-center justify-center">
+                  <Button
+                    size="icon"
+                    variant="ghost"
+                    className="h-16 w-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30"
+                    onClick={togglePlayPause}
+                  >
+                    {isPlaying ? (
+                      <Pause className="h-8 w-8 text-white" fill="white" />
+                    ) : (
+                      <Play className="h-8 w-8 text-white ml-1" fill="white" />
+                    )}
+                  </Button>
+                </div>
+
+                {/* Bottom Controls */}
+                <div className="absolute bottom-0 left-0 right-0 p-4 space-y-2">
+                  <Progress value={progress} className="h-1" />
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={togglePlayPause}
+                      >
+                        {isPlaying ? (
+                          <Pause className="h-4 w-4" />
+                        ) : (
+                          <Play className="h-4 w-4" />
+                        )}
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-8 w-8 text-white hover:bg-white/20"
+                        onClick={toggleMute}
+                      >
+                        {isMuted ? (
+                          <VolumeX className="h-4 w-4" />
+                        ) : (
+                          <Volume2 className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8 text-white hover:bg-white/20"
+                      onClick={toggleFullscreen}
+                    >
+                      <Maximize className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              </div>
             </AspectRatio>
           </div>
+
+          {/* Current Video Title */}
+          {currentVideo && (
+            <div className="text-sm text-muted-foreground">
+              Now playing: <span className="font-medium text-foreground">{currentVideo.title}</span>
+            </div>
+          )}
 
           {/* Video Info */}
           <div className="space-y-3">
@@ -206,7 +358,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }:
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8"
-                      onClick={() => handlePlay(variation)}
+                      onClick={() => handlePlayVariation(variation)}
                     >
                       <Play className="h-4 w-4" />
                     </Button>
