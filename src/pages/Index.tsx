@@ -324,47 +324,50 @@ const Index = () => {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <header className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        <div className="flex items-center justify-between gap-4">
-          <div className="flex-1">
+        {/* Title and Search Row */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+          <div className="flex-1 min-w-0">
             <h1 className="text-3xl font-bold text-foreground">Video Gallery</h1>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-sm text-muted-foreground mt-1 truncate">
               Professional stock video footage with real thumbnails • Infinite scroll • Click to preview
             </p>
           </div>
           
-          {/* Search Bar */}
-          <div className="relative w-full max-w-sm">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search videos by title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
-              className="pl-10 pr-4 h-9"
-            />
-          </div>
+          {/* Search and Controls */}
+          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
+            {/* Search Bar */}
+            <div className="relative flex-1 sm:flex-initial sm:w-64">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input
+                type="text"
+                placeholder="Search videos by title..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
+                className="pl-10 pr-4 h-9 w-full"
+              />
+            </div>
 
-          {/* Reset Filters Button */}
-          {hasActiveFilters && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handleResetFilters}
-              className="h-9"
-            >
-              <X className="w-4 h-4 mr-2" />
-              Reset Filters
-            </Button>
-          )}
-          
-          <div className="flex items-center gap-2">
+            {/* Reset Filters Button */}
+            {hasActiveFilters && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleResetFilters}
+                className="h-9 whitespace-nowrap"
+              >
+                <X className="w-4 h-4 mr-2" />
+                Reset
+              </Button>
+            )}
+            
             {/* View Mode Toggle */}
             <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
               <Button
                 variant={viewMode === 'masonry' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('masonry')}
-                className="h-8 px-3"
+                className="h-8 px-3 transition-all duration-200"
+                title="Masonry View"
               >
                 <Columns3 className="w-4 h-4" />
               </Button>
@@ -372,7 +375,8 @@ const Index = () => {
                 variant={viewMode === 'grid' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('grid')}
-                className="h-8 px-3"
+                className="h-8 px-3 transition-all duration-200"
+                title="Grid View"
               >
                 <LayoutGrid className="w-4 h-4" />
               </Button>
@@ -380,7 +384,8 @@ const Index = () => {
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
-                className="h-8 px-3"
+                className="h-8 px-3 transition-all duration-200"
+                title="List View"
               >
                 <List className="w-4 h-4" />
               </Button>
@@ -565,17 +570,17 @@ const Index = () => {
                 const ratiosInGroup = aspectRatioFilters.filter(f => f.category === orientation);
                 return (
                   <Collapsible key={orientation} defaultOpen>
-                    <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-accent rounded text-sm font-medium transition-colors">
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-accent rounded text-sm font-medium transition-all duration-200 ease-in-out">
                       <span>{orientation}</span>
-                      <ChevronDown className="w-4 h-4 transition-transform duration-200 data-[state=open]:rotate-180" />
+                      <ChevronDown className="w-4 h-4 transition-transform duration-300 ease-in-out data-[state=open]:rotate-180" />
                     </CollapsibleTrigger>
-                    <CollapsibleContent className="space-y-1 px-2 pb-2 animate-accordion-down data-[state=closed]:animate-accordion-up">
+                    <CollapsibleContent className="space-y-1 px-2 pb-2 overflow-hidden transition-all duration-300 ease-in-out data-[state=open]:animate-accordion-down data-[state=closed]:animate-accordion-up">
                       {ratiosInGroup.map((filter) => (
                         <DropdownMenuCheckboxItem
                           key={filter.value}
                           checked={selectedAspectRatios.includes(filter.value)}
                           onCheckedChange={() => handleAspectRatioToggle(filter.value)}
-                          className="flex items-center gap-3 cursor-pointer py-2 transition-colors"
+                          className="flex items-center gap-3 cursor-pointer py-2 transition-all duration-200 hover:scale-[1.02]"
                         >
                           <AspectRatioIcon ratio={filter.value} />
                           <span className="flex-1">{filter.label}</span>
@@ -644,19 +649,20 @@ const Index = () => {
         {/* Active Filters Chips */}
         {hasActiveFilters && (
           <div className="flex flex-wrap gap-2 items-center animate-fade-in">
-            <span className="text-sm text-muted-foreground font-medium">Active Filters:</span>
+            <span className="text-sm text-muted-foreground font-medium">Filters:</span>
             
             {/* Category Chips */}
             {selectedCategories.map((category) => (
               <Badge 
                 key={category} 
                 variant="secondary" 
-                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
               >
-                <span className="text-xs">{categories.find(c => c.value === category)?.label}</span>
+                <span className="text-xs font-medium">{categories.find(c => c.value === category)?.label}</span>
                 <button
                   onClick={() => handleCategoryToggle(category)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+                  aria-label={`Remove ${category} filter`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -668,12 +674,13 @@ const Index = () => {
               <Badge 
                 key={duration} 
                 variant="secondary" 
-                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
               >
-                <span className="text-xs">{durationFilters.find(d => d.value === duration)?.label}</span>
+                <span className="text-xs font-medium">{durationFilters.find(d => d.value === duration)?.label}</span>
                 <button
                   onClick={() => handleDurationToggle(duration)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+                  aria-label={`Remove ${duration} filter`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -685,12 +692,13 @@ const Index = () => {
               <Badge 
                 key={ratio} 
                 variant="secondary" 
-                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
               >
-                <span className="text-xs">{aspectRatioFilters.find(r => r.value === ratio)?.label}</span>
+                <span className="text-xs font-medium">{aspectRatioFilters.find(r => r.value === ratio)?.label}</span>
                 <button
                   onClick={() => handleAspectRatioToggle(ratio)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+                  aria-label={`Remove ${ratio} filter`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -702,12 +710,13 @@ const Index = () => {
               <Badge 
                 key={price} 
                 variant="secondary" 
-                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
               >
-                <span className="text-xs">{price}</span>
+                <span className="text-xs font-medium">{price}</span>
                 <button
                   onClick={() => handlePriceRangeToggle(price)}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+                  aria-label={`Remove ${price} filter`}
                 >
                   <X className="w-3 h-3" />
                 </button>
@@ -718,12 +727,13 @@ const Index = () => {
             {searchQuery && (
               <Badge 
                 variant="secondary" 
-                className="pl-3 pr-2 py-1 gap-1 hover:bg-secondary/80 transition-colors"
+                className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
               >
-                <span className="text-xs">Search: "{searchQuery}"</span>
+                <span className="text-xs font-medium">Search: "{searchQuery}"</span>
                 <button
                   onClick={() => setSearchQuery('')}
-                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-colors"
+                  className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+                  aria-label="Clear search"
                 >
                   <X className="w-3 h-3" />
                 </button>
