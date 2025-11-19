@@ -8,12 +8,10 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
-import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { toast } from 'sonner';
-import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Monitor, Sun, Moon } from 'lucide-react';
+import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import { useTheme } from 'next-themes';
 import {
   Sheet,
   SheetContent,
@@ -28,7 +26,6 @@ interface ProfileDrawerProps {
 }
 
 export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps) {
-  const { theme, setTheme } = useTheme();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -569,51 +566,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       </>
                     )}
                   </Button>
-                </CardContent>
-              </Card>
-
-              {/* Theme Preference */}
-              <Card>
-                <CardHeader>
-                  <div className="flex items-center gap-2">
-                    <Monitor className="h-5 w-5 text-primary" />
-                    <CardTitle>Theme Preference</CardTitle>
-                  </div>
-                  <CardDescription>Choose your preferred theme appearance</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <RadioGroup value={theme} onValueChange={setTheme} className="space-y-3">
-                    <div className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <Monitor className="h-4 w-4 text-muted-foreground" />
-                        <Label htmlFor="theme-system" className="cursor-pointer">
-                          <div className="font-medium">System</div>
-                          <div className="text-xs text-muted-foreground">Use device settings</div>
-                        </Label>
-                      </div>
-                      <RadioGroupItem value="system" id="theme-system" />
-                    </div>
-                    <div className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <Sun className="h-4 w-4 text-muted-foreground" />
-                        <Label htmlFor="theme-light" className="cursor-pointer">
-                          <div className="font-medium">Light</div>
-                          <div className="text-xs text-muted-foreground">Light theme</div>
-                        </Label>
-                      </div>
-                      <RadioGroupItem value="light" id="theme-light" />
-                    </div>
-                    <div className="flex items-center justify-between p-3 border border-border rounded-lg hover:bg-accent/50 transition-colors">
-                      <div className="flex items-center space-x-3">
-                        <Moon className="h-4 w-4 text-muted-foreground" />
-                        <Label htmlFor="theme-dark" className="cursor-pointer">
-                          <div className="font-medium">Dark</div>
-                          <div className="text-xs text-muted-foreground">Dark theme</div>
-                        </Label>
-                      </div>
-                      <RadioGroupItem value="dark" id="theme-dark" />
-                    </div>
-                  </RadioGroup>
                 </CardContent>
               </Card>
 
