@@ -130,8 +130,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
 
           {/* Video Info */}
           <div className="flex items-start justify-between gap-6">
-            <div className="flex-1 space-y-2">
-              <h3 className="text-sm font-medium text-foreground">{currentVideo?.title || video.title}</h3>
+            <div className="flex-1 space-y-1.5">
+              <h3 className="text-base font-bold text-foreground">{currentVideo?.title || video.title}</h3>
+              <p className="text-xs text-gray-400 font-medium">Stock Video #{video.id}</p>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
                   {selectedVariation ? selectedVariation.duration : video.duration}

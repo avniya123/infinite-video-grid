@@ -75,11 +75,10 @@ export const VariationCard = ({
         </div>
       </div>
 
-      {/* Variation Info */}
       <div className="flex-1 min-w-0 space-y-3">
         <div className="space-y-1.5">
           <div className="flex items-start justify-between gap-2">
-            <h5 className="font-medium text-xs text-muted-foreground leading-tight truncate flex-1">
+            <h5 className="font-bold text-sm text-foreground leading-tight line-clamp-2 flex-1">
               {variation.title}
             </h5>
             {isCurrentlyPlaying && (
