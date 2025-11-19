@@ -35,7 +35,13 @@ export const GenerateThumbnailButton = ({
         },
       });
 
-      if (error) throw error;
+      if (error) {
+        if (error.message?.includes('credits')) {
+          toast.error(error.message, { id: toastId, duration: 6000 });
+          return;
+        }
+        throw error;
+      }
 
       if (data?.thumbnailUrl) {
         toast.success("Thumbnail generated successfully!", { id: toastId });
@@ -43,9 +49,12 @@ export const GenerateThumbnailButton = ({
       } else {
         throw new Error('No thumbnail URL received');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Error generating thumbnail:', error);
-      toast.error("Failed to generate thumbnail. Please try again.", { id: toastId });
+      const message = error?.message?.includes('credits') 
+        ? error.message 
+        : "Failed to generate thumbnail. Please try again.";
+      toast.error(message, { id: toastId, duration: 6000 });
     } finally {
       setIsGenerating(false);
     }
