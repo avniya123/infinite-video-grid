@@ -239,16 +239,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
           {/* Bottom Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
-            {/* Category Badges */}
-            <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-              <Badge className="bg-primary/90 hover:bg-primary text-primary-foreground text-[9px] px-2 py-0.5 font-medium">
-                {video.mainCategory}
-              </Badge>
-              <Badge variant="secondary" className="bg-white/90 hover:bg-white text-foreground text-[9px] px-2 py-0.5 font-medium">
-                {video.subcategory}
-              </Badge>
-            </div>
-
             {/* Title */}
             <h3 className="text-[10px] font-semibold text-white line-clamp-2 mb-2 leading-tight">
               {video.title}

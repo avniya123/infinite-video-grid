@@ -201,6 +201,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
                   variation={variation}
                   videoTitle={video.title}
                   videoImage={video.image}
+                  mainCategory={video.mainCategory}
+                  subcategory={video.subcategory}
                   isCurrentlyPlaying={currentVideo?.id === variation.id}
                   onPlay={handlePlayVariation}
                   onThumbnailGenerated={handleThumbnailGenerated}
