@@ -4,6 +4,12 @@ import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { VideoVariation } from "@/hooks/useVideoVariations";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 
 interface VariationCardProps {
   variation: VideoVariation;
@@ -23,14 +29,17 @@ export const VariationCard = ({
   onThumbnailGenerated,
 }: VariationCardProps) => {
   return (
-    <div
-      className={`group flex items-start gap-4 p-4 rounded-lg border transition-all duration-300 cursor-pointer ${
-        isCurrentlyPlaying 
-          ? 'bg-primary/5 border-primary shadow-sm' 
-          : 'bg-card hover:bg-accent/30 hover:shadow-sm hover:border-accent'
-      }`}
-      onClick={() => onPlay(variation)}
-    >
+    <TooltipProvider>
+      <Tooltip delayDuration={300}>
+        <TooltipTrigger asChild>
+          <div
+            className={`group flex items-start gap-4 p-4 rounded-lg border transition-all duration-300 cursor-pointer ${
+              isCurrentlyPlaying 
+                ? 'bg-primary/5 border-primary shadow-sm' 
+                : 'bg-card hover:bg-accent/30 hover:shadow-sm hover:border-accent'
+            }`}
+            onClick={() => onPlay(variation)}
+          >
       {/* Thumbnail */}
       <div className="w-24 h-24 rounded-md overflow-hidden bg-muted/30 flex-shrink-0 relative">
         <ProgressiveImage
@@ -148,5 +157,46 @@ export const VariationCard = ({
         </div>
       </div>
     </div>
+        </TooltipTrigger>
+        
+        <TooltipContent side="top" className="max-w-xs p-3 pointer-events-auto">
+          <div className="space-y-2">
+            <p className="font-semibold text-sm">{variation.title}</p>
+            <div className="grid grid-cols-2 gap-2 text-xs">
+              <div>
+                <span className="text-muted-foreground">Duration:</span>
+                <span className="ml-1 font-medium">{variation.duration}</span>
+              </div>
+              {variation.aspect_ratio && (
+                <div>
+                  <span className="text-muted-foreground">Ratio:</span>
+                  <span className="ml-1 font-medium">{variation.aspect_ratio}</span>
+                </div>
+              )}
+              {variation.quality && (
+                <div>
+                  <span className="text-muted-foreground">Quality:</span>
+                  <span className="ml-1 font-medium">{variation.quality}</span>
+                </div>
+              )}
+              {variation.platforms && variation.platforms.length > 0 && (
+                <div className="col-span-2">
+                  <span className="text-muted-foreground">Platforms:</span>
+                  <span className="ml-1 font-medium">{variation.platforms.join(", ")}</span>
+                </div>
+              )}
+            </div>
+            <div className="flex items-center gap-2 pt-1 border-t">
+              {variation.video_url && (
+                <span className="flex items-center gap-1 text-xs text-green-600 dark:text-green-400">
+                  <span className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-400" />
+                  Ready to play
+                </span>
+              )}
+            </div>
+          </div>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
