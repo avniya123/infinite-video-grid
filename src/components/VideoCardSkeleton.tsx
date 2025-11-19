@@ -7,28 +7,41 @@ interface VideoCardSkeletonProps {
 
 export function VideoCardSkeleton({ aspectRatio = 16 / 9 }: VideoCardSkeletonProps) {
   return (
-    <article className="relative overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)] break-inside-avoid mb-5 animate-fade-in">
+    <article className="relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-[var(--shadow-card)] break-inside-avoid mb-5 animate-fade-in">
       <AspectRatio ratio={aspectRatio}>
         <div className="relative w-full h-full">
-          {/* Image Skeleton with shimmer */}
-          <Skeleton className="w-full h-full bg-muted/60" />
+          {/* Main Image Skeleton with enhanced shimmer */}
+          <div className="w-full h-full bg-gradient-to-br from-gray-200 via-gray-100 to-gray-200 dark:from-gray-800 dark:via-gray-700 dark:to-gray-800 relative overflow-hidden">
+            <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/30 dark:via-white/10 to-transparent" />
+          </div>
+          
+          {/* Variations Count Badge Skeleton */}
+          <div className="absolute top-3 left-3 z-10">
+            <Skeleton className="h-6 w-14 rounded bg-gray-300/80 dark:bg-gray-700/80" />
+          </div>
+
+          {/* Price Badge Skeleton */}
+          <div className="absolute top-3 right-3 z-10">
+            <Skeleton className="h-8 w-16 rounded-md bg-gray-300/80 dark:bg-gray-700/80" />
+          </div>
+
+          {/* Play Button Skeleton */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 z-10">
+            <Skeleton className="w-12 h-12 rounded-full bg-white/90 dark:bg-gray-800/90" />
+          </div>
           
           {/* Bottom Overlay Skeleton */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3 space-y-2">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 py-4 space-y-2">
             {/* Title Skeleton */}
-            <Skeleton className="h-4 w-3/4 bg-white/30" />
+            <Skeleton className="h-3 w-3/4 bg-white/40 dark:bg-white/30" />
             
-            {/* Metadata Row Skeleton */}
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                <Skeleton className="h-5 w-16 bg-white/30 rounded-full" />
-                <Skeleton className="h-5 w-20 bg-white/30 rounded-full" />
-              </div>
-              <div className="text-right space-y-1">
-                <Skeleton className="h-3 w-16 bg-white/30" />
-                <Skeleton className="h-4 w-12 bg-white/30 font-semibold" />
-              </div>
-            </div>
+            {/* Caption Skeleton */}
+            <Skeleton className="h-2 w-1/3 bg-white/30 dark:bg-white/20" />
+          </div>
+
+          {/* Variations Button Skeleton */}
+          <div className="absolute bottom-3 right-3 z-20">
+            <Skeleton className="h-8 w-24 rounded bg-gray-900/80 dark:bg-white/80" />
           </div>
         </div>
       </AspectRatio>
