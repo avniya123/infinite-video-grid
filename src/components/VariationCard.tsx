@@ -10,8 +10,6 @@ interface VariationCardProps {
   variation: VideoVariation;
   videoTitle: string;
   videoImage: string;
-  mainCategory: string;
-  subcategory: string;
   isCurrentlyPlaying: boolean;
   onPlay: (variation: VideoVariation) => void;
   onThumbnailGenerated: (variationId: string, url: string) => void;
@@ -21,8 +19,6 @@ export const VariationCard = ({
   variation,
   videoTitle,
   videoImage,
-  mainCategory,
-  subcategory,
   isCurrentlyPlaying,
   onPlay,
   onThumbnailGenerated,
@@ -82,16 +78,6 @@ export const VariationCard = ({
       {/* Variation Info */}
       <div className="flex-1 min-w-0 space-y-3">
         <div className="space-y-1.5">
-          {/* Category Badges */}
-          <div className="flex items-center gap-1.5 mb-2 flex-wrap">
-            <Badge className="bg-primary/90 hover:bg-primary text-primary-foreground text-[9px] px-2 py-0.5 font-medium">
-              {mainCategory}
-            </Badge>
-            <Badge variant="secondary" className="bg-muted text-foreground text-[9px] px-2 py-0.5 font-medium">
-              {subcategory}
-            </Badge>
-          </div>
-
           <div className="flex items-start justify-between gap-2">
             <h5 className="font-medium text-xs text-muted-foreground leading-tight truncate flex-1">
               {variation.title}

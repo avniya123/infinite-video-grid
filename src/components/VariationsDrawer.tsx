@@ -165,49 +165,69 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
 
           {/* Variations List */}
           <div className="space-y-4">
-            <div className="flex items-center justify-between px-1">
-              <div>
-                <h4 className="text-sm font-semibold text-foreground tracking-tight">Available Variations</h4>
-                <p className="text-xs text-muted-foreground/70 mt-0.5">Choose from different formats and platforms</p>
-              </div>
-              {variations && variations.length > 0 && (
-                <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
-                  {variations.filter(v => v.thumbnail_url).length} / {variations.length} thumbnails
-                </Badge>
-              )}
-            </div>
-
             {isLoading ? (
-              Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-start gap-4 p-4 rounded-lg border bg-card">
-                  <Skeleton className="w-24 h-24 rounded-md bg-muted/60" />
-                  <div className="flex-1 space-y-3">
-                    <Skeleton className="h-4 w-3/4 bg-muted/60" />
-                    <div className="flex gap-2">
-                      <Skeleton className="h-4 w-12 rounded-full bg-muted/60" />
-                      <Skeleton className="h-4 w-12 rounded-full bg-muted/60" />
-                    </div>
-                    <Skeleton className="h-3 w-full bg-muted/60" />
-                  </div>
-                  <div className="flex gap-2">
-                    <Skeleton className="h-8 w-8 rounded-md bg-muted/60" />
+              <>
+                <div className="flex items-center justify-between px-1 mb-4">
+                  <div>
+                    <h4 className="text-sm font-semibold text-foreground tracking-tight">Available Variations</h4>
+                    <p className="text-xs text-muted-foreground/70 mt-0.5">Choose from different formats and platforms</p>
                   </div>
                 </div>
-              ))
+                {Array.from({ length: 3 }).map((_, i) => (
+                  <div key={i} className="flex items-start gap-4 p-4 rounded-lg border bg-card">
+                    <Skeleton className="w-24 h-24 rounded-md bg-muted/60" />
+                    <div className="flex-1 space-y-3">
+                      <Skeleton className="h-4 w-3/4 bg-muted/60" />
+                      <div className="flex gap-2">
+                        <Skeleton className="h-4 w-12 rounded-full bg-muted/60" />
+                        <Skeleton className="h-4 w-12 rounded-full bg-muted/60" />
+                      </div>
+                      <Skeleton className="h-3 w-full bg-muted/60" />
+                    </div>
+                    <div className="flex gap-2">
+                      <Skeleton className="h-8 w-8 rounded-md bg-muted/60" />
+                    </div>
+                  </div>
+                ))}
+              </>
             ) : variations && variations.length > 0 ? (
-              variations.map((variation) => (
-                <VariationCard
-                  key={variation.id}
-                  variation={variation}
-                  videoTitle={video.title}
-                  videoImage={video.image}
-                  mainCategory={video.mainCategory}
-                  subcategory={video.subcategory}
-                  isCurrentlyPlaying={currentVideo?.id === variation.id}
-                  onPlay={handlePlayVariation}
-                  onThumbnailGenerated={handleThumbnailGenerated}
-                />
-              ))
+              <>
+                {/* Category Header */}
+                <div className="space-y-1 px-1 pb-2 border-b">
+                  <div className="flex items-center gap-2">
+                    <Badge className="bg-primary/90 text-primary-foreground text-xs px-2.5 py-1 font-semibold">
+                      {video.mainCategory}
+                    </Badge>
+                    <span className="text-muted-foreground text-xs">•</span>
+                    <Badge variant="secondary" className="bg-muted text-foreground text-xs px-2.5 py-1 font-semibold">
+                      {video.subcategory}
+                    </Badge>
+                  </div>
+                  <div className="flex items-center justify-between mt-2">
+                    <p className="text-xs text-muted-foreground/70">
+                      {variations.length} {variations.length === 1 ? 'variation' : 'variations'} available
+                    </p>
+                    <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
+                      {variations.filter(v => v.thumbnail_url).length} / {variations.length} thumbnails
+                    </Badge>
+                  </div>
+                </div>
+
+                {/* Variations */}
+                <div className="space-y-3">
+                  {variations.map((variation) => (
+                    <VariationCard
+                      key={variation.id}
+                      variation={variation}
+                      videoTitle={video.title}
+                      videoImage={video.image}
+                      isCurrentlyPlaying={currentVideo?.id === variation.id}
+                      onPlay={handlePlayVariation}
+                      onThumbnailGenerated={handleThumbnailGenerated}
+                    />
+                  ))}
+                </div>
+              </>
             ) : (
               <div className="text-center py-16 px-4">
                 <div className="w-16 h-16 mx-auto mb-4 rounded-full bg-muted/50 flex items-center justify-center">
