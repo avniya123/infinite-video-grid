@@ -2,6 +2,20 @@ import { Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Progress } from "@/components/ui/progress";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
+import { RefObject } from "react";
+
+interface VideoPlayerProps {
+  videoRef: RefObject<HTMLVideoElement>;
+  videoUrl: string;
+  posterUrl: string;
+  isPlaying: boolean;
+  isMuted: boolean;
+  progress: number;
+  isLoading: boolean;
+  onTogglePlayPause: () => void;
+  onToggleMute: () => void;
+  onToggleFullscreen: () => void;
+}
 
 export const VideoPlayer = ({
   videoRef,
@@ -14,7 +28,7 @@ export const VideoPlayer = ({
   onTogglePlayPause,
   onToggleMute,
   onToggleFullscreen,
-}) => {
+}: VideoPlayerProps) => {
   return (
     <div className="space-y-3">
       <AspectRatio ratio={16 / 9} className="bg-muted rounded-lg overflow-hidden">

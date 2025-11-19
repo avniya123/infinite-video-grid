@@ -19,7 +19,7 @@ export const TableSkeleton = () => (
   </div>
 );
 
-export const GridSkeleton = ({ count = 6 }) => (
+export const GridSkeleton = ({ count = 6 }: { count?: number }) => (
   <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
     {Array.from({ length: count }).map((_, i) => (
       <div 
@@ -39,7 +39,7 @@ export const GridSkeleton = ({ count = 6 }) => (
   </div>
 );
 
-export const ListSkeleton = ({ count = 4 }) => (
+export const ListSkeleton = ({ count = 4 }: { count?: number }) => (
   <div className="space-y-2 animate-fade-in">
     {Array.from({ length: count }).map((_, i) => (
       <div 

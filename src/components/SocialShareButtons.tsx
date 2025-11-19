@@ -9,7 +9,13 @@ import {
 import { toast } from "sonner";
 import { Share2 } from "lucide-react";
 
-export const SocialShareButtons = ({ title, description, url }) => {
+interface SocialShareButtonsProps {
+  title: string;
+  description: string;
+  url: string;
+}
+
+export const SocialShareButtons = ({ title, description, url }: SocialShareButtonsProps) => {
   const encodedUrl = encodeURIComponent(url);
   const encodedTitle = encodeURIComponent(title);
   const encodedDescription = encodeURIComponent(description);
@@ -31,7 +37,7 @@ export const SocialShareButtons = ({ title, description, url }) => {
     }
   };
 
-  const handleShare = (platform) => {
+  const handleShare = (platform: keyof typeof shareLinks) => {
     window.open(shareLinks[platform], '_blank', 'width=600,height=400');
   };
 

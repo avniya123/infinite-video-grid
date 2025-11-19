@@ -1,6 +1,21 @@
 import { X } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
+import { VideoCategory } from '@/types/video';
 import { durationFilters, aspectRatioFilters, priceRangeFilters } from '@/hooks/useVideoFilters';
+
+interface FilterChipsProps {
+  selectedCategories: VideoCategory[];
+  selectedDurations: string[];
+  selectedAspectRatios: string[];
+  selectedPriceRanges: string[];
+  searchQuery: string;
+  categories: { value: VideoCategory; label: string }[];
+  onCategoryToggle: (category: VideoCategory) => void;
+  onDurationToggle: (duration: string) => void;
+  onAspectRatioToggle: (ratio: string) => void;
+  onPriceRangeToggle: (price: string) => void;
+  onClearSearch: () => void;
+}
 
 export const FilterChips = ({
   selectedCategories,
@@ -14,7 +29,7 @@ export const FilterChips = ({
   onAspectRatioToggle,
   onPriceRangeToggle,
   onClearSearch,
-}) => {
+}: FilterChipsProps) => {
   return (
     <div className="flex flex-wrap gap-2 items-center animate-fade-in">
       <span className="text-sm text-muted-foreground font-medium">Filters:</span>
@@ -94,7 +109,6 @@ export const FilterChips = ({
       {/* Search Query Chip */}
       {searchQuery && (
         <Badge 
-          key="search" 
           variant="secondary" 
           className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
         >

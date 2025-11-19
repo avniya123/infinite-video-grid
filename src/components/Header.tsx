@@ -13,10 +13,10 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { toast } from 'sonner';
 
 export const Header = () => {
-  const [profileImage, setProfileImage] = useState('/placeholder.svg');
-  const fileInputRef = useRef(null);
+  const [profileImage, setProfileImage] = useState<string>('/placeholder.svg');
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const handleImageUpload = (event) => {
+  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
@@ -26,7 +26,7 @@ export const Header = () => {
 
       const reader = new FileReader();
       reader.onloadend = () => {
-        setProfileImage(reader.result);
+        setProfileImage(reader.result as string);
         toast.success('Profile image updated successfully');
       };
       reader.readAsDataURL(file);
@@ -99,46 +99,52 @@ export const Header = () => {
               ref={fileInputRef}
               type="file"
               accept="image/*"
-              className="hidden"
               onChange={handleImageUpload}
+              className="hidden"
             />
 
-            {/* Monitor Button */}
+            {/* Icon Buttons */}
             <Button variant="ghost" size="icon" className="hidden sm:flex">
-              <Monitor className="w-4 h-4 text-muted-foreground" />
+              <Monitor className="w-5 h-5 text-muted-foreground" />
             </Button>
-
-            {/* Favorites Button */}
-            <Button variant="ghost" size="icon">
-              <Heart className="w-4 h-4 text-muted-foreground" />
+            
+            <Button variant="ghost" size="icon" className="hidden sm:flex">
+              <Heart className="w-5 h-5 text-muted-foreground" />
             </Button>
-
-            {/* Notifications */}
+            
+            {/* Notifications Panel */}
             <NotificationsPanel />
 
-            {/* Theme Toggle */}
-            <ThemeToggle />
-
-            {/* User Profile */}
+            {/* Profile Avatar */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="rounded-full">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={profileImage} alt="User" />
-                    <AvatarFallback>
-                      <User className="w-4 h-4" />
+                <Button variant="ghost" className="relative h-10 w-10 rounded-full p-0">
+                  <Avatar className="h-10 w-10">
+                    <AvatarImage src={profileImage} alt="Profile" />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-purple-500 text-white">
+                      <User className="w-5 h-5" />
                     </AvatarFallback>
                   </Avatar>
                 </Button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
+              <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuItem onClick={triggerFileInput}>
-                  Change Picture
+                  <Upload className="mr-2 h-4 w-4" />
+                  <span>Change Profile Picture</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem>Profile</DropdownMenuItem>
-                <DropdownMenuItem>Dashboard</DropdownMenuItem>
+                <DropdownMenuItem>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>Profile</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem>
+                  <Monitor className="mr-2 h-4 w-4" />
+                  <span>Dashboard</span>
+                </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
           </div>
         </div>
       </div>

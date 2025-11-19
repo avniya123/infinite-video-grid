@@ -11,7 +11,17 @@ import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
 import { useNavigate } from 'react-router-dom';
 
-const mockNotifications = [
+interface Notification {
+  id: string;
+  type: 'like' | 'comment' | 'download' | 'share' | 'upload' | 'system';
+  title: string;
+  message: string;
+  timestamp: string;
+  read: boolean;
+  icon: React.ReactNode;
+}
+
+const mockNotifications: Notification[] = [
   {
     id: '1',
     type: 'like',
@@ -70,12 +80,12 @@ const mockNotifications = [
 
 export const NotificationsPanel = () => {
   const navigate = useNavigate();
-  const [notifications, setNotifications] = useState(mockNotifications);
+  const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [open, setOpen] = useState(false);
 
   const unreadCount = notifications.filter(n => !n.read).length;
 
-  const markAsRead = (id) => {
+  const markAsRead = (id: string) => {
     setNotifications(prev =>
       prev.map(n => (n.id === id ? { ...n, read: true } : n))
     );
@@ -85,11 +95,11 @@ export const NotificationsPanel = () => {
     setNotifications(prev => prev.map(n => ({ ...n, read: true })));
   };
 
-  const deleteNotification = (id) => {
+  const deleteNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
   };
 
-  const getIconColor = (type) => {
+  const getIconColor = (type: Notification['type']) => {
     switch (type) {
       case 'like':
         return 'text-red-500';

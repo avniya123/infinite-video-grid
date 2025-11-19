@@ -1,3 +1,4 @@
+import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Play, Check, List } from 'lucide-react';
@@ -9,7 +10,15 @@ import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect }) {
+interface VideoCardProps {
+  video: VideoItem;
+  onPlay: (video: VideoItem, seekTime?: number) => void;
+  onClick: (video: VideoItem) => void;
+  isSelected?: boolean;
+  onSelect?: (video: VideoItem) => void;
+}
+
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -18,10 +27,10 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [isInView, setIsInView] = useState(false);
   const [variationsOpen, setVariationsOpen] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
-  const [selectedVariation, setSelectedVariation] = useState(null);
-  const videoRef = useRef(null);
-  const cardRef = useRef(null);
-  const hoverTimerRef = useRef(null);
+  const [selectedVariation, setSelectedVariation] = useState<any>(null);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate aspect ratio based on orientation
   const getAspectRatio = () => {
@@ -76,7 +85,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     }
   }, [isInView, video.videoUrl]);
 
-  const handlePlayClick = (e) => {
+  const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onPlay(video, 0);
   };
@@ -85,7 +94,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     onClick(video);
   };
 
-  const handleSelectClick = (e) => {
+  const handleSelectClick = (e: React.MouseEvent) => {
     e.stopPropagation();
     onSelect?.(video);
   };
