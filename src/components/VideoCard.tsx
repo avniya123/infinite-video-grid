@@ -205,22 +205,15 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Trending Badge */}
-          {video.trending && (
-            <Badge className="absolute top-3 left-3 bg-trending text-trending-foreground font-semibold text-xs px-2 py-1 shadow-lg z-10">
-              TRENDING
-            </Badge>
-          )}
-
           {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-black/70 backdrop-blur-sm text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10" style={{ top: video.trending ? '3.5rem' : '0.75rem' }}>
+          <Badge className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 font-semibold text-[10px] px-2 py-1 shadow-lg z-10">
             01/{String(variationsCount + 1).padStart(2, '0')}
           </Badge>
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
             {/* Price Section */}
-            <div className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1.5 rounded-md">
+            <div className="bg-white/90 backdrop-blur-sm text-gray-800 px-2.5 py-1.5 rounded-md shadow-sm">
               <div className="text-xs font-semibold">₹ {video.price}</div>
             </div>
             
@@ -260,7 +253,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           <Button
             size="sm"
             variant="outline"
-            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-background/95 backdrop-blur-sm hover:bg-background text-foreground"
+            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-white/95 backdrop-blur-sm hover:bg-gray-100 text-gray-800 border-gray-200"
             onClick={(e) => {
               e.stopPropagation();
               setVariationsOpen(true);
