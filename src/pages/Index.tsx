@@ -16,7 +16,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 const PAGE_SIZE = 8;
 
 type DurationFilter = 'All' | 'Teaser' | 'Trailer' | 'Gimbel' | 'Document';
-type AspectRatioFilter = 'Landscape' | 'Portrait' | 'Square';
+type AspectRatioFilter = '16:9' | '9:16' | '1:1' | '4:3' | '3:4' | '21:9' | '9:21' | '2:3' | '3:2';
 type PriceRangeFilter = 'Under $50' | '$50-$100' | '$100-$200' | 'Over $200';
 
 const categories: { value: VideoCategory; label: string; icon: React.ReactNode }[] = [
@@ -34,10 +34,16 @@ const durationFilters: { value: DurationFilter; label: string; range: string }[]
   { value: 'Document', label: 'Document', range: '5+ min' },
 ];
 
-const aspectRatioFilters: { value: AspectRatioFilter; label: string }[] = [
-  { value: 'Landscape', label: 'Landscape (16:9)' },
-  { value: 'Portrait', label: 'Portrait (9:16)' },
-  { value: 'Square', label: 'Square (1:1)' },
+const aspectRatioFilters: { value: AspectRatioFilter; label: string; category: 'Landscape' | 'Portrait' | 'Square' }[] = [
+  { value: '16:9', label: 'Landscape 16:9', category: 'Landscape' },
+  { value: '21:9', label: 'Ultrawide 21:9', category: 'Landscape' },
+  { value: '4:3', label: 'Standard 4:3', category: 'Landscape' },
+  { value: '3:2', label: 'Classic 3:2', category: 'Landscape' },
+  { value: '9:16', label: 'Portrait 9:16', category: 'Portrait' },
+  { value: '9:21', label: 'Tall 9:21', category: 'Portrait' },
+  { value: '3:4', label: 'Portrait 3:4', category: 'Portrait' },
+  { value: '2:3', label: 'Portrait 2:3', category: 'Portrait' },
+  { value: '1:1', label: 'Square 1:1', category: 'Square' },
 ];
 
 const priceRangeFilters: { value: PriceRangeFilter; label: string; range: [number, number] }[] = [
@@ -235,7 +241,14 @@ const Index = () => {
   const filteredVideos = videos
     .filter(video => selectedCategories.length === 0 || selectedCategories.includes(video.category))
     .filter(filterByDuration)
-    .filter(video => selectedAspectRatios.length === 0 || selectedAspectRatios.includes(video.orientation))
+    .filter(video => {
+      if (selectedAspectRatios.length === 0) return true;
+      // Map selected aspect ratios to their orientation categories
+      const selectedOrientations = selectedAspectRatios.map(ratio => 
+        aspectRatioFilters.find(f => f.value === ratio)?.category
+      );
+      return selectedOrientations.includes(video.orientation);
+    })
     .filter(video => {
       if (selectedPriceRanges.length === 0) return true;
       const price = parseFloat(video.price.replace('$', ''));
