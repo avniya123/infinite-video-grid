@@ -103,6 +103,8 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
       trending: id % 7 === 0,
       image: thumbnails[thumbnailIndex],
       videoUrl: sampleVideoUrls[thumbnailIndex],
+      aspectRatio: (['Landscape', 'Portrait', 'Square'] as const)[id % 3] === 'Landscape' ? 16/9 : 
+                   (['Landscape', 'Portrait', 'Square'] as const)[id % 3] === 'Portrait' ? 9/16 : 1,
       category: videoCategories[(id - 1) % videoCategories.length],
       resolution: videoResolutions[(id - 1) % videoResolutions.length],
     });
