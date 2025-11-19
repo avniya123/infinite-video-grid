@@ -17,6 +17,8 @@ const thumbnails = [
   video1, video2, video3, video4, video5, video6, video7, video8
 ];
 
+console.log('MockData loaded, thumbnails:', thumbnails.length, thumbnails[0]);
+
 // Sample video titles matching the thumbnails
 const videoTitles = [
   'Aerial City Skyline at Golden Hour',
@@ -39,6 +41,7 @@ const videoTitles = [
 
 export function generateMockVideos(page: number, pageSize: number): { items: VideoItem[]; total: number } {
   const start = (page - 1) * pageSize;
+  console.log('generateMockVideos called:', { page, pageSize, start, thumbnailCount: thumbnails.length });
   
   if (start >= TOTAL_MOCK_ITEMS) {
     return { items: [], total: TOTAL_MOCK_ITEMS };
@@ -68,6 +71,7 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
     });
   }
   
+  console.log('Generated items:', items.length, 'First item image:', items[0]?.image?.substring(0, 50));
   return { items, total: TOTAL_MOCK_ITEMS };
 }
 
