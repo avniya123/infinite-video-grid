@@ -37,7 +37,12 @@ const businessCategories = [
   'E-commerce',
 ];
 
-export const Header = () => {
+interface HeaderProps {
+  selectedSubcategory?: string | null;
+  onSubcategorySelect?: (subcategory: string | null) => void;
+}
+
+export const Header = ({ selectedSubcategory, onSubcategorySelect }: HeaderProps) => {
   const navigate = useNavigate();
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
@@ -236,7 +241,13 @@ export const Header = () => {
         </div>
       </header>
 
-      {selectedCategory && <SubcategorySlider category={selectedCategory} />}
+      {selectedCategory && (
+        <SubcategorySlider 
+          category={selectedCategory} 
+          selectedSubcategory={selectedSubcategory || null}
+          onSubcategorySelect={onSubcategorySelect || (() => {})}
+        />
+      )}
 
       <AuthDrawer open={authDrawerOpen} onOpenChange={setAuthDrawerOpen} />
       <ProfileDrawer open={profileDrawerOpen} onOpenChange={setProfileDrawerOpen} />
