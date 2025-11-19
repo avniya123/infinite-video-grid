@@ -81,7 +81,7 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[650px] md:w-[750px] lg:w-[900px] p-0 overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:w-[550px] p-0 overflow-y-auto">
         {/* Video Player Section */}
         <div className="relative bg-black">
           <AspectRatio ratio={16 / 9} className="bg-black">
@@ -111,53 +111,56 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
         </div>
 
         {/* Content Section */}
-        <div className="p-6 space-y-6">
+        <div className="p-5 space-y-5">
           {/* Title and Action Buttons */}
-          <div className="space-y-4">
-            <div className="flex items-start justify-between gap-4">
-              <div className="flex-1 space-y-2">
-                <h2 className="text-2xl font-bold text-foreground leading-tight">
-                  {video.title}
+          <div className="space-y-3">
+            <div className="flex items-start justify-between gap-3">
+              <div className="flex-1 space-y-1.5">
+                <h2 className="text-lg font-semibold text-foreground leading-tight">
+                  {video.title.split(' - ')[0]}
                 </h2>
-                <div className="flex items-center gap-2 flex-wrap">
+                <p className="text-xs text-muted-foreground">
+                  {video.title.split(' - ')[1] || `Stock Video #${video.id}`}
+                </p>
+                <div className="flex items-center gap-1.5 flex-wrap">
                   {video.trending && (
-                    <Badge className="bg-trending text-trending-foreground">
-                      <TrendingUp className="w-3 h-3 mr-1" />
+                    <Badge className="bg-trending text-trending-foreground text-[10px] px-1.5 py-0.5">
+                      <TrendingUp className="w-2.5 h-2.5 mr-0.5" />
                       Trending
                     </Badge>
                   )}
-                  <Badge variant="secondary">{video.category}</Badge>
-                  <Badge variant="outline">{video.resolution}</Badge>
+                  <Badge variant="secondary" className="text-[10px] px-1.5 py-0.5">{video.category}</Badge>
+                  <Badge variant="outline" className="text-[10px] px-1.5 py-0.5">{video.resolution}</Badge>
                 </div>
               </div>
             </div>
 
             {/* Action Buttons */}
-            <div className="flex items-center gap-2 flex-wrap">
+            <div className="flex items-center gap-1.5 flex-wrap">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button className="gap-2">
-                    <Download className="w-4 h-4" />
-                    Download Video
+                  <Button size="sm" className="gap-1.5 text-xs h-8">
+                    <Download className="w-3.5 h-3.5" />
+                    Download
                   </Button>
                 </DropdownMenuTrigger>
-                <DropdownMenuContent align="start" className="w-56">
+                <DropdownMenuContent align="start" className="w-48">
                   <DropdownMenuItem onClick={() => handleDownload('MP4')}>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold">MP4 Format</span>
-                      <span className="text-xs text-muted-foreground">Most compatible, recommended</span>
+                      <span className="text-xs font-semibold">MP4 Format</span>
+                      <span className="text-[10px] text-muted-foreground">Most compatible</span>
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleDownload('MOV')}>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold">MOV Format</span>
-                      <span className="text-xs text-muted-foreground">High quality, larger file size</span>
+                      <span className="text-xs font-semibold">MOV Format</span>
+                      <span className="text-[10px] text-muted-foreground">High quality</span>
                     </div>
                   </DropdownMenuItem>
                   <DropdownMenuItem onClick={() => handleDownload('WebM')}>
                     <div className="flex flex-col gap-0.5">
-                      <span className="font-semibold">WebM Format</span>
-                      <span className="text-xs text-muted-foreground">Web optimized, smaller size</span>
+                      <span className="text-xs font-semibold">WebM Format</span>
+                      <span className="text-[10px] text-muted-foreground">Web optimized</span>
                     </div>
                   </DropdownMenuItem>
                 </DropdownMenuContent>
@@ -165,21 +168,21 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
 
               <Drawer open={filtersOpen} onOpenChange={setFiltersOpen}>
                 <DrawerTrigger asChild>
-                  <Button variant="outline" className="gap-2">
-                    <Settings className="w-4 h-4" />
-                    Video Filters
+                  <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
+                    <Settings className="w-3.5 h-3.5" />
+                    Filters
                   </Button>
                 </DrawerTrigger>
                 <DrawerContent>
                   <DrawerHeader>
-                    <DrawerTitle>Adjust Video Filters</DrawerTitle>
+                    <DrawerTitle className="text-base">Adjust Video Filters</DrawerTitle>
                   </DrawerHeader>
-                  <div className="px-6 pb-8 space-y-6">
+                  <div className="px-6 pb-6 space-y-4">
                     {/* Brightness Control */}
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium">Brightness</label>
-                        <span className="text-sm font-semibold text-primary">{brightness}%</span>
+                        <label className="text-xs font-medium">Brightness</label>
+                        <span className="text-xs font-semibold text-primary">{brightness}%</span>
                       </div>
                       <Slider
                         value={[brightness]}
@@ -192,10 +195,10 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
                     </div>
 
                     {/* Contrast Control */}
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium">Contrast</label>
-                        <span className="text-sm font-semibold text-primary">{contrast}%</span>
+                        <label className="text-xs font-medium">Contrast</label>
+                        <span className="text-xs font-semibold text-primary">{contrast}%</span>
                       </div>
                       <Slider
                         value={[contrast]}
@@ -208,10 +211,10 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
                     </div>
 
                     {/* Saturation Control */}
-                    <div className="space-y-3">
+                    <div className="space-y-2">
                       <div className="flex items-center justify-between">
-                        <label className="text-sm font-medium">Saturation</label>
-                        <span className="text-sm font-semibold text-primary">{saturation}%</span>
+                        <label className="text-xs font-medium">Saturation</label>
+                        <span className="text-xs font-semibold text-primary">{saturation}%</span>
                       </div>
                       <Slider
                         value={[saturation]}
@@ -229,91 +232,81 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
                     <Button
                       variant="outline"
                       onClick={handleResetFilters}
-                      className="w-full gap-2"
+                      size="sm"
+                      className="w-full gap-1.5 text-xs"
                     >
-                      <RotateCcw className="w-4 h-4" />
-                      Reset All Filters
+                      <RotateCcw className="w-3.5 h-3.5" />
+                      Reset Filters
                     </Button>
                   </div>
                 </DrawerContent>
               </Drawer>
 
-              <ShareButton video={video} variant="outline" size="default" />
+              <ShareButton video={video} variant="outline" size="sm" />
             </div>
           </div>
 
           <Separator />
 
-          {/* Video Specifications */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Video Specifications</h3>
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                <Clock className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground mb-0.5">Duration</p>
-                  <p className="font-semibold text-foreground truncate">{video.duration}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                <Maximize2 className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground mb-0.5">Orientation</p>
-                  <p className="font-semibold text-foreground truncate">{video.orientation}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                <Play className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground mb-0.5">Resolution</p>
-                  <p className="font-semibold text-foreground truncate">{video.resolution}</p>
-                </div>
-              </div>
-
-              <div className="flex items-start gap-3 p-3 rounded-lg bg-muted/50">
-                <Tag className="w-5 h-5 text-primary mt-0.5 flex-shrink-0" />
-                <div className="flex-1 min-w-0">
-                  <p className="text-xs text-muted-foreground mb-0.5">Category</p>
-                  <p className="font-semibold text-foreground truncate">{video.category}</p>
-                </div>
-              </div>
+          {/* Video Specifications - Table Format */}
+          <div className="space-y-2.5">
+            <h3 className="text-sm font-semibold text-foreground">Specifications</h3>
+            <div className="border border-border rounded-lg overflow-hidden">
+              <table className="w-full text-xs">
+                <tbody className="divide-y divide-border">
+                  <tr className="hover:bg-muted/50 transition-colors">
+                    <td className="px-3 py-2 text-muted-foreground font-medium w-28">Duration</td>
+                    <td className="px-3 py-2 text-foreground">{video.duration}</td>
+                  </tr>
+                  <tr className="hover:bg-muted/50 transition-colors">
+                    <td className="px-3 py-2 text-muted-foreground font-medium">Orientation</td>
+                    <td className="px-3 py-2 text-foreground">{video.orientation}</td>
+                  </tr>
+                  <tr className="hover:bg-muted/50 transition-colors">
+                    <td className="px-3 py-2 text-muted-foreground font-medium">Resolution</td>
+                    <td className="px-3 py-2 text-foreground">{video.resolution}</td>
+                  </tr>
+                  <tr className="hover:bg-muted/50 transition-colors">
+                    <td className="px-3 py-2 text-muted-foreground font-medium">Category</td>
+                    <td className="px-3 py-2 text-foreground">{video.category}</td>
+                  </tr>
+                </tbody>
+              </table>
             </div>
           </div>
 
           <Separator />
 
           {/* Pricing Section */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-foreground">Pricing</h3>
-            <div className="p-6 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
-              <div className="flex items-end justify-between gap-4 mb-3">
+          <div className="space-y-3">
+            <h3 className="text-sm font-semibold text-foreground">Pricing</h3>
+            <div className="p-4 rounded-lg bg-gradient-to-br from-primary/5 to-primary/10 border border-primary/20">
+              <div className="flex items-end justify-between gap-3 mb-2">
                 <div>
-                  <p className="text-sm text-muted-foreground mb-1">Regular Price</p>
-                  <p className="text-2xl font-light text-muted-foreground line-through">
+                  <p className="text-[10px] text-muted-foreground mb-0.5">Regular Price</p>
+                  <p className="text-base font-light text-muted-foreground line-through">
                     ${video.mrp}
                   </p>
                 </div>
-                <Badge className="bg-discount text-discount-foreground px-3 py-1 text-sm">
+                <Badge className="bg-discount text-discount-foreground px-2 py-0.5 text-[10px]">
                   {video.discount}
                 </Badge>
               </div>
               <div>
-                <p className="text-sm text-muted-foreground mb-1">Your Price</p>
-                <p className="text-4xl font-bold text-primary">
+                <p className="text-[10px] text-muted-foreground mb-0.5">Your Price</p>
+                <p className="text-2xl font-bold text-primary">
                   ${video.price}
                 </p>
               </div>
-              <Button className="w-full mt-4" size="lg">
+              <Button className="w-full mt-3" size="sm">
                 Purchase License
               </Button>
             </div>
           </div>
 
           {/* License Information */}
-          <div className="p-4 rounded-lg bg-muted/30 border border-border">
-            <p className="text-sm text-muted-foreground">
+          <div className="p-3 rounded-lg bg-muted/30 border border-border">
+            <p className="text-[10px] text-muted-foreground">
               <strong className="text-foreground">License:</strong> Standard royalty-free license. 
               Use in unlimited projects. No attribution required.
             </p>
