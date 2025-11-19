@@ -102,20 +102,25 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
       setSignupErrors(prev => ({ ...prev, [name]: undefined }));
     }
 
-    // Trigger location lookup when pincode changes
-    if (name === 'pincode' && value.length >= 4) {
-      lookupPincode(value).catch(err => {
-        console.error('Pincode lookup failed:', err);
-        setLocationError('Unable to verify pincode. Please continue with manual entry.');
-      });
-    } else if (name === 'pincode' && value.length < 4) {
-      setLocationData(null);
-      setLocationError('');
+    // Trigger location lookup when pincode changes and has correct length for country
+    if (name === 'pincode') {
+      const requiredLength = selectedCountry === 'IN' ? 6 : 5; // India: 6 digits, US: 5 digits
+      
+      if (value.length === requiredLength) {
+        lookupPincode(value).catch(err => {
+          console.error('Pincode lookup failed:', err);
+          setLocationError('Unable to verify pincode. Please continue with manual entry.');
+        });
+      } else if (value.length < requiredLength) {
+        setLocationData(null);
+        setLocationError('');
+      }
     }
   };
 
   const lookupPincode = async (pincode: string) => {
-    if (!pincode || pincode.length < 4) return;
+    const requiredLength = selectedCountry === 'IN' ? 6 : 5;
+    if (!pincode || pincode.length < requiredLength) return;
     
     setLocationLoading(true);
     setLocationError('');
