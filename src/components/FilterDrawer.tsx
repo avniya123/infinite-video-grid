@@ -93,8 +93,8 @@ export const FilterDrawer = ({
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-md">
-        <SheetHeader className="space-y-4">
+      <SheetContent side="right" className="w-full sm:max-w-2xl p-0">
+        <SheetHeader className="space-y-4 p-6 pb-4 border-b">
           <SheetDescription className="sr-only">
             Filter videos by categories, duration, aspect ratio, and price range
           </SheetDescription>
@@ -113,8 +113,8 @@ export const FilterDrawer = ({
           </div>
         </SheetHeader>
 
-        <ScrollArea className="h-[calc(100vh-120px)] pr-4 mt-6">
-          <div className="space-y-8">
+        <ScrollArea className="h-[calc(100vh-120px)] pr-4">
+          <div className="space-y-8 p-6">
             {/* Categories Section */}
             <div className="space-y-4">
               <div className="flex items-center justify-between">
