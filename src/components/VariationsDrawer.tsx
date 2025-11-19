@@ -9,16 +9,20 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { useState, useEffect } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { VariationCard } from "@/components/VariationCard";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onRequestAuth?: () => void;
 }
 
-export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: VariationsDrawerProps) => {
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
+  const [user, setUser] = useState<any>(null);
   
   const {
     videoRef,
@@ -35,6 +39,18 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
   } = useVideoPlayer();
 
   if (!video) return null;
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   useEffect(() => {
     if (open) {
@@ -62,6 +78,24 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
       thumbnail: variation.thumbnail_url || video.image,
       id: variation.id
     });
+  };
+
+  const handleShareCart = () => {
+    if (!user) {
+      toast.error('Please sign in to add items to cart');
+      onRequestAuth?.();
+      return;
+    }
+    toast.success('Added to cart');
+  };
+
+  const handleEdit = () => {
+    if (!user) {
+      toast.error('Please sign in to edit videos');
+      onRequestAuth?.();
+      return;
+    }
+    toast.success('Opening editor...');
   };
 
   return (
@@ -117,11 +151,11 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
               
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <Button size="sm" className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
+                <Button size="sm" onClick={handleShareCart} className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
                   <ShoppingCart className="h-3.5 w-3.5" />
                   Share Cart
                 </Button>
-                <Button size="sm" variant="outline" className="gap-2">
+                <Button size="sm" onClick={handleEdit} variant="outline" className="gap-2">
                   <Edit className="h-3.5 w-3.5" />
                   Edit
                 </Button>

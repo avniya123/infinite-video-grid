@@ -84,52 +84,56 @@ export const Header = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-2">
-              {/* Upload Button */}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={triggerFileInput}
-                className="hidden sm:flex items-center gap-2 h-9 rounded-lg hover:bg-muted/50 transition-all"
-              >
-                <Upload className="w-4 h-4" />
-                <span className="hidden lg:inline">Upload</span>
-              </Button>
-              <input
-                ref={fileInputRef}
-                type="file"
-                accept="image/*"
-                onChange={handleImageUpload}
-                className="hidden"
-              />
+              {user && (
+                <>
+                  {/* Upload Button */}
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={triggerFileInput}
+                    className="hidden sm:flex items-center gap-2 h-9 rounded-lg hover:bg-muted/50 transition-all"
+                  >
+                    <Upload className="w-4 h-4" />
+                    <span className="hidden lg:inline">Upload</span>
+                  </Button>
+                  <input
+                    ref={fileInputRef}
+                    type="file"
+                    accept="image/*"
+                    onChange={handleImageUpload}
+                    className="hidden"
+                  />
 
-              {/* Icon Buttons */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
-              >
-                <Monitor className="w-5 h-5 text-muted-foreground" />
-              </Button>
+                  {/* Icon Buttons */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+                  >
+                    <Monitor className="w-5 h-5 text-muted-foreground" />
+                  </Button>
 
-              <Button
-                variant="ghost"
-                size="icon"
-                className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
-              >
-                <Heart className="w-5 h-5 text-muted-foreground" />
-              </Button>
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+                  >
+                    <Heart className="w-5 h-5 text-muted-foreground" />
+                  </Button>
 
-              {/* Notification Bell */}
-              <Button
-                variant="ghost"
-                size="icon"
-                className="relative h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
-              >
-                <Bell className="w-5 h-5 text-muted-foreground" />
-                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full">
-                  3
-                </Badge>
-              </Button>
+                  {/* Notification Bell */}
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="relative h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+                  >
+                    <Bell className="w-5 h-5 text-muted-foreground" />
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full">
+                      3
+                    </Badge>
+                  </Button>
+                </>
+              )}
 
               {/* Theme Toggle */}
               <ThemeToggle />
