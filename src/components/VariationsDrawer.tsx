@@ -237,17 +237,20 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
             </AspectRatio>
           </div>
 
-          {/* Current Video Title */}
-          {currentVideo && (
-            <div className="text-sm text-muted-foreground">
-              Now playing: <span className="font-medium text-foreground">{currentVideo.title}</span>
-            </div>
-          )}
-
           {/* Video Info */}
           <div className="space-y-3">
             <div className="flex items-start justify-between gap-4">
-              <h3 className="text-sm font-medium text-foreground">{video.title}</h3>
+              <div className="flex-1">
+                <h3 className="text-sm font-medium text-foreground">{currentVideo?.title || video.title}</h3>
+                <div className="flex items-center gap-2 flex-wrap mt-2">
+                  <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
+                    {video.duration}
+                  </Badge>
+                  <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
+                    {video.resolution}
+                  </Badge>
+                </div>
+              </div>
               <div className="text-right shrink-0">
                 <div className="flex items-baseline gap-2">
                   <div className="text-lg font-bold text-foreground">₹ {video.price}</div>
@@ -257,15 +260,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                   <span className="text-xs text-destructive font-medium">( {video.discount} Off )</span>
                 </div>
               </div>
-            </div>
-
-            <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
-                {video.duration}
-              </Badge>
-              <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
-                {video.resolution}
-              </Badge>
             </div>
 
             {/* Action Buttons */}
