@@ -21,6 +21,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { useVideoFilters } from '@/hooks/useVideoFilters';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useCategories } from '@/contexts/CategoryContext';
 
 const PAGE_SIZE = 8;
 
@@ -56,8 +57,13 @@ const Index = () => {
   const [listVariationsOpen, setListVariationsOpen] = useState<string | null>(null);
   const [listAuthDrawerOpen, setListAuthDrawerOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
+  
+  // Get header categories from context
+  const { selectedCategories: headerCategories } = useCategories();
 
-  // Use custom filter hook
+  useKeyboardShortcuts({});
+
+  // Use custom filter hook - pass header categories to the hook
   const {
     selectedCategories,
     selectedDurations,
@@ -82,7 +88,7 @@ const Index = () => {
     handleSelectAllPriceRanges,
     handleClearPriceRanges,
     handleResetFilters,
-  } = useVideoFilters(videos);
+  } = useVideoFilters(videos, headerCategories);
 
   // Load next page of videos
   const loadNextPage = useCallback(async () => {
