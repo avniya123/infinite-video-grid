@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { VideoCard } from '@/components/VideoCard';
+import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { VideoItem } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
@@ -12,6 +13,8 @@ const Index = () => {
   const [loading, setLoading] = useState(false);
   const [finished, setFinished] = useState(false);
   const [total, setTotal] = useState<number | null>(null);
+  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadNextPage = async () => {
@@ -68,9 +71,8 @@ const Index = () => {
   }, [loading, finished, currentPage]);
 
   const handlePlayVideo = (video: VideoItem) => {
-    toast.success(`Playing: ${video.title}`, {
-      description: video.videoUrl ? `Video file: ${video.videoUrl}` : 'Video player would open here',
-    });
+    setSelectedVideo(video);
+    setDrawerOpen(true);
   };
 
   const handleVideoClick = (video: VideoItem) => {
@@ -132,6 +134,12 @@ const Index = () => {
           </div>
         )}
       </main>
+
+      <VideoPlayerDrawer
+        video={selectedVideo}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   );
 };
