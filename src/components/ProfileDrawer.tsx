@@ -5,8 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Camera, Loader2, User } from 'lucide-react';
+import { Camera, Loader2, LogOut, User, Shield, Bell, Info, Key, Mail } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
@@ -37,6 +40,15 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [errors, setErrors] = useState<Partial<Record<keyof ProfileFormData, string>>>({});
+  const [activeTab, setActiveTab] = useState('profile');
+  
+  // Notification preferences state
+  const [notifications, setNotifications] = useState({
+    emailNotifications: true,
+    pushNotifications: false,
+    weeklyDigest: true,
+    newFeatures: true,
+  });
 
   useEffect(() => {
     if (open) {
@@ -60,7 +72,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
         .from('profiles')
         .select('*')
         .eq('id', userId)
-        .maybeSingle();
+        .single();
 
       if (error) throw error;
 
@@ -182,6 +194,12 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     }
   };
 
+  const handleSignOut = async () => {
+    await supabase.auth.signOut();
+    onOpenChange(false);
+    toast.success('Signed out successfully');
+  };
+
   if (loading) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
@@ -198,162 +216,347 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
         <SheetHeader className="p-6 pb-4 border-b">
-          <SheetTitle className="text-xl">Profile</SheetTitle>
-          <SheetDescription>Manage your profile information</SheetDescription>
+          <SheetTitle className="text-xl">Settings</SheetTitle>
+          <SheetDescription>Manage your account settings and preferences</SheetDescription>
         </SheetHeader>
 
-        <div className="p-6 space-y-6">
-          {/* Profile Picture */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Profile Picture</CardTitle>
-              <CardDescription>Upload a profile picture (max 2MB)</CardDescription>
-            </CardHeader>
-            <CardContent className="flex flex-col items-center gap-4">
-              <Avatar className="h-24 w-24">
-                <AvatarImage src={avatarUrl || undefined} alt="Profile" />
-                <AvatarFallback>
-                  <User className="h-12 w-12" />
-                </AvatarFallback>
-              </Avatar>
-              <div className="relative">
-                <input
-                  type="file"
-                  id="avatar"
-                  accept="image/*"
-                  onChange={handleAvatarUpload}
-                  className="hidden"
-                  disabled={uploading}
-                />
-                <Button
-                  variant="outline"
-                  size="sm"
-                  disabled={uploading}
-                  onClick={() => document.getElementById('avatar')?.click()}
-                >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Uploading...
-                    </>
-                  ) : (
-                    <>
-                      <Camera className="mr-2 h-4 w-4" />
-                      Change Avatar
-                    </>
-                  )}
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+          <div className="px-6 pt-4">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="profile" className="flex items-center gap-2">
+                <User className="h-4 w-4" />
+                Profile
+              </TabsTrigger>
+              <TabsTrigger value="account" className="flex items-center gap-2">
+                <Shield className="h-4 w-4" />
+                Account Settings
+              </TabsTrigger>
+            </TabsList>
+          </div>
 
-          {/* Personal Information */}
-          <Card>
-            <CardHeader>
-              <CardTitle>Personal Information</CardTitle>
-              <CardDescription>Update your personal details</CardDescription>
-            </CardHeader>
-            <CardContent>
-              <form onSubmit={handleSubmit} className="space-y-4">
-                <div className="space-y-2">
-                  <Label htmlFor="fullName">Full Name</Label>
-                  <Input
-                    id="fullName"
-                    name="fullName"
-                    value={formData.fullName}
-                    onChange={handleChange}
-                    placeholder="John Doe"
-                  />
-                  {errors.fullName && (
-                    <p className="text-sm text-destructive">{errors.fullName}</p>
-                  )}
-                </div>
+          <div className="p-6 space-y-6">
+            {/* Profile Tab */}
+            <TabsContent value="profile" className="space-y-6 mt-0">
+              <Card>
+                <CardHeader>
+                  <CardTitle>Profile Picture</CardTitle>
+                  <CardDescription>Upload a profile picture (max 2MB)</CardDescription>
+                </CardHeader>
+                <CardContent className="flex flex-col items-center gap-4">
+                  <Avatar className="h-24 w-24">
+                    <AvatarImage src={avatarUrl || undefined} alt="Profile" />
+                    <AvatarFallback>
+                      <User className="h-12 w-12" />
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="relative">
+                    <input
+                      type="file"
+                      id="avatar"
+                      accept="image/*"
+                      onChange={handleAvatarUpload}
+                      className="hidden"
+                      disabled={uploading}
+                    />
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      disabled={uploading}
+                      onClick={() => document.getElementById('avatar')?.click()}
+                    >
+                      {uploading ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Uploading...
+                        </>
+                      ) : (
+                        <>
+                          <Camera className="mr-2 h-4 w-4" />
+                          Change Avatar
+                        </>
+                      )}
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
 
-                <div className="space-y-2">
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    name="email"
-                    type="email"
-                    value={formData.email}
-                    onChange={handleChange}
-                    placeholder="john@example.com"
-                  />
-                  {errors.email && (
-                    <p className="text-sm text-destructive">{errors.email}</p>
-                  )}
-                </div>
+              <Card>
+                <CardHeader>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>Update your personal details</CardDescription>
+                </CardHeader>
+                <CardContent>
+                  <form onSubmit={handleSubmit} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="fullName">Full Name</Label>
+                    <Input
+                      id="fullName"
+                      name="fullName"
+                      value={formData.fullName}
+                      onChange={handleChange}
+                      placeholder="John Doe"
+                    />
+                    {errors.fullName && (
+                      <p className="text-sm text-destructive">{errors.fullName}</p>
+                    )}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    name="phone"
-                    value={formData.phone}
-                    onChange={handleChange}
-                    placeholder="+1234567890"
-                  />
-                  {errors.phone && (
-                    <p className="text-sm text-destructive">{errors.phone}</p>
-                  )}
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="email">Email</Label>
+                    <Input
+                      id="email"
+                      name="email"
+                      type="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="john@example.com"
+                    />
+                    {errors.email && (
+                      <p className="text-sm text-destructive">{errors.email}</p>
+                    )}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="dateOfBirth">Date of Birth</Label>
-                  <Input
-                    id="dateOfBirth"
-                    name="dateOfBirth"
-                    type="date"
-                    value={formData.dateOfBirth}
-                    onChange={handleChange}
-                  />
-                  {errors.dateOfBirth && (
-                    <p className="text-sm text-destructive">{errors.dateOfBirth}</p>
-                  )}
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="phone">Phone</Label>
+                    <Input
+                      id="phone"
+                      name="phone"
+                      value={formData.phone}
+                      onChange={handleChange}
+                      placeholder="+1234567890"
+                    />
+                    {errors.phone && (
+                      <p className="text-sm text-destructive">{errors.phone}</p>
+                    )}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    value={formData.address}
-                    onChange={handleChange}
-                    placeholder="123 Main St, City, Country"
-                  />
-                  {errors.address && (
-                    <p className="text-sm text-destructive">{errors.address}</p>
-                  )}
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
+                    <Input
+                      id="dateOfBirth"
+                      name="dateOfBirth"
+                      type="date"
+                      value={formData.dateOfBirth}
+                      onChange={handleChange}
+                    />
+                    {errors.dateOfBirth && (
+                      <p className="text-sm text-destructive">{errors.dateOfBirth}</p>
+                    )}
+                  </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="pincode">Pincode</Label>
-                  <Input
-                    id="pincode"
-                    name="pincode"
-                    value={formData.pincode}
-                    onChange={handleChange}
-                    placeholder="123456"
-                  />
-                  {errors.pincode && (
-                    <p className="text-sm text-destructive">{errors.pincode}</p>
-                  )}
-                </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="address">Address</Label>
+                    <Input
+                      id="address"
+                      name="address"
+                      value={formData.address}
+                      onChange={handleChange}
+                      placeholder="123 Main St, City, Country"
+                    />
+                    {errors.address && (
+                      <p className="text-sm text-destructive">{errors.address}</p>
+                    )}
+                  </div>
 
-                <Button type="submit" disabled={saving} className="w-full mt-6">
-                  {saving ? (
-                    <>
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                      Saving Changes...
-                    </>
-                  ) : (
-                    'Save Changes'
-                  )}
-                </Button>
-              </form>
-            </CardContent>
-          </Card>
-        </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="pincode">Pincode</Label>
+                    <Input
+                      id="pincode"
+                      name="pincode"
+                      value={formData.pincode}
+                      onChange={handleChange}
+                      placeholder="123456"
+                    />
+                    {errors.pincode && (
+                      <p className="text-sm text-destructive">{errors.pincode}</p>
+                    )}
+                  </div>
+
+                    <Button type="submit" disabled={saving} className="w-full mt-6">
+                      {saving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Saving Changes...
+                        </>
+                      ) : (
+                        'Save Changes'
+                      )}
+                    </Button>
+                  </form>
+                </CardContent>
+              </Card>
+            </TabsContent>
+
+            {/* Account Settings Tab */}
+            <TabsContent value="account" className="space-y-6 mt-0">
+              {/* Security Information */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Shield className="h-5 w-5 text-primary" />
+                    <CardTitle>Security Information</CardTitle>
+                  </div>
+                  <CardDescription>Manage your password and security settings</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="currentPassword">Current Password</Label>
+                    <Input
+                      id="currentPassword"
+                      type="password"
+                      placeholder="Enter current password"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="newPassword">New Password</Label>
+                    <Input
+                      id="newPassword"
+                      type="password"
+                      placeholder="Enter new password"
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm new password"
+                    />
+                  </div>
+                  <Button variant="outline" className="w-full">
+                    <Key className="mr-2 h-4 w-4" />
+                    Update Password
+                  </Button>
+                </CardContent>
+              </Card>
+
+              {/* Notification Preferences */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Bell className="h-5 w-5 text-primary" />
+                    <CardTitle>Notification Preferences</CardTitle>
+                  </div>
+                  <CardDescription>Choose how you want to receive notifications</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="emailNotifications">Email Notifications</Label>
+                      <p className="text-sm text-muted-foreground">Receive notifications via email</p>
+                    </div>
+                    <Switch
+                      id="emailNotifications"
+                      checked={notifications.emailNotifications}
+                      onCheckedChange={(checked) => 
+                        setNotifications(prev => ({ ...prev, emailNotifications: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="pushNotifications">Push Notifications</Label>
+                      <p className="text-sm text-muted-foreground">Receive push notifications in browser</p>
+                    </div>
+                    <Switch
+                      id="pushNotifications"
+                      checked={notifications.pushNotifications}
+                      onCheckedChange={(checked) => 
+                        setNotifications(prev => ({ ...prev, pushNotifications: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="weeklyDigest">Weekly Digest</Label>
+                      <p className="text-sm text-muted-foreground">Get a summary of your activity</p>
+                    </div>
+                    <Switch
+                      id="weeklyDigest"
+                      checked={notifications.weeklyDigest}
+                      onCheckedChange={(checked) => 
+                        setNotifications(prev => ({ ...prev, weeklyDigest: checked }))
+                      }
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="newFeatures">New Features</Label>
+                      <p className="text-sm text-muted-foreground">Updates about new features and improvements</p>
+                    </div>
+                    <Switch
+                      id="newFeatures"
+                      checked={notifications.newFeatures}
+                      onCheckedChange={(checked) => 
+                        setNotifications(prev => ({ ...prev, newFeatures: checked }))
+                      }
+                    />
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Account Information */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Info className="h-5 w-5 text-primary" />
+                    <CardTitle>Account Information</CardTitle>
+                  </div>
+                  <CardDescription>View your account details</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium">Account ID</p>
+                      <p className="text-sm text-muted-foreground">{user?.id.substring(0, 18)}...</p>
+                    </div>
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium">Email Verified</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.email_confirmed_at ? 'Yes' : 'No'}
+                      </p>
+                    </div>
+                    {!user?.email_confirmed_at && (
+                      <Button variant="outline" size="sm">
+                        <Mail className="mr-2 h-4 w-4" />
+                        Verify Email
+                      </Button>
+                    )}
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between py-2">
+                    <div className="space-y-0.5">
+                      <p className="text-sm font-medium">Account Created</p>
+                      <p className="text-sm text-muted-foreground">
+                        {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
+                      </p>
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+
+              {/* Sign Out Button */}
+              <Card className="border-destructive/50">
+                <CardContent className="pt-6">
+                  <Button
+                    variant="destructive"
+                    className="w-full"
+                    onClick={handleSignOut}
+                  >
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </CardContent>
+              </Card>
+            </TabsContent>
+          </div>
+        </Tabs>
       </SheetContent>
     </Sheet>
   );

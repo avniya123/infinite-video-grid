@@ -20,6 +20,7 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export const Header = () => {
   const navigate = useNavigate();
+  const [profileImage, setProfileImage] = useState<string>('/placeholder.svg');
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -43,10 +44,16 @@ export const Header = () => {
     const file = event.target.files?.[0];
     if (file) {
       if (file.size > 5 * 1024 * 1024) {
-        toast.error('File size should be less than 5MB');
+        toast.error('Image size should be less than 5MB');
         return;
       }
-      toast.success('File uploaded successfully');
+
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setProfileImage(reader.result as string);
+        toast.success('Profile image updated successfully');
+      };
+      reader.readAsDataURL(file);
     }
   };
 
@@ -81,12 +88,12 @@ export const Header = () => {
             <div className="flex items-center gap-2">
               {user && (
                 <>
+                  {/* Upload Button */}
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={triggerFileInput}
                     className="hidden sm:flex items-center gap-2 h-9 rounded-lg hover:bg-muted/50 transition-all"
-                    title="Upload content"
                   >
                     <Upload className="w-4 h-4" />
                     <span className="hidden lg:inline">Upload</span>
@@ -94,7 +101,7 @@ export const Header = () => {
                   <input
                     ref={fileInputRef}
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*"
                     onChange={handleImageUpload}
                     className="hidden"
                   />
@@ -144,7 +151,7 @@ export const Header = () => {
                       </AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 bg-card">
+                  <DropdownMenuContent align="end" className="w-56">
                     <DropdownMenuItem onClick={() => setProfileDrawerOpen(true)}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
@@ -154,10 +161,9 @@ export const Header = () => {
                       <Settings className="mr-2 h-4 w-4" />
                       <span>Settings</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout} className="text-destructive focus:text-destructive">
+                    <DropdownMenuItem onClick={handleLogout}>
                       <LogOut className="mr-2 h-4 w-4" />
-                      <span>Sign Out</span>
+                      <span>Log out</span>
                     </DropdownMenuItem>
                   </DropdownMenuContent>
                 </DropdownMenu>
