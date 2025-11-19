@@ -10,14 +10,12 @@ import { Camera, Loader2, LogOut, User } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
-  Drawer,
-  DrawerClose,
-  DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
 
 interface ProfileDrawerProps {
   open: boolean;
@@ -192,26 +190,25 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
   if (loading) {
     return (
-      <Drawer open={open} onOpenChange={onOpenChange}>
-        <DrawerContent className="max-h-[90vh]">
+      <Sheet open={open} onOpenChange={onOpenChange}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
-        </DrawerContent>
-      </Drawer>
+        </SheetContent>
+      </Sheet>
     );
   }
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="max-h-[90vh]">
-        <div className="mx-auto w-full max-w-2xl overflow-y-auto">
-          <DrawerHeader>
-            <DrawerTitle>Profile Settings</DrawerTitle>
-            <DrawerDescription>Update your profile information</DrawerDescription>
-          </DrawerHeader>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
+        <SheetHeader className="p-6 pb-4 border-b">
+          <SheetTitle className="text-xl">Profile Settings</SheetTitle>
+          <SheetDescription>Update your profile information</SheetDescription>
+        </SheetHeader>
 
-          <div className="px-4 pb-4 space-y-6">
+        <div className="p-6 space-y-6">
             <Card>
               <CardHeader>
                 <CardTitle>Profile Picture</CardTitle>
@@ -370,14 +367,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
               </CardContent>
             </Card>
           </div>
-
-          <DrawerFooter>
-            <DrawerClose asChild>
-              <Button variant="outline">Close</Button>
-            </DrawerClose>
-          </DrawerFooter>
-        </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }
