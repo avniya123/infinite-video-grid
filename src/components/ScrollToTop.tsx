@@ -29,9 +29,9 @@ export function ScrollToTop() {
 
   return (
     <Button
-      className={`fixed bottom-8 right-8 z-50 h-12 w-12 rounded-full bg-gray-900 text-white hover:bg-gray-800 shadow-lg transition-all duration-300 border-0 ${
+      className={`fixed bottom-8 right-8 z-50 h-12 w-12 rounded-full shadow-lg transition-all duration-300 border-0 ${
         isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-16 pointer-events-none'
-      }`}
+      } bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900`}
       onClick={scrollToTop}
       aria-label="Scroll to top"
     >

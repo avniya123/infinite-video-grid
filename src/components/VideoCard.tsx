@@ -144,7 +144,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   return (
     <article 
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
+      className={`group relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
       onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
@@ -207,14 +207,14 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           )}
 
           {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-white/90 backdrop-blur-sm text-gray-800 font-semibold text-[10px] px-2 py-1 shadow-lg z-10">
+          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
             01/{String(variationsCount + 1).padStart(2, '0')}
           </Badge>
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
             {/* Price Section */}
-            <div className="bg-white/90 backdrop-blur-sm text-gray-800 px-2.5 py-1.5 rounded-md shadow-sm">
+            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-800 dark:text-white px-2.5 py-1.5 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
               <div className="text-xs font-semibold">₹ {video.price}</div>
             </div>
             
@@ -267,7 +267,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {/* Variations Button */}
           <Button
             size="sm"
-            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900 hover:bg-gray-800 text-white border-0"
+            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
             onClick={(e) => {
               e.stopPropagation();
               setVariationsOpen(true);
