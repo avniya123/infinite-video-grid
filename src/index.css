@@ -55,7 +55,8 @@ All colors MUST be HSL.
 
     --radius: 0.75rem;
     
-    --transition-smooth: all 0.25s cubic-bezier(0.2, 0.9, 0.2, 1);
+    --transition-smooth: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --transition-theme: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --shadow-card: 0 2px 8px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.06);
     --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
     --shadow-auth: 0 4px 24px rgba(0, 0, 0, 0.06);
@@ -116,6 +117,8 @@ All colors MUST be HSL.
     --shadow-card: 0 4px 12px rgb(0 0 0 / 0.4), 0 2px 6px rgb(0 0 0 / 0.3);
     --shadow-card-hover: 0 12px 32px rgba(0, 0, 0, 0.6);
     
+    --transition-theme: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    
     --sidebar-background: 0 0% 10%;
     --sidebar-foreground: 40 15% 90%;
     --sidebar-primary: 40 15% 95%;
@@ -130,10 +133,30 @@ All colors MUST be HSL.
 @layer base {
   * {
     @apply border-border;
+    transition: border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
 
   body {
     @apply bg-background text-foreground font-sans antialiased;
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1), 
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  
+  /* Smooth transitions for theme switching */
+  header,
+  button,
+  a,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  [class*="bg-"],
+  [class*="text-"],
+  [class*="border-"] {
+    transition: background-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                border-color 0.3s cubic-bezier(0.4, 0, 0.2, 1),
+                box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
   
   /* Typography Hierarchy */
