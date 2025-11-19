@@ -240,7 +240,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {/* Bottom Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 py-4">
             {/* Title with Tooltip */}
-            <TooltipProvider>
+            <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
                   <h3 className="text-xs font-bold text-white line-clamp-2 mb-1 leading-relaxed cursor-help">
@@ -248,10 +248,13 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                     {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '').length > 30 ? '...' : ''}
                   </h3>
                 </TooltipTrigger>
-                <TooltipContent className="max-w-xs bg-gray-900 text-white border-gray-700">
-                  <p className="text-sm">{video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}</p>
-                  <p className="text-xs text-gray-400 mt-1">Stock Video #{video.id}</p>
-                  <p className="text-xs text-gray-400">Price: ₹{video.price}</p>
+                <TooltipContent 
+                  className="max-w-xs bg-gray-900 text-white border-gray-700 animate-in fade-in-0 zoom-in-95 duration-200"
+                  sideOffset={5}
+                >
+                  <p className="text-sm font-medium animate-fade-in">{video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}</p>
+                  <p className="text-xs text-gray-400 mt-1.5 animate-fade-in" style={{ animationDelay: '50ms' }}>Stock Video #{video.id}</p>
+                  <p className="text-xs text-gray-400 animate-fade-in" style={{ animationDelay: '100ms' }}>Price: ₹{video.price}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
