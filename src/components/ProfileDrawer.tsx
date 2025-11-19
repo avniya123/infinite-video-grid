@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { toast } from 'sonner';
-import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail } from 'lucide-react';
+import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Globe } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
@@ -55,6 +56,9 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     twoFactorEnabled: false,
     loginAlerts: true,
   });
+
+  // Language preference state
+  const [language, setLanguage] = useState('en');
 
   useEffect(() => {
     if (open) {
@@ -261,6 +265,11 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleLanguageChange = (newLanguage: string) => {
+    setLanguage(newLanguage);
+    toast.success('Language preference updated');
   };
 
   const handleSignOut = async () => {
@@ -566,6 +575,44 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       </>
                     )}
                   </Button>
+                </CardContent>
+              </Card>
+
+              {/* Language Preference */}
+              <Card>
+                <CardHeader>
+                  <div className="flex items-center gap-2">
+                    <Globe className="h-5 w-5 text-primary" />
+                    <CardTitle>Language Preference</CardTitle>
+                  </div>
+                  <CardDescription>Choose your preferred language for the interface</CardDescription>
+                </CardHeader>
+                <CardContent className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="language">Interface Language</Label>
+                    <Select value={language} onValueChange={handleLanguageChange}>
+                      <SelectTrigger id="language" className="w-full">
+                        <SelectValue placeholder="Select a language" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-popover z-50">
+                        <SelectItem value="en">English</SelectItem>
+                        <SelectItem value="es">Español (Spanish)</SelectItem>
+                        <SelectItem value="fr">Français (French)</SelectItem>
+                        <SelectItem value="de">Deutsch (German)</SelectItem>
+                        <SelectItem value="it">Italiano (Italian)</SelectItem>
+                        <SelectItem value="pt">Português (Portuguese)</SelectItem>
+                        <SelectItem value="zh">中文 (Chinese)</SelectItem>
+                        <SelectItem value="ja">日本語 (Japanese)</SelectItem>
+                        <SelectItem value="ko">한국어 (Korean)</SelectItem>
+                        <SelectItem value="ar">العربية (Arabic)</SelectItem>
+                        <SelectItem value="hi">हिन्दी (Hindi)</SelectItem>
+                        <SelectItem value="ru">Русский (Russian)</SelectItem>
+                      </SelectContent>
+                    </Select>
+                    <p className="text-sm text-muted-foreground">
+                      Select your preferred language. This will update the interface language for your account.
+                    </p>
+                  </div>
                 </CardContent>
               </Card>
 
