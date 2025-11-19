@@ -209,6 +209,11 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
+            {/* Price Badge */}
+            <div className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
+              ${video.price}
+            </div>
+            
             {/* Share Button - visible on hover */}
             <div 
               className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
@@ -229,36 +234,31 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           </div>
 
           {/* Bottom Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-white/95 via-white/90 to-transparent px-3 py-3">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
             {/* Title */}
-            <h3 className="text-[10px] font-medium text-foreground/90 line-clamp-2 mb-2">
+            <h3 className="text-sm font-semibold text-white line-clamp-2 mb-2">
               {video.title}
             </h3>
 
             {/* Metadata Row */}
-            <div className="flex items-center justify-between">
+            <div className="flex items-center justify-between text-xs">
               {/* Left: Tags */}
-              <div className="flex items-center gap-1.5">
-                <span className="px-1.5 py-0.5 bg-muted/80 backdrop-blur-sm rounded text-muted-foreground text-[8px] font-medium">
+              <div className="flex items-center gap-2">
+                <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px]">
                   {video.orientation}
                 </span>
-                <span className="px-1.5 py-0.5 bg-muted/80 backdrop-blur-sm rounded text-muted-foreground text-[8px] font-medium flex items-center gap-1">
+                <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px] flex items-center gap-1">
                   <span>⏱</span> {video.duration}
                 </span>
               </div>
 
               {/* Right: Pricing */}
-              <div className="flex flex-col items-end gap-0.5">
-                <div className="flex items-center gap-1.5">
-                  <div className="text-[11px] font-bold text-foreground">
-                    ₹{video.price}
-                  </div>
-                  <div className="text-[8px] line-through text-muted-foreground font-normal">
-                    MRP: ₹{video.mrp}
-                  </div>
+              <div className="text-right">
+                <div className="text-[10px] line-through text-gray-300">
+                  MRP ${video.mrp}
                 </div>
-                <div className="text-[9px] text-green-600 dark:text-green-500 font-semibold">
-                  ({video.discount} Off)
+                <div className="text-[11px] text-discount-foreground font-bold">
+                  {video.discount}
                 </div>
               </div>
             </div>
