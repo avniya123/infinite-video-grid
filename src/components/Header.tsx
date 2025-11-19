@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Upload, Monitor, Heart, User, Bell, LogOut } from 'lucide-react';
+import { Upload, Monitor, Heart, User, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
@@ -8,12 +8,10 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AuthDrawer } from '@/components/AuthDrawer';
-import ProfileDrawer from '@/components/ProfileDrawer';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -22,7 +20,6 @@ export const Header = () => {
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState<string>('/placeholder.svg');
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
-  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -61,16 +58,6 @@ export const Header = () => {
     fileInputRef.current?.click();
   };
 
-  const handleLogout = async () => {
-    try {
-      await supabase.auth.signOut();
-      toast.success('Logged out successfully');
-      navigate('/');
-    } catch (error: any) {
-      toast.error(error.message || 'Failed to log out');
-    }
-  };
-
   return (
     <>
       <header className="sticky top-0 z-50 w-full border-b border-border bg-card shadow-sm">
@@ -86,83 +73,66 @@ export const Header = () => {
 
             {/* Right Side Actions */}
             <div className="flex items-center gap-2">
-              {user && (
-                <>
-                  {/* Upload Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={triggerFileInput}
-                    className="hidden sm:flex items-center gap-2 h-9 rounded-lg hover:bg-muted/50 transition-all"
-                  >
-                    <Upload className="w-4 h-4" />
-                    <span className="hidden lg:inline">Upload</span>
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
+              {/* Upload Button */}
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={triggerFileInput}
+                className="hidden sm:flex items-center gap-2 h-9 rounded-lg hover:bg-muted/50 transition-all"
+              >
+                <Upload className="w-4 h-4" />
+                <span className="hidden lg:inline">Upload</span>
+              </Button>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="hidden"
+              />
 
-                  {/* Icon Buttons */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
-                  >
-                    <Monitor className="w-5 h-5 text-muted-foreground" />
-                  </Button>
+              {/* Icon Buttons */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+              >
+                <Monitor className="w-5 h-5 text-muted-foreground" />
+              </Button>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
-                  >
-                    <Heart className="w-5 h-5 text-muted-foreground" />
-                  </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+              >
+                <Heart className="w-5 h-5 text-muted-foreground" />
+              </Button>
 
-                  {/* Notification Bell */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
-                  >
-                    <Bell className="w-5 h-5 text-muted-foreground" />
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full">
-                      3
-                    </Badge>
-                  </Button>
-                </>
-              )}
+              {/* Notification Bell */}
+              <Button
+                variant="ghost"
+                size="icon"
+                className="relative h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+              >
+                <Bell className="w-5 h-5 text-muted-foreground" />
+                <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full">
+                  3
+                </Badge>
+              </Button>
 
               {/* Theme Toggle */}
               <ThemeToggle />
 
               {/* Sign In / User Profile */}
               {user ? (
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Avatar className="w-9 h-9 border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer">
-                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || 'User'} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
-                        <User className="w-4 h-4" />
-                      </AvatarFallback>
-                    </Avatar>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem onClick={() => setProfileDrawerOpen(true)}>
-                      <User className="mr-2 h-4 w-4" />
-                      <span>Profile</span>
-                    </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
-                      <LogOut className="mr-2 h-4 w-4" />
-                      <span>Log out</span>
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                <Link to="/profile">
+                  <Avatar className="w-9 h-9 border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer">
+                    <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || 'User'} />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
+                      <User className="w-4 h-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
               ) : (
                 <Button
                   onClick={() => setAuthDrawerOpen(true)}
@@ -177,7 +147,6 @@ export const Header = () => {
       </header>
 
       <AuthDrawer open={authDrawerOpen} onOpenChange={setAuthDrawerOpen} />
-      <ProfileDrawer open={profileDrawerOpen} onOpenChange={setProfileDrawerOpen} />
     </>
   );
 };

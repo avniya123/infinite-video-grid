@@ -6,12 +6,11 @@ import { toast } from 'sonner';
 
 interface OTPVerificationProps {
   email: string;
-  expectedOTP?: string;
   onVerified: () => void;
   onBack: () => void;
 }
 
-export const OTPVerification = ({ email, expectedOTP, onVerified, onBack }: OTPVerificationProps) => {
+export const OTPVerification = ({ email, onVerified, onBack }: OTPVerificationProps) => {
   const [otp, setOtp] = useState('');
   const [timer, setTimer] = useState(60);
   const [canResend, setCanResend] = useState(false);
@@ -28,36 +27,20 @@ export const OTPVerification = ({ email, expectedOTP, onVerified, onBack }: OTPV
   }, [timer]);
 
   const handleVerify = () => {
-    if (otp.length !== 6) {
+    if (otp.length === 6) {
+      // Verify OTP logic here
+      toast.success('Email verified successfully!');
+      onVerified();
+    } else {
       toast.error('Please enter a valid 6-digit code');
-      return;
     }
-
-    // Verify against expected OTP if provided (test mode)
-    if (expectedOTP && otp !== expectedOTP) {
-      toast.error('Invalid verification code');
-      return;
-    }
-
-    toast.success('Email verified successfully!');
-    onVerified();
   };
 
   const handleResend = () => {
     if (canResend) {
       setTimer(60);
       setCanResend(false);
-      
-      // Generate new dummy OTP for testing
-      if (expectedOTP) {
-        const newOTP = Math.floor(100000 + Math.random() * 900000).toString();
-        toast.success(`New test OTP: ${newOTP}`, {
-          duration: 10000,
-        });
-        console.log('🔐 New Test OTP Code:', newOTP);
-      } else {
-        toast.success('Verification code sent!');
-      }
+      toast.success('Verification code sent!');
     }
   };
 
