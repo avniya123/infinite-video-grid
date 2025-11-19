@@ -252,15 +252,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               {video.title}
             </h3>
 
-            {/* Metadata Row */}
-            <div className="flex items-center gap-2 text-xs">
-              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[9px]">
-                {video.orientation}
-              </span>
-              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[9px] flex items-center gap-1">
-                <span>⏱</span> {video.duration}
-              </span>
-            </div>
           </div>
 
           {/* Variations Button */}
