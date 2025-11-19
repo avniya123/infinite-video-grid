@@ -1,6 +1,6 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Upload, Monitor, ShoppingCart, User, Bell, LogOut } from 'lucide-react';
+import { Monitor, ShoppingCart, User, Bell, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
@@ -20,11 +20,9 @@ import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export const Header = () => {
   const navigate = useNavigate();
-  const [profileImage, setProfileImage] = useState<string>('/placeholder.svg');
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     // Check current session
@@ -39,27 +37,6 @@ export const Header = () => {
 
     return () => subscription.unsubscribe();
   }, []);
-
-  const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.size > 5 * 1024 * 1024) {
-        toast.error('Image size should be less than 5MB');
-        return;
-      }
-
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setProfileImage(reader.result as string);
-        toast.success('Profile image updated successfully');
-      };
-      reader.readAsDataURL(file);
-    }
-  };
-
-  const triggerFileInput = () => {
-    fileInputRef.current?.click();
-  };
 
   const handleLogout = async () => {
     try {
@@ -88,24 +65,6 @@ export const Header = () => {
             <div className="flex items-center gap-2">
               {user && (
                 <>
-                  {/* Upload Button */}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={triggerFileInput}
-                    className="hidden sm:flex items-center gap-2 h-9 rounded-lg hover:bg-muted/50 transition-all"
-                  >
-                    <Upload className="w-4 h-4" />
-                    <span className="hidden lg:inline">Upload</span>
-                  </Button>
-                  <input
-                    ref={fileInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={handleImageUpload}
-                    className="hidden"
-                  />
-
                   {/* Icon Buttons */}
                   <Button
                     variant="ghost"
