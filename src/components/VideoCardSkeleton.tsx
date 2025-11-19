@@ -2,10 +2,10 @@ import { Skeleton } from '@/components/ui/skeleton';
 
 export function VideoCardSkeleton() {
   return (
-    <article className="relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] break-inside-avoid mb-5 animate-pulse">
+    <article className="relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] break-inside-avoid mb-5">
       <div className="relative">
-        {/* Image Skeleton */}
-        <Skeleton className="w-full h-64 bg-muted" />
+        {/* Image Skeleton with natural aspect ratio */}
+        <Skeleton className="w-full aspect-[4/5] bg-muted" />
         
         {/* Bottom Overlay Skeleton */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
