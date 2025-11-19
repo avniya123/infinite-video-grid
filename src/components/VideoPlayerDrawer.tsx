@@ -39,6 +39,9 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
   const [contrast, setContrast] = useState(100);
   const [saturation, setSaturation] = useState(100);
   const [filtersOpen, setFiltersOpen] = useState(false);
+  const [downloading, setDownloading] = useState(false);
+  const [downloadProgress, setDownloadProgress] = useState(0);
+  const [downloadFormat, setDownloadFormat] = useState('');
   const videoRef = useRef<HTMLVideoElement>(null);
   
   // Seek to start time when video loads
@@ -61,10 +64,30 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
   
   if (!video) return null;
 
-  const handleDownload = (format: string) => {
-    toast.success(`Downloading video in ${format} format`, {
-      description: `${video.title} will be downloaded shortly.`
-    });
+  const handleDownload = async (format: string) => {
+    setDownloading(true);
+    setDownloadProgress(0);
+    setDownloadFormat(format);
+    
+    // Simulate download progress
+    const progressInterval = setInterval(() => {
+      setDownloadProgress(prev => {
+        if (prev >= 100) {
+          clearInterval(progressInterval);
+          setTimeout(() => {
+            setDownloading(false);
+            setDownloadProgress(0);
+            toast.success(`Video downloaded successfully!`, {
+              description: `${video.title} downloaded in ${format} format.`
+            });
+          }, 500);
+          return 100;
+        }
+        return prev + 10;
+      });
+    }, 200);
+    
+    // In production, this would trigger actual download with real progress tracking
     console.log(`Downloading ${video.videoUrl} as ${format}`);
   };
 
@@ -81,7 +104,7 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[550px] p-0 overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:w-[650px] md:w-[700px] p-0 overflow-y-auto">
         {/* Video Player Section */}
         <div className="relative bg-black">
           <AspectRatio ratio={16 / 9} className="bg-black">
@@ -109,6 +132,27 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
             <X className="h-5 w-5" />
           </Button>
         </div>
+
+        {/* Download Progress Indicator */}
+        {downloading && (
+          <div className="sticky top-0 z-50 bg-primary/10 border-b border-primary/20 px-5 py-3">
+            <div className="flex items-center justify-between mb-2">
+              <div className="flex items-center gap-2">
+                <Download className="w-4 h-4 text-primary animate-pulse" />
+                <span className="text-xs font-medium text-foreground">
+                  Downloading {downloadFormat} format...
+                </span>
+              </div>
+              <span className="text-xs font-bold text-primary">{downloadProgress}%</span>
+            </div>
+            <div className="w-full bg-muted rounded-full h-1.5 overflow-hidden">
+              <div 
+                className="bg-primary h-full transition-all duration-300 ease-out"
+                style={{ width: `${downloadProgress}%` }}
+              />
+            </div>
+          </div>
+        )}
 
         {/* Content Section */}
         <div className="p-5 space-y-5">
@@ -139,9 +183,9 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
             <div className="flex items-center gap-1.5 flex-wrap">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button size="sm" className="gap-1.5 text-xs h-8">
+                  <Button size="sm" className="gap-1.5 text-xs h-8" disabled={downloading}>
                     <Download className="w-3.5 h-3.5" />
-                    Download
+                    {downloading ? 'Downloading...' : 'Download'}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="start" className="w-48">
