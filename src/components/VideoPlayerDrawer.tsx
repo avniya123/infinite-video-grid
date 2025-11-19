@@ -1,11 +1,12 @@
 import { VideoItem } from '@/types/video';
 import {
-  Drawer,
-  DrawerContent,
-  DrawerDescription,
-  DrawerHeader,
-  DrawerTitle,
-} from '@/components/ui/drawer';
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from '@/components/ui/sheet';
+import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface VideoPlayerDrawerProps {
   video: VideoItem | null;
@@ -17,28 +18,30 @@ export function VideoPlayerDrawer({ video, open, onOpenChange }: VideoPlayerDraw
   if (!video) return null;
 
   return (
-    <Drawer open={open} onOpenChange={onOpenChange}>
-      <DrawerContent className="h-[90vh]">
-        <DrawerHeader>
-          <DrawerTitle>{video.title}</DrawerTitle>
-          <DrawerDescription>
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent side="right" className="w-full sm:w-[600px] md:w-[700px] lg:w-[800px] p-0 overflow-y-auto">
+        <SheetHeader className="px-6 pt-6 pb-4">
+          <SheetTitle>{video.title}</SheetTitle>
+          <SheetDescription>
             {video.orientation} • {video.duration} • ${video.price}
-          </DrawerDescription>
-        </DrawerHeader>
+          </SheetDescription>
+        </SheetHeader>
         
-        <div className="flex-1 px-4 pb-4">
-          <video
-            key={video.videoUrl}
-            controls
-            autoPlay
-            className="w-full h-full rounded-lg bg-black"
-            controlsList="nodownload"
-          >
-            <source src={video.videoUrl} type="video/mp4" />
-            Your browser does not support the video tag.
-          </video>
+        <div className="px-6 pb-6">
+          <AspectRatio ratio={16 / 9} className="bg-black rounded-lg overflow-hidden">
+            <video
+              key={video.videoUrl}
+              controls
+              autoPlay
+              className="w-full h-full object-contain"
+              controlsList="nodownload"
+            >
+              <source src={video.videoUrl} type="video/mp4" />
+              Your browser does not support the video tag.
+            </video>
+          </AspectRatio>
         </div>
-      </DrawerContent>
-    </Drawer>
+      </SheetContent>
+    </Sheet>
   );
 }
