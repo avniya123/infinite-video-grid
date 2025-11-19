@@ -209,9 +209,11 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-            {/* Price Badge */}
-            <div className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
-              ${video.price}
+            {/* Price Section */}
+            <div className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1.5 rounded-md">
+              <div className="text-xs font-semibold">₹ {video.price}</div>
+              <div className="text-[10px] line-through text-gray-300">MRP: ₹{video.mrp}</div>
+              <div className="text-[10px] text-green-400 font-medium">{video.discount} Off</div>
             </div>
             
             {/* Share Button - visible on hover */}
@@ -241,26 +243,13 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </h3>
 
             {/* Metadata Row */}
-            <div className="flex items-center justify-between text-xs">
-              {/* Left: Tags */}
-              <div className="flex items-center gap-2">
-                <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px]">
-                  {video.orientation}
-                </span>
-                <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px] flex items-center gap-1">
-                  <span>⏱</span> {video.duration}
-                </span>
-              </div>
-
-              {/* Right: Pricing */}
-              <div className="text-right">
-                <div className="text-[10px] line-through text-gray-300">
-                  MRP ${video.mrp}
-                </div>
-                <div className="text-[11px] text-discount-foreground font-bold">
-                  {video.discount}
-                </div>
-              </div>
+            <div className="flex items-center gap-2 text-xs">
+              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px]">
+                {video.orientation}
+              </span>
+              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px] flex items-center gap-1">
+                <span>⏱</span> {video.duration}
+              </span>
             </div>
           </div>
 
@@ -268,7 +257,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           <Button
             size="sm"
             variant="outline"
-            className="absolute bottom-3 left-3 z-20 gap-1.5 bg-background/95 backdrop-blur-sm hover:bg-background text-foreground"
+            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-background/95 backdrop-blur-sm hover:bg-background text-foreground"
             onClick={(e) => {
               e.stopPropagation();
               setVariationsOpen(true);
