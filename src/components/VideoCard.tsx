@@ -246,8 +246,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {/* Bottom Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 py-4">
             {/* Title */}
-            <h3 className="text-[11px] font-bold text-white line-clamp-2 mb-1 leading-relaxed">
-              {video.title}
+            <h3 className="text-sm font-bold text-white line-clamp-2 mb-1 leading-relaxed">
+              {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}
             </h3>
             {/* Caption */}
             <p className="text-[9px] text-gray-400 font-medium">
