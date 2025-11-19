@@ -47,7 +47,6 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
     dob: '',
     password: '',
     confirmPassword: '',
-    address: '',
     pincode: '',
   });
   const [signupErrors, setSignupErrors] = useState<Partial<Record<keyof typeof signupData, string>>>({});
@@ -232,7 +231,6 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
             full_name: signupData.fullName,
             phone: signupData.phone,
             dob: signupData.dob,
-            address: signupData.address,
             pincode: signupData.pincode,
           },
         },
@@ -363,7 +361,6 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
         dob: '',
         password: '',
         confirmPassword: '',
-        address: '',
         pincode: '',
       });
       setSignupErrors({});
@@ -721,19 +718,6 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                 </div>
 
                 <div className="space-y-2">
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    name="address"
-                    placeholder="123 Main Street"
-                    value={signupData.address}
-                    onChange={handleSignupChange}
-                    className="h-11 rounded-xl"
-                    required
-                  />
-                </div>
-
-                <div className="space-y-2">
                   <Label htmlFor="country">Country</Label>
                   <Select value={selectedCountry} onValueChange={(value) => {
                     setSelectedCountry(value);
@@ -791,18 +775,10 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                   {locationData && !locationLoading && !locationError && (
                     <div className="text-xs text-muted-foreground space-y-1 p-2 bg-muted/30 rounded-md">
                       <p className="flex items-center gap-1">
-                        <span className="font-medium">City:</span> {locationData.city}
-                      </p>
-                      {locationData.district && (
-                        <p className="flex items-center gap-1">
-                          <span className="font-medium">District:</span> {locationData.district}
-                        </p>
-                      )}
-                      <p className="flex items-center gap-1">
-                        <span className="font-medium">State:</span> {locationData.state}
+                        {locationData.city}{locationData.district && `, ${locationData.district}`}
                       </p>
                       <p className="flex items-center gap-1">
-                        <span className="font-medium">Country:</span> {locationData.country}
+                        {locationData.state}, {locationData.country}
                       </p>
                     </div>
                   )}

@@ -45,11 +45,6 @@ export const signupSchema = z.object({
     .regex(/[A-Z]/, 'Password must contain an uppercase letter')
     .regex(/[0-9]/, 'Password must contain a number'),
   confirmPassword: z.string().min(1, 'Please confirm your password'),
-  address: z
-    .string()
-    .trim()
-    .min(1, 'Address is required')
-    .max(200, 'Address must be less than 200 characters'),
   pincode: z
     .string()
     .trim()
@@ -78,12 +73,6 @@ export const profileSchema = z.object({
     .optional()
     .or(z.literal('')),
   dateOfBirth: z.string().optional(),
-  address: z
-    .string()
-    .trim()
-    .max(200, 'Address must be less than 200 characters')
-    .optional()
-    .or(z.literal('')),
   pincode: z
     .string()
     .trim()
