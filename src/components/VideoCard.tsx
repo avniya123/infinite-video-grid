@@ -9,7 +9,7 @@ import { VideoTimeline } from '@/components/VideoTimeline';
 
 interface VideoCardProps {
   video: VideoItem;
-  onPlay: (video: VideoItem) => void;
+  onPlay: (video: VideoItem, seekTime?: number) => void;
   onClick: (video: VideoItem) => void;
   isSelected?: boolean;
   onSelect?: (video: VideoItem) => void;
@@ -21,6 +21,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [showVideo, setShowVideo] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [seekTime, setSeekTime] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -51,7 +52,13 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onPlay(video);
+    setSeekTime(0); // Reset seek time for normal play
+    onPlay(video, 0);
+  };
+
+  const handleTimelineSeek = (position: number) => {
+    setSeekTime(position);
+    onPlay(video, position);
   };
 
   const handleCardClick = () => {
@@ -229,6 +236,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             <VideoTimeline 
               videoUrl={video.videoUrl} 
               isVisible={isHovering && !showVideo}
+              onSeek={handleTimelineSeek}
             />
           )}
         </div>
