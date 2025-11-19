@@ -564,15 +564,12 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowPassword(!showPassword)}
+                      onMouseEnter={() => setShowPassword(true)}
+                      onMouseLeave={() => setShowPassword(false)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showPassword ? "Hide password" : "Show password"}
+                      aria-label="Show password on hover"
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
+                      <Eye className="h-5 w-5" />
                     </button>
                   </div>
                   <p className="text-xs text-muted-foreground">
@@ -595,15 +592,12 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                     />
                     <button
                       type="button"
-                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      onMouseEnter={() => setShowConfirmPassword(true)}
+                      onMouseLeave={() => setShowConfirmPassword(false)}
                       className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
-                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                      aria-label="Show password on hover"
                     >
-                      {showConfirmPassword ? (
-                        <EyeOff className="h-5 w-5" />
-                      ) : (
-                        <Eye className="h-5 w-5" />
-                      )}
+                      <Eye className="h-5 w-5" />
                     </button>
                   </div>
                 </div>
