@@ -117,6 +117,14 @@ export default {
             transform: "translateX(100%)",
           },
         },
+        "pulse-subtle": {
+          "0%, 100%": {
+            opacity: "1",
+          },
+          "50%": {
+            opacity: "0.8",
+          },
+        },
         "scale-in": {
           "0%": {
             transform: "scale(0.95)",
@@ -145,6 +153,7 @@ export default {
         "scale-in": "scale-in 0.2s ease-out",
         "slide-up": "slide-up 0.3s ease-out",
         shimmer: "shimmer 2.5s ease-in-out infinite",
+        "pulse-subtle": "pulse-subtle 2s cubic-bezier(0.4, 0, 0.6, 1) infinite",
       },
     },
   },
