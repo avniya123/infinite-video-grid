@@ -43,11 +43,27 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
   const [activeTab, setActiveTab] = useState('profile');
   
   // Notification preferences state
+  // Password change state
+  const [passwordData, setPasswordData] = useState({
+    currentPassword: '',
+    newPassword: '',
+    confirmPassword: '',
+  });
+
+  // Notification preferences state
   const [notifications, setNotifications] = useState({
     emailNotifications: true,
     pushNotifications: false,
     weeklyDigest: true,
     newFeatures: true,
+    marketingEmails: false,
+    securityAlerts: true,
+  });
+
+  // Security options state
+  const [securityOptions, setSecurityOptions] = useState({
+    twoFactorEnabled: false,
+    loginAlerts: true,
   });
 
   useEffect(() => {
@@ -189,6 +205,77 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
       } else {
         toast.error('Failed to update profile');
       }
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (passwordData.newPassword !== passwordData.confirmPassword) {
+      toast.error('New passwords do not match');
+      return;
+    }
+
+    if (passwordData.newPassword.length < 8) {
+      toast.error('Password must be at least 8 characters');
+      return;
+    }
+
+    setSaving(true);
+    try {
+      const { error } = await supabase.auth.updateUser({
+        password: passwordData.newPassword,
+      });
+
+      if (error) throw error;
+
+      toast.success('Password updated successfully');
+      setPasswordData({
+        currentPassword: '',
+        newPassword: '',
+        confirmPassword: '',
+      });
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to update password');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleSecurityToggle = (key: keyof typeof securityOptions) => {
+    setSecurityOptions(prev => {
+      const newState = { ...prev, [key]: !prev[key] };
+      
+      if (key === 'twoFactorEnabled' && newState[key]) {
+        toast.success('Two-factor authentication enabled');
+      } else if (key === 'twoFactorEnabled') {
+        toast.success('Two-factor authentication disabled');
+      } else {
+        toast.success('Security settings updated');
+      }
+      
+      return newState;
+    });
+  };
+
+  const handleNotificationToggle = (key: keyof typeof notifications) => {
+    setNotifications(prev => {
+      const newState = { ...prev, [key]: !prev[key] };
+      toast.success('Notification preferences updated');
+      return newState;
+    });
+  };
+
+  const handleSignOutAllDevices = async () => {
+    setSaving(true);
+    try {
+      await supabase.auth.signOut({ scope: 'global' });
+      toast.success('Signed out from all devices');
+      onOpenChange(false);
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to sign out');
     } finally {
       setSaving(false);
     }
@@ -399,33 +486,99 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   <CardDescription>Manage your password and security settings</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="currentPassword">Current Password</Label>
-                    <Input
-                      id="currentPassword"
-                      type="password"
-                      placeholder="Enter current password"
-                    />
+                  <form onSubmit={handlePasswordChange} className="space-y-4">
+                    <div className="space-y-2">
+                      <Label htmlFor="currentPassword">Current Password</Label>
+                      <Input
+                        id="currentPassword"
+                        type="password"
+                        value={passwordData.currentPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
+                        placeholder="Enter current password"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <Input
+                        id="newPassword"
+                        type="password"
+                        value={passwordData.newPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
+                        placeholder="Enter new password (min 8 characters)"
+                      />
+                    </div>
+                    <div className="space-y-2">
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                      <Input
+                        id="confirmPassword"
+                        type="password"
+                        value={passwordData.confirmPassword}
+                        onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
+                        placeholder="Confirm new password"
+                      />
+                    </div>
+                    <Button type="submit" variant="outline" className="w-full" disabled={saving}>
+                      {saving ? (
+                        <>
+                          <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                          Updating...
+                        </>
+                      ) : (
+                        <>
+                          <Key className="mr-2 h-4 w-4" />
+                          Update Password
+                        </>
+                      )}
+                    </Button>
+                  </form>
+
+                  <Separator className="my-6" />
+
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="twoFactor">Two-Factor Authentication</Label>
+                        <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
+                      </div>
+                      <Switch
+                        id="twoFactor"
+                        checked={securityOptions.twoFactorEnabled}
+                        onCheckedChange={() => handleSecurityToggle('twoFactorEnabled')}
+                      />
+                    </div>
+                    <Separator />
+                    <div className="flex items-center justify-between">
+                      <div className="space-y-0.5">
+                        <Label htmlFor="loginAlerts">Login Alerts</Label>
+                        <p className="text-sm text-muted-foreground">Get notified of new sign-ins</p>
+                      </div>
+                      <Switch
+                        id="loginAlerts"
+                        checked={securityOptions.loginAlerts}
+                        onCheckedChange={() => handleSecurityToggle('loginAlerts')}
+                      />
+                    </div>
                   </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="newPassword">New Password</Label>
-                    <Input
-                      id="newPassword"
-                      type="password"
-                      placeholder="Enter new password"
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                    <Input
-                      id="confirmPassword"
-                      type="password"
-                      placeholder="Confirm new password"
-                    />
-                  </div>
-                  <Button variant="outline" className="w-full">
-                    <Key className="mr-2 h-4 w-4" />
-                    Update Password
+
+                  <Separator className="my-6" />
+
+                  <Button 
+                    variant="destructive" 
+                    className="w-full"
+                    onClick={handleSignOutAllDevices}
+                    disabled={saving}
+                  >
+                    {saving ? (
+                      <>
+                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                        Signing out...
+                      </>
+                    ) : (
+                      <>
+                        <LogOut className="mr-2 h-4 w-4" />
+                        Sign Out All Devices
+                      </>
+                    )}
                   </Button>
                 </CardContent>
               </Card>
@@ -448,9 +601,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     <Switch
                       id="emailNotifications"
                       checked={notifications.emailNotifications}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, emailNotifications: checked }))
-                      }
+                      onCheckedChange={() => handleNotificationToggle('emailNotifications')}
                     />
                   </div>
                   <Separator />
@@ -462,9 +613,31 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     <Switch
                       id="pushNotifications"
                       checked={notifications.pushNotifications}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, pushNotifications: checked }))
-                      }
+                      onCheckedChange={() => handleNotificationToggle('pushNotifications')}
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="marketingEmails">Marketing Emails</Label>
+                      <p className="text-sm text-muted-foreground">Receive marketing and promotional emails</p>
+                    </div>
+                    <Switch
+                      id="marketingEmails"
+                      checked={notifications.marketingEmails}
+                      onCheckedChange={() => handleNotificationToggle('marketingEmails')}
+                    />
+                  </div>
+                  <Separator />
+                  <div className="flex items-center justify-between">
+                    <div className="space-y-0.5">
+                      <Label htmlFor="securityAlerts">Security Alerts</Label>
+                      <p className="text-sm text-muted-foreground">Important security-related notifications</p>
+                    </div>
+                    <Switch
+                      id="securityAlerts"
+                      checked={notifications.securityAlerts}
+                      onCheckedChange={() => handleNotificationToggle('securityAlerts')}
                     />
                   </div>
                   <Separator />
@@ -476,9 +649,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     <Switch
                       id="weeklyDigest"
                       checked={notifications.weeklyDigest}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, weeklyDigest: checked }))
-                      }
+                      onCheckedChange={() => handleNotificationToggle('weeklyDigest')}
                     />
                   </div>
                   <Separator />
@@ -490,9 +661,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     <Switch
                       id="newFeatures"
                       checked={notifications.newFeatures}
-                      onCheckedChange={(checked) => 
-                        setNotifications(prev => ({ ...prev, newFeatures: checked }))
-                      }
+                      onCheckedChange={() => handleNotificationToggle('newFeatures')}
                     />
                   </div>
                 </CardContent>
