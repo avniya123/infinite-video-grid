@@ -1,5 +1,5 @@
-import { useState, useRef } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useState, useRef, useEffect } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
 import { Upload, Monitor, Heart, User, Bell } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -13,12 +13,29 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AuthDrawer } from '@/components/AuthDrawer';
 import { toast } from 'sonner';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 export const Header = () => {
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState<string>('/placeholder.svg');
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const handleImageUpload = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -103,16 +120,27 @@ export const Header = () => {
                 </Badge>
               </Button>
 
-              {/* Sign In Button */}
-              <Button
-                onClick={() => setAuthDrawerOpen(true)}
-                className="h-9 px-6 rounded-lg bg-success hover:bg-success/90 text-success-foreground font-medium shadow-sm hover:shadow-md transition-all"
-              >
-                Sign In
-              </Button>
-
               {/* Theme Toggle */}
               <ThemeToggle />
+
+              {/* Sign In / User Profile */}
+              {user ? (
+                <Link to="/profile">
+                  <Avatar className="w-9 h-9 border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer">
+                    <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || 'User'} />
+                    <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
+                      <User className="w-4 h-4" />
+                    </AvatarFallback>
+                  </Avatar>
+                </Link>
+              ) : (
+                <Button
+                  onClick={() => setAuthDrawerOpen(true)}
+                  className="h-9 px-6 rounded-lg bg-success hover:bg-success/90 text-success-foreground font-medium shadow-sm hover:shadow-md transition-all"
+                >
+                  Sign In
+                </Button>
+              )}
             </div>
           </div>
         </div>
