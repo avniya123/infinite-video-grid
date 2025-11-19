@@ -222,8 +222,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             {/* Price Section */}
             <div className="bg-black/60 backdrop-blur-sm text-white px-2.5 py-1.5 rounded-md">
               <div className="text-xs font-semibold">₹ {video.price}</div>
-              <div className="text-[10px] line-through text-gray-300">MRP: ₹{video.mrp}</div>
-              <div className="text-[10px] text-green-400 font-medium">{video.discount} Off</div>
             </div>
             
             {/* Share Button - visible on hover */}
