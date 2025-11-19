@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
 import { VariationsDrawer } from '@/components/VariationsDrawer';
 import { Button } from '@/components/ui/button';
+import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -24,6 +25,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [isBuffering, setIsBuffering] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [variationsOpen, setVariationsOpen] = useState(false);
+  const [playerOpen, setPlayerOpen] = useState(false);
+  const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -280,6 +283,16 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
         video={video}
         open={variationsOpen}
         onOpenChange={setVariationsOpen}
+        onPlayVariation={(variation) => {
+          setSelectedVariation(variation);
+          setPlayerOpen(true);
+        }}
+      />
+
+      <VideoPlayerDrawer
+        video={selectedVariation || video}
+        open={playerOpen}
+        onOpenChange={setPlayerOpen}
       />
     </article>
   );

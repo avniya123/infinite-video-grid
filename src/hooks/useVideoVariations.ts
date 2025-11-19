@@ -1,0 +1,35 @@
+import { useQuery } from "@tanstack/react-query";
+import { supabase } from "@/integrations/supabase/client";
+
+export interface VideoVariation {
+  id: string;
+  video_id: number;
+  title: string;
+  duration: string;
+  aspect_ratio: string;
+  quality: string | null;
+  thumbnail_url: string | null;
+  video_url: string | null;
+  platforms: string[];
+}
+
+export const useVideoVariations = (videoId: number) => {
+  return useQuery({
+    queryKey: ['video-variations', videoId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('video_variations')
+        .select('*')
+        .eq('video_id', videoId)
+        .order('created_at', { ascending: true });
+
+      if (error) {
+        console.error('Error fetching variations:', error);
+        throw error;
+      }
+
+      return data as VideoVariation[];
+    },
+    enabled: !!videoId,
+  });
+};
