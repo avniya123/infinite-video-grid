@@ -6,6 +6,8 @@ import { Header } from '@/components/Header';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FilterChips } from '@/components/FilterChips';
 import { FilterDrawer } from '@/components/FilterDrawer';
+import { VariationsDrawer } from '@/components/VariationsDrawer';
+import { AuthDrawer } from '@/components/AuthDrawer';
 import { ArrowUpDown, ChevronDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { ScrollToTop } from '@/components/ScrollToTop';
@@ -51,6 +53,8 @@ const Index = () => {
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [videoStartTime, setVideoStartTime] = useState(0);
   const [columnCount, setColumnCount] = useState(3);
+  const [listVariationsOpen, setListVariationsOpen] = useState<string | null>(null);
+  const [listAuthDrawerOpen, setListAuthDrawerOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Use custom filter hook
@@ -383,13 +387,15 @@ const Index = () => {
                   />
                   <Button
                     size="sm"
+                    variant="outline"
                     onClick={(e) => {
                       e.stopPropagation();
-                      handlePlayVideo(video);
+                      setListVariationsOpen(video.id.toString());
                     }}
-                    className="absolute bottom-2 right-2 transition-all duration-200 hover:scale-110"
+                    className="absolute bottom-2 right-2 gap-1.5 bg-background/95 backdrop-blur-sm hover:bg-background transition-all duration-200 hover:scale-110"
                   >
-                    Play
+                    <List className="h-3.5 w-3.5" />
+                    Variations
                   </Button>
                 </div>
                 <div className="flex-1 flex flex-col">
@@ -426,6 +432,22 @@ const Index = () => {
             ))}
           </div>
         )}
+
+        {/* Variations Drawer for List View */}
+        {listVariationsOpen && (
+          <VariationsDrawer
+            video={filteredVideos.find(v => v.id.toString() === listVariationsOpen)!}
+            open={!!listVariationsOpen}
+            onOpenChange={(open) => !open && setListVariationsOpen(null)}
+            onRequestAuth={() => setListAuthDrawerOpen(true)}
+          />
+        )}
+
+        {/* Auth Drawer for List View */}
+        <AuthDrawer 
+          open={listAuthDrawerOpen} 
+          onOpenChange={setListAuthDrawerOpen} 
+        />
 
         {/* Loading Sentinel */}
         {!finished && (
