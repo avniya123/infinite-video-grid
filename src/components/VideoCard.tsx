@@ -5,7 +5,6 @@ import { Play, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
-import { VideoTimeline } from '@/components/VideoTimeline';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -21,7 +20,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [showVideo, setShowVideo] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
-  const [seekTime, setSeekTime] = useState(0);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -52,13 +50,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setSeekTime(0); // Reset seek time for normal play
     onPlay(video, 0);
-  };
-
-  const handleTimelineSeek = (position: number) => {
-    setSeekTime(position);
-    onPlay(video, position);
   };
 
   const handleCardClick = () => {
@@ -230,15 +222,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               </div>
             </div>
           </div>
-
-          {/* Video Timeline with Thumbnails */}
-          {video.videoUrl && (
-            <VideoTimeline 
-              videoUrl={video.videoUrl} 
-              isVisible={isHovering && !showVideo}
-              onSeek={handleTimelineSeek}
-            />
-          )}
         </div>
       </AspectRatio>
     </article>
