@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { Play } from 'lucide-react';
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -11,6 +11,10 @@ interface VideoCardProps {
 
 export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const [showVideo, setShowVideo] = useState(false);
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -21,23 +25,68 @@ export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
     onClick(video);
   };
 
+  const handleMouseEnter = () => {
+    setIsHovering(true);
+    // Start playing video after 500ms hover
+    hoverTimerRef.current = setTimeout(() => {
+      setShowVideo(true);
+      if (videoRef.current) {
+        videoRef.current.play();
+      }
+    }, 500);
+  };
+
+  const handleMouseLeave = () => {
+    setIsHovering(false);
+    setShowVideo(false);
+    if (hoverTimerRef.current) {
+      clearTimeout(hoverTimerRef.current);
+    }
+    if (videoRef.current) {
+      videoRef.current.pause();
+      videoRef.current.currentTime = 0;
+    }
+  };
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+    };
+  }, []);
+
   return (
     <article 
       className="group relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5"
       onClick={handleCardClick}
+      onMouseEnter={handleMouseEnter}
+      onMouseLeave={handleMouseLeave}
     >
       <div className="relative">
         {/* Image */}
         <img
           src={video.image}
           alt={video.title}
-          className={`w-full object-cover transition-opacity duration-300 ${imageLoaded ? 'opacity-100' : 'opacity-0'}`}
+          className={`w-full object-cover transition-opacity duration-300 ${imageLoaded && !showVideo ? 'opacity-100' : 'opacity-0'}`}
           onLoad={() => setImageLoaded(true)}
           loading="lazy"
         />
+
+        {/* Video Preview on Hover */}
+        {showVideo && (
+          <video
+            ref={videoRef}
+            src={video.videoUrl}
+            className="w-full object-cover absolute inset-0 transition-opacity duration-300"
+            loop
+            muted
+            playsInline
+          />
+        )}
         
         {/* Loading placeholder */}
-        {!imageLoaded && (
+        {!imageLoaded && !showVideo && (
           <div className="absolute inset-0 bg-muted animate-pulse" />
         )}
 
@@ -53,15 +102,17 @@ export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
           ${video.price}
         </div>
 
-        {/* Play Button */}
-        <div 
-          className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
-          onClick={handlePlayClick}
-        >
-          <div className="w-16 h-16 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
-            <Play className="w-7 h-7 text-primary ml-1" fill="currentColor" />
+        {/* Play Button - hide when video is playing */}
+        {!showVideo && (
+          <div 
+            className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2"
+            onClick={handlePlayClick}
+          >
+            <div className="w-16 h-16 rounded-full bg-white/95 backdrop-blur-sm flex items-center justify-center shadow-lg transition-all duration-300 group-hover:scale-110 group-hover:shadow-2xl">
+              <Play className="w-7 h-7 text-primary ml-1" fill="currentColor" />
+            </div>
           </div>
-        </div>
+        )}
 
         {/* Bottom Overlay */}
         <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
