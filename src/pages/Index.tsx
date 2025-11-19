@@ -5,7 +5,9 @@ import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Header } from '@/components/Header';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FilterChips } from '@/components/FilterChips';
-import { FilterDropdowns } from '@/components/FilterDropdowns';
+import { FilterDrawer } from '@/components/FilterDrawer';
+import { ArrowUpDown, ChevronDown } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { ShareButton } from '@/components/ShareButton';
 import { VideoItem, VideoCategory } from '@/types/video';
@@ -250,29 +252,56 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Filter Dropdowns */}
-        <FilterDropdowns
-          sortBy={sortBy}
-          sortOptions={sortOptions}
-          selectedCategories={selectedCategories}
-          selectedDurations={selectedDurations}
-          selectedAspectRatios={selectedAspectRatios}
-          selectedPriceRanges={selectedPriceRanges}
-          categories={categories}
-          onSortChange={(value) => setSortBy(value as any)}
-          onCategoryToggle={handleCategoryToggle}
-          onDurationToggle={handleDurationToggle}
-          onAspectRatioToggle={handleAspectRatioToggle}
-          onPriceRangeToggle={handlePriceRangeToggle}
-          onSelectAllCategories={() => handleSelectAllCategories(categories)}
-          onClearCategories={handleClearCategories}
-          onSelectAllDurations={handleSelectAllDurations}
-          onClearDurations={handleClearDurations}
-          onSelectAllAspectRatios={handleSelectAllAspectRatios}
-          onClearAspectRatios={handleClearAspectRatios}
-          onSelectAllPriceRanges={handleSelectAllPriceRanges}
-          onClearPriceRanges={handleClearPriceRanges}
-        />
+        {/* Sort and Filters */}
+        <div className="flex gap-3 items-center flex-wrap">
+          {/* Sort Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 border-2 hover:bg-accent transition-all duration-200">
+                <ArrowUpDown className="w-4 h-4 mr-2" />
+                {sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort'}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+              <DropdownMenuLabel className="font-semibold">Sort By</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {sortOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => setSortBy(option.value as any)}
+                  className={`cursor-pointer transition-colors ${sortBy === option.value ? 'bg-accent' : ''}`}
+                >
+                  <span>{option.label}</span>
+                  {sortBy === option.value && <span className="ml-auto">✓</span>}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Filter Drawer */}
+          <FilterDrawer
+            selectedCategories={selectedCategories}
+            selectedDurations={selectedDurations}
+            selectedAspectRatios={selectedAspectRatios}
+            selectedPriceRanges={selectedPriceRanges}
+            categories={categories}
+            onCategoryToggle={handleCategoryToggle}
+            onDurationToggle={handleDurationToggle}
+            onAspectRatioToggle={handleAspectRatioToggle}
+            onPriceRangeToggle={handlePriceRangeToggle}
+            onSelectAllCategories={() => handleSelectAllCategories(categories)}
+            onClearCategories={handleClearCategories}
+            onSelectAllDurations={handleSelectAllDurations}
+            onClearDurations={handleClearDurations}
+            onSelectAllAspectRatios={handleSelectAllAspectRatios}
+            onClearAspectRatios={handleClearAspectRatios}
+            onSelectAllPriceRanges={handleSelectAllPriceRanges}
+            onClearPriceRanges={handleClearPriceRanges}
+            onResetFilters={handleResetFilters}
+            hasActiveFilters={hasActiveFilters}
+          />
+        </div>
 
         {/* Active Filters Chips */}
         {hasActiveFilters && (
