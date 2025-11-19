@@ -100,7 +100,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
 
   return (
     <>
-      <header className="sticky top-0 z-50 w-full border-b border-border bg-white shadow-sm">
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
             {/* Logo and Brand */}
@@ -117,74 +117,74 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                 {/* Personals Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      className="h-9 px-3 rounded-lg hover:bg-gray-100 text-sm font-medium text-gray-700 flex items-center gap-1"
-                    >
-                      Personals
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    align="start" 
-                    className="w-64 p-2 bg-white border-gray-200 shadow-lg"
+                  <Button 
+                    variant="ghost" 
+                    className="h-9 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1"
                   >
-                    <DropdownMenuLabel className="text-xs font-semibold text-gray-500 px-2">
-                      Personal Categories
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-gray-200" />
-                    <div className="grid grid-cols-1 gap-1">
-                      {personalCategories.map((category) => (
-                        <DropdownMenuItem
-                          key={category}
-                          onClick={() => selectCategory(category)}
-                          className="cursor-pointer flex items-center justify-between px-2 py-2 hover:bg-gray-100 rounded text-gray-700"
-                        >
-                          <span className="text-sm">{category}</span>
-                          {selectedCategory === category && (
-                            <Check className="w-4 h-4 text-gray-900" />
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    Personals
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="start" 
+                  className="w-64 p-2 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 shadow-lg"
+                >
+                  <DropdownMenuLabel className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2">
+                    Personal Categories
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
+                  <div className="grid grid-cols-1 gap-1">
+                    {personalCategories.map((category) => (
+                      <DropdownMenuItem
+                        key={category}
+                        onClick={() => selectCategory(category)}
+                        className="cursor-pointer flex items-center justify-between px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-700 dark:text-gray-200"
+                      >
+                        <span className="text-sm">{category}</span>
+                        {selectedCategory === category && (
+                          <Check className="w-4 h-4 text-gray-900 dark:text-white" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
 
-                {/* Business Dropdown */}
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button 
-                      variant="ghost" 
-                      className="h-9 px-3 rounded-lg hover:bg-gray-100 text-sm font-medium text-gray-700 flex items-center gap-1"
-                    >
-                      Business
-                      <ChevronDown className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent 
-                    align="start" 
-                    className="w-64 p-2 bg-white border-gray-200 shadow-lg"
+              {/* Business Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button 
+                    variant="ghost" 
+                    className="h-9 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300 flex items-center gap-1"
                   >
-                    <DropdownMenuLabel className="text-xs font-semibold text-gray-500 px-2">
-                      Business Categories
-                    </DropdownMenuLabel>
-                    <DropdownMenuSeparator className="bg-gray-200" />
-                    <div className="grid grid-cols-1 gap-1">
-                      {businessCategories.map((category) => (
-                        <DropdownMenuItem
-                          key={category}
-                          onClick={() => selectCategory(category)}
-                          className="cursor-pointer flex items-center justify-between px-2 py-2 hover:bg-gray-100 rounded text-gray-700"
-                        >
-                          <span className="text-sm">{category}</span>
-                          {selectedCategory === category && (
-                            <Check className="w-4 h-4 text-gray-900" />
-                          )}
-                        </DropdownMenuItem>
-                      ))}
-                    </div>
-                  </DropdownMenuContent>
-                </DropdownMenu>
+                    Business
+                    <ChevronDown className="w-4 h-4" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent 
+                  align="start" 
+                  className="w-64 p-2 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 shadow-lg"
+                >
+                  <DropdownMenuLabel className="text-xs font-semibold text-gray-500 dark:text-gray-400 px-2">
+                    Business Categories
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
+                  <div className="grid grid-cols-1 gap-1">
+                    {businessCategories.map((category) => (
+                      <DropdownMenuItem
+                        key={category}
+                        onClick={() => selectCategory(category)}
+                        className="cursor-pointer flex items-center justify-between px-2 py-2 hover:bg-gray-100 dark:hover:bg-gray-800 rounded text-gray-700 dark:text-gray-200"
+                      >
+                        <span className="text-sm">{category}</span>
+                        {selectedCategory === category && (
+                          <Check className="w-4 h-4 text-gray-900 dark:text-white" />
+                        )}
+                      </DropdownMenuItem>
+                    ))}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
               </nav>
             </div>
 
