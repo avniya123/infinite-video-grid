@@ -19,6 +19,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [isBuffering, setIsBuffering] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
@@ -67,6 +68,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     hoverTimerRef.current = setTimeout(() => {
       if (videoRef.current && videoLoaded) {
         setShowVideo(true);
+        setIsBuffering(true);
         videoRef.current.play().catch(err => console.log('Play failed:', err));
       }
     }, 500);
@@ -75,6 +77,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const handleMouseLeave = () => {
     setIsHovering(false);
     setShowVideo(false);
+    setIsBuffering(false);
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
     }
@@ -129,7 +132,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
             style={{
               objectFit: 'cover',
-              // Hide all browser controls and indicators
               WebkitMaskImage: '-webkit-radial-gradient(white, black)',
             }}
             loop
@@ -137,8 +139,18 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             playsInline
             preload="auto"
             onLoadedData={() => setVideoLoaded(true)}
+            onWaiting={() => setIsBuffering(true)}
+            onCanPlay={() => setIsBuffering(false)}
+            onPlaying={() => setIsBuffering(false)}
             onError={(e) => console.log('Video load error:', e)}
           />
+
+          {/* Buffering Shimmer Overlay */}
+          {showVideo && isBuffering && (
+            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-20">
+              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            </div>
+          )}
           
           {/* Loading placeholder */}
           {!imageLoaded && !showVideo && (
