@@ -286,18 +286,22 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
             </div>
 
             {isLoading ? (
-              // Loading skeleton
+              // Loading skeleton with shimmer
               Array.from({ length: 3 }).map((_, i) => (
-                <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
-                  <Skeleton className="w-20 h-20 rounded-md" />
-                  <div className="flex-1 space-y-2">
-                    <Skeleton className="h-4 w-32" />
-                    <Skeleton className="h-3 w-24" />
-                    <Skeleton className="h-3 w-full" />
+                <div key={i} className="flex items-start gap-3 p-4 rounded-lg border bg-card animate-fade-in" style={{ animationDelay: `${i * 100}ms` }}>
+                  <Skeleton className="w-20 h-20 rounded-md bg-muted/60" />
+                  <div className="flex-1 space-y-2.5">
+                    <Skeleton className="h-5 w-40 bg-muted/60" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-16 rounded-full bg-muted/60" />
+                      <Skeleton className="h-4 w-20 rounded-full bg-muted/60" />
+                      <Skeleton className="h-4 w-12 rounded-full bg-muted/60" />
+                    </div>
+                    <Skeleton className="h-3 w-full bg-muted/60" />
                   </div>
                   <div className="flex gap-2">
-                    <Skeleton className="h-8 w-8 rounded-md" />
-                    <Skeleton className="h-8 w-8 rounded-md" />
+                    <Skeleton className="h-8 w-8 rounded-md bg-muted/60" />
+                    <Skeleton className="h-8 w-8 rounded-md bg-muted/60" />
                   </div>
                 </div>
               ))
