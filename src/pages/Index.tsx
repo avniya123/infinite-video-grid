@@ -20,7 +20,6 @@ const Index = () => {
     setLoading(true);
     try {
       const result = await fetchVideos(currentPage, PAGE_SIZE);
-      console.log('Loaded videos:', result.items.length, 'First video:', result.items[0]);
       
       if (result.items.length === 0) {
         setFinished(true);
