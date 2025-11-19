@@ -6,18 +6,20 @@ import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, Clock, Search, ChevronDown, X, Filter, DollarSign, Maximize } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, Clock, Search, ChevronDown, X, Filter, DollarSign, Maximize, ArrowUpDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 
 const PAGE_SIZE = 8;
 
 type DurationFilter = 'All' | 'Teaser' | 'Trailer' | 'Gimbel' | 'Document';
 type AspectRatioFilter = '16:9' | '9:16' | '1:1' | '4:3' | '3:4' | '21:9' | '9:21' | '2:3' | '3:2';
 type PriceRangeFilter = 'Under $50' | '$50-$100' | '$100-$200' | 'Over $200';
+type SortOption = 'newest' | 'price-low' | 'price-high' | 'popular';
 
 const categories: { value: VideoCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'All', label: 'All Videos', icon: null },
@@ -53,6 +55,36 @@ const priceRangeFilters: { value: PriceRangeFilter; label: string; range: [numbe
   { value: 'Over $200', label: 'Over $200', range: [200, Infinity] },
 ];
 
+const sortOptions: { value: SortOption; label: string }[] = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'popular', label: 'Most Popular' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'price-high', label: 'Price: High to Low' },
+];
+
+const AspectRatioIcon = ({ ratio }: { ratio: string }) => {
+  const ratioStyles: Record<string, { width: string; height: string }> = {
+    '16:9': { width: '32px', height: '18px' },
+    '21:9': { width: '32px', height: '13px' },
+    '4:3': { width: '28px', height: '21px' },
+    '3:2': { width: '30px', height: '20px' },
+    '9:16': { width: '18px', height: '32px' },
+    '9:21': { width: '13px', height: '32px' },
+    '3:4': { width: '21px', height: '28px' },
+    '2:3': { width: '20px', height: '30px' },
+    '1:1': { width: '24px', height: '24px' },
+  };
+
+  const style = ratioStyles[ratio] || { width: '24px', height: '24px' };
+
+  return (
+    <div 
+      className="border-2 border-primary rounded-sm bg-primary/10 flex-shrink-0"
+      style={style}
+    />
+  );
+};
+
 type ViewMode = 'masonry' | 'grid' | 'list';
 
 const Index = () => {
@@ -68,6 +100,7 @@ const Index = () => {
   const [selectedAspectRatios, setSelectedAspectRatios] = useState<AspectRatioFilter[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRangeFilter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
+  const [sortBy, setSortBy] = useState<SortOption>('newest');
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const sentinelRef = useRef<HTMLDivElement>(null);
 
@@ -261,6 +294,19 @@ const Index = () => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase().trim();
       return video.title.toLowerCase().includes(query);
+    })
+    .sort((a, b) => {
+      switch (sortBy) {
+        case 'price-low':
+          return parseFloat(a.price.replace('$', '')) - parseFloat(b.price.replace('$', ''));
+        case 'price-high':
+          return parseFloat(b.price.replace('$', '')) - parseFloat(a.price.replace('$', ''));
+        case 'popular':
+          return b.trending ? 1 : -1;
+        case 'newest':
+        default:
+          return b.id - a.id;
+      }
     });
 
   const handleResetFilters = () => {
@@ -344,6 +390,31 @@ const Index = () => {
 
         {/* Filter Dropdowns */}
         <div className="flex gap-3 items-center flex-wrap">
+          {/* Sort Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
+                <ArrowUpDown className="w-4 h-4 mr-2" />
+                {sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort'}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+              <DropdownMenuLabel className="font-semibold">Sort By</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {sortOptions.map((option) => (
+                <DropdownMenuItem
+                  key={option.value}
+                  onClick={() => setSortBy(option.value)}
+                  className={`cursor-pointer ${sortBy === option.value ? 'bg-accent' : ''}`}
+                >
+                  <span>{option.label}</span>
+                  {sortBy === option.value && <span className="ml-auto">✓</span>}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
           {/* Category Filter */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
@@ -464,7 +535,7 @@ const Index = () => {
                 <ChevronDown className="w-4 h-4 ml-2" />
               </Button>
             </DropdownMenuTrigger>
-            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+            <DropdownMenuContent align="start" className="w-72 bg-background/95 backdrop-blur-sm border-2">
               <DropdownMenuLabel className="font-semibold">Filter by Aspect Ratio</DropdownMenuLabel>
               <DropdownMenuSeparator />
               
@@ -489,16 +560,31 @@ const Index = () => {
               </div>
               <DropdownMenuSeparator />
               
-              {aspectRatioFilters.map((filter) => (
-                <DropdownMenuCheckboxItem
-                  key={filter.value}
-                  checked={selectedAspectRatios.includes(filter.value)}
-                  onCheckedChange={() => handleAspectRatioToggle(filter.value)}
-                  className="flex items-center gap-2 cursor-pointer"
-                >
-                  <span>{filter.label}</span>
-                </DropdownMenuCheckboxItem>
-              ))}
+              {/* Grouped by Orientation */}
+              {['Landscape', 'Portrait', 'Square'].map((orientation) => {
+                const ratiosInGroup = aspectRatioFilters.filter(f => f.category === orientation);
+                return (
+                  <Collapsible key={orientation} defaultOpen>
+                    <CollapsibleTrigger className="flex items-center justify-between w-full px-2 py-2 hover:bg-accent rounded text-sm font-medium">
+                      <span>{orientation}</span>
+                      <ChevronDown className="w-4 h-4 transition-transform" />
+                    </CollapsibleTrigger>
+                    <CollapsibleContent className="space-y-1 px-2 pb-2">
+                      {ratiosInGroup.map((filter) => (
+                        <DropdownMenuCheckboxItem
+                          key={filter.value}
+                          checked={selectedAspectRatios.includes(filter.value)}
+                          onCheckedChange={() => handleAspectRatioToggle(filter.value)}
+                          className="flex items-center gap-3 cursor-pointer py-2"
+                        >
+                          <AspectRatioIcon ratio={filter.value} />
+                          <span className="flex-1">{filter.label}</span>
+                        </DropdownMenuCheckboxItem>
+                      ))}
+                    </CollapsibleContent>
+                  </Collapsible>
+                );
+              })}
             </DropdownMenuContent>
           </DropdownMenu>
 
