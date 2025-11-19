@@ -244,12 +244,15 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           </div>
 
           {/* Bottom Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 py-4">
             {/* Title */}
-            <h3 className="text-[11px] font-semibold text-white line-clamp-2 mb-2 leading-relaxed">
+            <h3 className="text-[11px] font-bold text-white line-clamp-2 mb-1 leading-relaxed">
               {video.title}
             </h3>
-
+            {/* Caption */}
+            <p className="text-[9px] text-gray-400 font-medium">
+              Stock Video #{video.id}
+            </p>
           </div>
 
           {/* Variations Button */}

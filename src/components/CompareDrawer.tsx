@@ -51,7 +51,8 @@ export function CompareDrawer({ videos, open, onClose, onRemove, onPlayVideo }: 
               </div>
 
               <div className="p-4">
-                <h3 className="font-semibold text-sm mb-2 line-clamp-2">{video.title}</h3>
+                <h3 className="font-bold text-sm mb-1 line-clamp-2">{video.title}</h3>
+                <p className="text-[10px] text-gray-400 font-medium mb-3">Stock Video #{video.id}</p>
                 
                 <div className="space-y-2 text-sm text-muted-foreground">
                   <div className="flex justify-between">
