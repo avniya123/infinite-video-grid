@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { Upload, Monitor, Heart, User, Bell, LogOut } from 'lucide-react';
+import { Upload, Monitor, ShoppingCart, User, Bell, LogOut } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
@@ -120,7 +120,7 @@ export const Header = () => {
                     size="icon"
                     className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
                   >
-                    <Heart className="w-5 h-5 text-muted-foreground" />
+                    <ShoppingCart className="w-5 h-5 text-muted-foreground" />
                   </Button>
 
                   {/* Notification Bell */}
