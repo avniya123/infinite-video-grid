@@ -16,7 +16,7 @@ export function VideoTimeline({ videoUrl, isVisible }: VideoTimelineProps) {
   useEffect(() => {
     if (isVisible && videoUrl && thumbnails.length === 0) {
       setLoading(true);
-      generateVideoThumbnails(videoUrl, 5)
+      generateVideoThumbnails(videoUrl, 10)
         .then((thumbs) => {
           setThumbnails(thumbs);
           setLoading(false);
