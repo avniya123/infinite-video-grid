@@ -95,7 +95,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
       onRequestAuth?.();
       return;
     }
-    toast.success('Opening editor...');
+    window.location.href = `/template-editor/${video.id}`;
   };
 
   return (
