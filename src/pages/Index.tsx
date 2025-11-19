@@ -127,6 +127,15 @@ const Index = () => {
     });
   };
 
+  const handleSelectAllCategories = () => {
+    const allCategories = categories.filter(cat => cat.value !== 'All').map(cat => cat.value);
+    setSelectedCategories(allCategories);
+  };
+
+  const handleClearCategories = () => {
+    setSelectedCategories([]);
+  };
+
   const handleDurationToggle = (duration: DurationFilter) => {
     setSelectedDurations(prev => {
       if (prev.includes(duration)) {
@@ -135,6 +144,15 @@ const Index = () => {
         return [...prev, duration];
       }
     });
+  };
+
+  const handleSelectAllDurations = () => {
+    const allDurations = durationFilters.filter(filter => filter.value !== 'All').map(filter => filter.value);
+    setSelectedDurations(allDurations);
+  };
+
+  const handleClearDurations = () => {
+    setSelectedDurations([]);
   };
 
   const parseDuration = (durationStr: string): number => {
@@ -331,6 +349,28 @@ const Index = () => {
             <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
               <DropdownMenuLabel className="font-semibold">Filter by Category</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              
+              {/* Quick Actions */}
+              <div className="flex gap-1 px-2 py-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleSelectAllCategories}
+                >
+                  Select All
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleClearCategories}
+                >
+                  Clear
+                </Button>
+              </div>
+              <DropdownMenuSeparator />
+              
               {categories.filter(cat => cat.value !== 'All').map((category) => (
                 <DropdownMenuCheckboxItem
                   key={category.value}
@@ -362,6 +402,28 @@ const Index = () => {
             <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
               <DropdownMenuLabel className="font-semibold">Filter by Duration</DropdownMenuLabel>
               <DropdownMenuSeparator />
+              
+              {/* Quick Actions */}
+              <div className="flex gap-1 px-2 py-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleSelectAllDurations}
+                >
+                  Select All
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleClearDurations}
+                >
+                  Clear
+                </Button>
+              </div>
+              <DropdownMenuSeparator />
+              
               {durationFilters.filter(filter => filter.value !== 'All').map((filter) => (
                 <DropdownMenuCheckboxItem
                   key={filter.value}
