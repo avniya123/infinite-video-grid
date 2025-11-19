@@ -54,6 +54,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   const [phoneOTP, setPhoneOTP] = useState('');
 
   // Password visibility state
+  const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
@@ -325,15 +326,26 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
                 <div className="space-y-2">
                   <Label htmlFor="password">Password</Label>
-                  <Input
-                    id="password"
-                    name="password"
-                    type="password"
-                    placeholder="Enter your password"
-                    value={loginData.password}
-                    onChange={handleLoginChange}
-                    className={`h-11 rounded-lg ${loginErrors.password ? 'border-red-500' : ''}`}
-                  />
+                  <div className="relative">
+                    <Input
+                      id="password"
+                      name="password"
+                      type={showLoginPassword ? "text" : "password"}
+                      placeholder="Enter your password"
+                      value={loginData.password}
+                      onChange={handleLoginChange}
+                      className={`h-11 rounded-lg pr-10 ${loginErrors.password ? 'border-red-500' : ''}`}
+                    />
+                    <button
+                      type="button"
+                      onMouseEnter={() => setShowLoginPassword(true)}
+                      onMouseLeave={() => setShowLoginPassword(false)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label="Show password on hover"
+                    >
+                      <Eye className="h-5 w-5" />
+                    </button>
+                  </div>
                   {loginErrors.password && (
                     <p className="text-xs text-red-500 flex items-center gap-1">
                       <AlertCircle className="w-3 h-3" />
