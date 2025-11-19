@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { VideoCard } from '@/components/VideoCard';
+import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
@@ -96,11 +97,29 @@ const Index = () => {
     });
   };
 
-  const handleCategoryChange = (category: string) => {
+  const handleCategoryChange = async (category: string) => {
     setSelectedCategory(category as VideoCategory);
     setVideos([]);
     setCurrentPage(1);
     setFinished(false);
+    setLoading(true);
+    
+    // Reload first page with new category
+    try {
+      const result = await fetchVideos(1, PAGE_SIZE);
+      setVideos(result.items);
+      setTotal(result.total);
+      setCurrentPage(2);
+      
+      if (result.total && result.items.length >= result.total) {
+        setFinished(true);
+      }
+    } catch (error) {
+      console.error('Error loading videos:', error);
+      toast.error('Failed to load videos. Please try again.');
+    } finally {
+      setLoading(false);
+    }
   };
 
   const filteredVideos = selectedCategory === 'All' 
@@ -170,13 +189,21 @@ const Index = () => {
         {/* Masonry Layout */}
         {viewMode === 'masonry' && (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5">
-            {filteredVideos.map((video) => (
-              <VideoCard
-                key={video.id}
-                video={video}
-                onPlay={handlePlayVideo}
-                onClick={handleVideoClick}
-              />
+            {filteredVideos.map((video, index) => (
+              <div 
+                key={video.id} 
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <VideoCard
+                  video={video}
+                  onPlay={handlePlayVideo}
+                  onClick={handleVideoClick}
+                />
+              </div>
+            ))}
+            {loading && Array.from({ length: 4 }).map((_, i) => (
+              <VideoCardSkeleton key={`skeleton-masonry-${i}`} />
             ))}
           </div>
         )}
@@ -184,13 +211,21 @@ const Index = () => {
         {/* Grid Layout */}
         {viewMode === 'grid' && (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filteredVideos.map((video) => (
-              <VideoCard
-                key={video.id}
-                video={video}
-                onPlay={handlePlayVideo}
-                onClick={handleVideoClick}
-              />
+            {filteredVideos.map((video, index) => (
+              <div 
+                key={video.id} 
+                className="animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
+                <VideoCard
+                  video={video}
+                  onPlay={handlePlayVideo}
+                  onClick={handleVideoClick}
+                />
+              </div>
+            ))}
+            {loading && Array.from({ length: 4 }).map((_, i) => (
+              <VideoCardSkeleton key={`skeleton-grid-${i}`} />
             ))}
           </div>
         )}
@@ -198,8 +233,12 @@ const Index = () => {
         {/* List Layout */}
         {viewMode === 'list' && (
           <div className="flex flex-col gap-4">
-            {filteredVideos.map((video) => (
-              <div key={video.id} className="flex gap-4 bg-card p-4 rounded-none shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow">
+            {filteredVideos.map((video, index) => (
+              <div 
+                key={video.id} 
+                className="flex gap-4 bg-card p-4 rounded-none shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-shadow animate-fade-in"
+                style={{ animationDelay: `${index * 0.05}s` }}
+              >
                 <div className="relative w-64 flex-shrink-0">
                   <img
                     src={video.image}
@@ -240,6 +279,27 @@ const Index = () => {
                     >
                       View Details
                     </Button>
+                  </div>
+                </div>
+              </div>
+            ))}
+            {loading && Array.from({ length: 2 }).map((_, i) => (
+              <div key={`skeleton-list-${i}`} className="flex gap-4 bg-card p-4 rounded-none shadow-[var(--shadow-card)] animate-pulse">
+                <div className="w-64 h-36 bg-muted flex-shrink-0" />
+                <div className="flex-1 flex flex-col justify-between">
+                  <div>
+                    <div className="h-5 w-3/4 bg-muted mb-2 rounded" />
+                    <div className="flex items-center gap-3">
+                      <div className="h-6 w-16 bg-muted rounded" />
+                      <div className="h-6 w-16 bg-muted rounded" />
+                    </div>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-2">
+                      <div className="h-8 w-20 bg-muted rounded" />
+                      <div className="h-5 w-16 bg-muted rounded" />
+                    </div>
+                    <div className="h-9 w-28 bg-muted rounded" />
                   </div>
                 </div>
               </div>
