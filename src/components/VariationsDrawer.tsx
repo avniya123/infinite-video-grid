@@ -2,7 +2,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
-import { ShoppingCart, Edit, Share2, Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
+import { ShoppingCart, Edit, Play, Pause, Volume2, VolumeX, Maximize } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { toast } from "sonner";
@@ -11,6 +11,7 @@ import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
 import { useState, useRef, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
+import { SocialShareButtons } from "@/components/SocialShareButtons";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
@@ -106,28 +107,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
     }
   };
 
-  const handleShare = async (variation: any) => {
-    const shareData = {
-      title: `${video.title} - ${variation.title}`,
-      text: `Check out this video variation: ${variation.title}`,
-      url: window.location.href,
-    };
-
-    try {
-      if (navigator.share) {
-        await navigator.share(shareData);
-        toast.success("Shared successfully!");
-      } else {
-        // Fallback: Copy to clipboard
-        await navigator.clipboard.writeText(shareData.url);
-        toast.success("Link copied to clipboard!");
-      }
-    } catch (error) {
-      if (error instanceof Error && error.name !== 'AbortError') {
-        toast.error("Failed to share");
-      }
-    }
-  };
 
   const handlePlayVariation = (variation: any) => {
     setCurrentVideo({
@@ -424,28 +403,13 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
 
                   {/* Action Buttons */}
                   <div className="flex flex-col gap-2 flex-shrink-0">
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className="h-9 w-9 hover:bg-accent"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleShare(variation);
-                      }}
-                    >
-                      <Share2 className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      size="icon"
-                      variant="ghost"
-                      className={`h-9 w-9 ${isCurrentlyPlaying ? 'bg-primary/10 text-primary' : 'hover:bg-accent'}`}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handlePlayVariation(variation);
-                      }}
-                    >
-                      <Play className="h-4 w-4" />
-                    </Button>
+                    <div onClick={(e) => e.stopPropagation()}>
+                      <SocialShareButtons
+                        title={`${video.title} - ${variation.title}`}
+                        description={`Check out this video variation: ${variation.title}`}
+                        url={window.location.href}
+                      />
+                    </div>
                   </div>
                 </div>
                 );
