@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { X, Chrome, AlertCircle, Facebook, Twitter, Github, Eye, EyeOff } from 'lucide-react';
 import {
@@ -10,6 +10,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { OTPVerification } from './OTPVerification';
 import { PasswordStrength } from './PasswordStrength';
 import { toast } from 'sonner';
@@ -29,6 +30,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   // Login state
   const [loginData, setLoginData] = useState({ email: '', password: '' });
   const [loginErrors, setLoginErrors] = useState<{ email?: string; password?: string }>({});
+  const [rememberMe, setRememberMe] = useState(false);
   
   // Signup state
   const [signupData, setSignupData] = useState({
@@ -57,6 +59,14 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   const [showLoginPassword, setShowLoginPassword] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  // Load remember me preference on mount
+  useEffect(() => {
+    const savedRememberMe = localStorage.getItem('rememberMe');
+    if (savedRememberMe === 'true') {
+      setRememberMe(true);
+    }
+  }, []);
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -102,6 +112,13 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
       if (error) throw error;
 
       if (data.user) {
+        // Store remember me preference
+        if (rememberMe) {
+          localStorage.setItem('rememberMe', 'true');
+        } else {
+          localStorage.removeItem('rememberMe');
+        }
+        
         toast.success('Welcome back!');
         handleDrawerChange(false);
         navigate('/');
@@ -354,13 +371,28 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                   )}
                 </div>
 
-                <button
-                  type="button"
-                  onClick={() => setView('forgot')}
-                  className="text-sm text-primary hover:underline"
-                >
-                  Forgot password?
-                </button>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="remember"
+                      checked={rememberMe}
+                      onCheckedChange={(checked) => setRememberMe(checked as boolean)}
+                    />
+                    <Label
+                      htmlFor="remember"
+                      className="text-sm font-normal cursor-pointer"
+                    >
+                      Remember me
+                    </Label>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setView('forgot')}
+                    className="text-sm text-primary hover:underline"
+                  >
+                    Forgot password?
+                  </button>
+                </div>
 
                 <Button
                   type="submit"
