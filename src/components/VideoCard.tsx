@@ -20,7 +20,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [showVideo, setShowVideo] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
+  const [isInView, setIsInView] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
+  const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
 
   // Calculate aspect ratio based on orientation
@@ -41,12 +43,40 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   const aspectRatio = getAspectRatio();
 
-  // Preload video when component mounts
+  // Lazy loading with Intersection Observer
   useEffect(() => {
-    if (videoRef.current && video.videoUrl) {
+    if (!cardRef.current) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            setIsInView(true);
+          }
+        });
+      },
+      {
+        root: null,
+        rootMargin: '100px', // Start loading 100px before entering viewport
+        threshold: 0.1,
+      }
+    );
+
+    observer.observe(cardRef.current);
+
+    return () => {
+      if (cardRef.current) {
+        observer.unobserve(cardRef.current);
+      }
+    };
+  }, []);
+
+  // Preload video when in view
+  useEffect(() => {
+    if (isInView && videoRef.current && video.videoUrl) {
       videoRef.current.load();
     }
-  }, [video.videoUrl]);
+  }, [isInView, video.videoUrl]);
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -63,6 +93,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   };
 
   const handleMouseEnter = () => {
+    // Only start video preview if card is in view and video is loaded
+    if (!isInView || !videoLoaded) return;
+    
     setIsHovering(true);
     // Start playing video after 500ms hover
     hoverTimerRef.current = setTimeout(() => {
@@ -97,6 +130,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   return (
     <article 
+      ref={cardRef}
       className={`group relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
       onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
@@ -125,25 +159,27 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             loading="lazy"
           />
 
-          {/* Video Preview on Hover */}
-          <video
-            ref={videoRef}
-            src={video.videoUrl}
-            className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
-            style={{
-              objectFit: 'cover',
-              WebkitMaskImage: '-webkit-radial-gradient(white, black)',
-            }}
-            loop
-            muted
-            playsInline
-            preload="auto"
-            onLoadedData={() => setVideoLoaded(true)}
-            onWaiting={() => setIsBuffering(true)}
-            onCanPlay={() => setIsBuffering(false)}
-            onPlaying={() => setIsBuffering(false)}
-            onError={(e) => console.log('Video load error:', e)}
-          />
+          {/* Video Preview on Hover - Only load when in view */}
+          {isInView && (
+            <video
+              ref={videoRef}
+              src={video.videoUrl}
+              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ${showVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              style={{
+                objectFit: 'cover',
+                WebkitMaskImage: '-webkit-radial-gradient(white, black)',
+              }}
+              loop
+              muted
+              playsInline
+              preload="none"
+              onLoadedData={() => setVideoLoaded(true)}
+              onWaiting={() => setIsBuffering(true)}
+              onCanPlay={() => setIsBuffering(false)}
+              onPlaying={() => setIsBuffering(false)}
+              onError={(e) => console.log('Video load error:', e)}
+            />
+          )}
 
           {/* Buffering Shimmer Overlay */}
           {showVideo && isBuffering && (
