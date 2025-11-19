@@ -20,7 +20,7 @@ interface VariationsDrawerProps {
 export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawerProps) => {
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
-  const [currentVideo, setCurrentVideo] = useState<{ url: string; title: string; thumbnail: string } | null>(null);
+  const [currentVideo, setCurrentVideo] = useState<{ url: string; title: string; thumbnail: string; id?: string } | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -302,12 +302,18 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                 </div>
               ))
             ) : variations && variations.length > 0 ? (
-              variations.map((variation) => (
-                <div
-                  key={variation.id}
-                  className="flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-all duration-200 cursor-pointer"
-                  onClick={() => handlePlayVariation(variation)}
-                >
+              variations.map((variation) => {
+                const isCurrentlyPlaying = currentVideo?.id === variation.id;
+                return (
+                  <div
+                    key={variation.id}
+                    className={`flex items-start gap-3 p-4 rounded-lg border transition-all duration-200 cursor-pointer ${
+                      isCurrentlyPlaying 
+                        ? 'bg-primary/10 border-primary ring-2 ring-primary/20 shadow-md' 
+                        : 'bg-card hover:bg-accent/50'
+                    }`}
+                    onClick={() => handlePlayVariation(variation)}
+                  >
                   {/* Thumbnail */}
                   <div className="w-20 h-20 rounded-md overflow-hidden bg-muted flex-shrink-0 relative group">
                     <img
@@ -327,15 +333,28 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                       </div>
                     )}
                     {/* Play overlay icon */}
-                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
-                      <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="white" />
+                    <div className={`absolute inset-0 flex items-center justify-center transition-all ${
+                      isCurrentlyPlaying 
+                        ? 'bg-primary/50' 
+                        : 'bg-black/0 group-hover:bg-black/30'
+                    }`}>
+                      {isCurrentlyPlaying ? (
+                        <Volume2 className="h-8 w-8 text-white animate-pulse" />
+                      ) : (
+                        <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="white" />
+                      )}
                     </div>
                   </div>
 
                   {/* Variation Info */}
                   <div className="flex-1 min-w-0 space-y-2">
                     <div className="space-y-1">
-                      <h5 className="font-semibold text-sm leading-tight">{variation.title}</h5>
+                      <div className="flex items-center gap-2">
+                        <h5 className="font-semibold text-sm leading-tight">{variation.title}</h5>
+                        {isCurrentlyPlaying && (
+                          <Badge variant="default" className="text-xs">Now Playing</Badge>
+                        )}
+                      </div>
                       <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
                         <span className="px-2 py-0.5 bg-muted rounded font-medium">
                           {variation.duration}
@@ -412,7 +431,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                     </Button>
                   </div>
                 </div>
-              ))
+                );
+              })
             ) : (
               <div className="text-center py-12 text-muted-foreground space-y-2">
                 <div className="text-4xl mb-2">📹</div>
