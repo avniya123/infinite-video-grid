@@ -17,6 +17,18 @@ const thumbnails = [
   video1, video2, video3, video4, video5, video6, video7, video8
 ];
 
+// Sample video URLs from public CDN (using Big Buck Bunny samples)
+const sampleVideoUrls = [
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4',
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ElephantsDream.mp4',
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerBlazes.mp4',
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerEscapes.mp4',
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4',
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerJoyrides.mp4',
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/ForBiggerMeltdowns.mp4',
+  'https://commondatastorage.googleapis.com/gtv-videos-bucket/sample/Sintel.mp4',
+];
+
 // Sample video titles matching the thumbnails
 const videoTitles = [
   'Aerial City Skyline at Golden Hour',
@@ -90,7 +102,7 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
       orientation: (['Landscape', 'Portrait', 'Square'] as const)[id % 3],
       trending: id % 7 === 0,
       image: thumbnails[thumbnailIndex],
-      videoUrl: `/videos/sample-video-${id}.mp4`,
+      videoUrl: sampleVideoUrls[thumbnailIndex],
       category: videoCategories[(id - 1) % videoCategories.length],
       resolution: videoResolutions[(id - 1) % videoResolutions.length],
     });
