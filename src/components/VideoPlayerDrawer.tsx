@@ -62,6 +62,27 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
       };
     }
   }, [startTime, video?.videoUrl]);
+
+  const togglePlayPause = () => {
+    if (videoRef.current) {
+      if (videoRef.current.paused) {
+        videoRef.current.play();
+      } else {
+        videoRef.current.pause();
+      }
+    }
+  };
+
+  // Keyboard shortcuts for video player - MUST be called before early return
+  useKeyboardShortcuts({
+    onEscape: () => {
+      if (open) {
+        onOpenChange(false);
+      }
+    },
+    onSpace: togglePlayPause,
+    enabled: open && !!video,
+  });
   
   if (!video) return null;
 
@@ -98,27 +119,6 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
     setSaturation(100);
     toast.success('Filters reset to default');
   };
-
-  const togglePlayPause = () => {
-    if (videoRef.current) {
-      if (videoRef.current.paused) {
-        videoRef.current.play();
-      } else {
-        videoRef.current.pause();
-      }
-    }
-  };
-
-  // Keyboard shortcuts for video player
-  useKeyboardShortcuts({
-    onEscape: () => {
-      if (open) {
-        onOpenChange(false);
-      }
-    },
-    onSpace: togglePlayPause,
-    enabled: open,
-  });
 
   const videoStyle = {
     filter: `brightness(${brightness}%) contrast(${contrast}%) saturate(${saturation}%)`
