@@ -13,7 +13,7 @@ import { ShareButton } from '@/components/ShareButton';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, Search, X } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, List, Columns3, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useVideoFilters } from '@/hooks/useVideoFilters';
@@ -36,7 +36,7 @@ const sortOptions: { value: string; label: string }[] = [
   { value: 'price-high', label: 'Price: High to Low' },
 ];
 
-type ViewMode = 'masonry' | 'grid' | 'list';
+type ViewMode = 'masonry' | 'list';
 
 const Index = () => {
   // State
@@ -231,15 +231,6 @@ const Index = () => {
                 <Columns3 className="w-4 h-4" />
               </Button>
               <Button
-                variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                size="sm"
-                onClick={() => setViewMode('grid')}
-                className="h-8 px-3 transition-all duration-200"
-                title="Grid View"
-              >
-                <LayoutGrid className="w-4 h-4" />
-              </Button>
-              <Button
                 variant={viewMode === 'list' ? 'default' : 'ghost'}
                 size="sm"
                 onClick={() => setViewMode('list')}
@@ -335,44 +326,7 @@ const Index = () => {
         {/* Masonry Layout */}
         {viewMode === 'masonry' && (
           <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 [column-fill:balance]">
-            {filteredVideos.map((video, index) => (
-              <div 
-                key={video.id}
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <VideoCard
-                  video={video}
-                  onPlay={handlePlayVideo}
-                  onClick={handleVideoClick}
-                />
-              </div>
-            ))}
-            {loading && Array.from({ length: 4 }).map((_, i) => (
-              <VideoCardSkeleton key={`skeleton-masonry-${i}`} />
-            ))}
-          </div>
-        )}
-        
-        {/* Grid Layout */}
-        {viewMode === 'grid' && (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5">
-            {filteredVideos.map((video, index) => (
-              <div 
-                key={video.id} 
-                className="animate-fade-in"
-                style={{ animationDelay: `${index * 0.05}s` }}
-              >
-                <VideoCard
-                  video={video}
-                  onPlay={handlePlayVideo}
-                  onClick={handleVideoClick}
-                />
-              </div>
-            ))}
-            {loading && Array.from({ length: 4 }).map((_, i) => (
-              <VideoCardSkeleton key={`skeleton-grid-${i}`} />
-            ))}
+...
           </div>
         )}
         
