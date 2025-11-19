@@ -9,7 +9,7 @@ All colors MUST be HSL.
 @layer base {
   :root {
     /* Cream/White Light Background */
-    --background: 40 20% 97%;
+    --background: 0 0% 100%;
     --foreground: 0 0% 10%;
 
     /* Pure White Cards */
@@ -19,21 +19,21 @@ All colors MUST be HSL.
     --popover: 0 0% 100%;
     --popover-foreground: 0 0% 10%;
 
-    /* Charcoal Black Primary */
-    --primary: 0 0% 10%;
-    --primary-foreground: 40 20% 97%;
+    /* Blue Primary for Auth */
+    --primary: 217 91% 60%;
+    --primary-foreground: 0 0% 100%;
 
     /* Light Gray Secondary */
     --secondary: 0 0% 95%;
     --secondary-foreground: 0 0% 20%;
 
     /* Medium Gray Muted */
-    --muted: 0 0% 92%;
+    --muted: 0 0% 96%;
     --muted-foreground: 0 0% 45%;
 
-    /* Dark Gray Accent */
-    --accent: 0 0% 25%;
-    --accent-foreground: 0 0% 98%;
+    /* Purple Accent */
+    --accent: 262 83% 58%;
+    --accent-foreground: 0 0% 100%;
 
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
@@ -43,17 +43,23 @@ All colors MUST be HSL.
     
     --discount: 45 93% 47%;
     --discount-foreground: 45 100% 95%;
+    
+    /* Green for Sign In */
+    --success: 142 76% 36%;
+    --success-foreground: 0 0% 100%;
 
     /* Light Borders */
-    --border: 0 0% 88%;
+    --border: 0 0% 90%;
     --input: 0 0% 88%;
-    --ring: 0 0% 20%;
+    --ring: 217 91% 60%;
 
-    --radius: 0.5rem;
+    --radius: 0.75rem;
     
     --transition-smooth: all 0.25s cubic-bezier(0.2, 0.9, 0.2, 1);
     --shadow-card: 0 2px 8px rgb(0 0 0 / 0.08), 0 1px 3px rgb(0 0 0 / 0.06);
     --shadow-card-hover: 0 8px 24px rgba(0, 0, 0, 0.12);
+    --shadow-auth: 0 4px 24px rgba(0, 0, 0, 0.06);
+    --gradient-auth: linear-gradient(135deg, hsl(217 91% 60%), hsl(262 83% 58%));
 
     --sidebar-background: 0 0% 98%;
     --sidebar-foreground: 0 0% 20%;
