@@ -42,7 +42,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     email: '',
     phone: '',
     dateOfBirth: '',
-    address: '',
     pincode: '',
   });
   const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
@@ -111,7 +110,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
           email: data.email || '',
           phone: data.phone || '',
           dateOfBirth: data.date_of_birth || '',
-          address: data.address || '',
           pincode: data.pincode || '',
         });
         setAvatarUrl(data.avatar_url);
@@ -254,7 +252,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
           email: validatedData.email,
           phone: validatedData.phone,
           date_of_birth: validatedData.dateOfBirth,
-          address: validatedData.address,
           pincode: validatedData.pincode,
         })
         .eq('id', user.id);
@@ -497,20 +494,6 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address">Address</Label>
-                    <Input
-                      id="address"
-                      name="address"
-                      value={formData.address}
-                      onChange={handleChange}
-                      placeholder="123 Main St, City, Country"
-                    />
-                    {errors.address && (
-                      <p className="text-sm text-destructive">{errors.address}</p>
-                    )}
-                  </div>
-
-                  <div className="space-y-2">
                     <Label htmlFor="country">Country</Label>
                     <Select value={selectedCountry} onValueChange={(value) => {
                       setSelectedCountry(value);
@@ -569,18 +552,10 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     {locationData && !locationLoading && !locationError && (
                       <div className="text-xs text-muted-foreground space-y-1 p-2 bg-muted/30 rounded-md">
                         <p className="flex items-center gap-1">
-                          <span className="font-medium">City:</span> {locationData.city}
-                        </p>
-                        {locationData.district && (
-                          <p className="flex items-center gap-1">
-                            <span className="font-medium">District:</span> {locationData.district}
-                          </p>
-                        )}
-                        <p className="flex items-center gap-1">
-                          <span className="font-medium">State:</span> {locationData.state}
+                          {locationData.city}{locationData.district && `, ${locationData.district}`}
                         </p>
                         <p className="flex items-center gap-1">
-                          <span className="font-medium">Country:</span> {locationData.country}
+                          {locationData.state}, {locationData.country}
                         </p>
                       </div>
                     )}
