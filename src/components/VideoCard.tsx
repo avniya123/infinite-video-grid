@@ -117,17 +117,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           </Badge>
         )}
 
-        {/* Resolution Badge */}
-        <div className="absolute top-12 right-3 z-10">
-          <Badge className={`font-semibold text-xs px-2 py-1 shadow-lg ${
-            video.resolution === '8K' ? 'bg-purple-600 text-white' :
-            video.resolution === '4K' ? 'bg-blue-600 text-white' :
-            'bg-green-600 text-white'
-          }`}>
-            {video.resolution}
-          </Badge>
-        </div>
-
         {/* Price Badge */}
         <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
           ${video.price}
