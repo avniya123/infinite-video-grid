@@ -13,6 +13,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AuthDrawer } from '@/components/AuthDrawer';
+import ProfileDrawer from '@/components/ProfileDrawer';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -21,6 +22,7 @@ export const Header = () => {
   const navigate = useNavigate();
   const [profileImage, setProfileImage] = useState<string>('/placeholder.svg');
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -150,7 +152,7 @@ export const Header = () => {
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem onClick={() => navigate('/profile')}>
+                    <DropdownMenuItem onClick={() => setProfileDrawerOpen(true)}>
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
@@ -179,6 +181,7 @@ export const Header = () => {
       </header>
 
       <AuthDrawer open={authDrawerOpen} onOpenChange={setAuthDrawerOpen} />
+      <ProfileDrawer open={profileDrawerOpen} onOpenChange={setProfileDrawerOpen} />
     </>
   );
 };
