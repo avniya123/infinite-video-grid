@@ -10,6 +10,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
 import { useState, useRef, useEffect } from "react";
 import { Progress } from "@/components/ui/progress";
+import { ProgressiveImage } from "@/components/ProgressiveImage";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
@@ -318,15 +319,15 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                     }`}
                     onClick={() => handlePlayVariation(variation)}
                   >
-                  {/* Thumbnail */}
+                  {/* Thumbnail with Progressive Loading */}
                   <div className="w-20 h-20 rounded-md overflow-hidden bg-muted flex-shrink-0 relative group">
-                    <img
+                    <ProgressiveImage
                       src={variation.thumbnail_url || video.image}
                       alt={variation.title}
-                      className="w-full h-full object-cover"
+                      className="w-full h-full"
                     />
                     {!variation.thumbnail_url && (
-                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute inset-0 bg-black/60 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity z-10">
                         <GenerateThumbnailButton
                           variationId={variation.id}
                           videoTitle={video.title}

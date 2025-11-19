@@ -8,6 +8,7 @@ import { ShareButton } from '@/components/ShareButton';
 import { VariationsDrawer } from '@/components/VariationsDrawer';
 import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+import { ProgressiveImage } from '@/components/ProgressiveImage';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -156,14 +157,20 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Image */}
-          <img
-            src={video.image}
-            alt={video.title}
-            className={`w-full h-full object-cover transition-all duration-500 ease-out ${imageLoaded && !showVideo ? 'opacity-100 scale-100' : 'opacity-0 scale-105'}`}
-            onLoad={() => setImageLoaded(true)}
-            loading="lazy"
-          />
+          {/* Progressive Image with Blur-up */}
+          {isInView && (
+            <ProgressiveImage
+              src={video.image}
+              alt={video.title}
+              className={`w-full h-full transition-all duration-500 ease-out ${showVideo ? 'opacity-0 scale-95' : 'opacity-100 scale-100'}`}
+              onLoad={() => setImageLoaded(true)}
+            />
+          )}
+          
+          {/* Placeholder before in view */}
+          {!isInView && (
+            <div className="absolute inset-0 bg-muted/40 animate-pulse" />
+          )}
 
           {/* Video Preview on Hover - Only load when in view */}
           {isInView && (
@@ -192,11 +199,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-20 transition-opacity duration-300">
               <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
             </div>
-          )}
-          
-          {/* Loading placeholder */}
-          {!imageLoaded && !showVideo && (
-            <div className="absolute inset-0 bg-muted animate-pulse" />
           )}
 
           {/* Trending Badge */}

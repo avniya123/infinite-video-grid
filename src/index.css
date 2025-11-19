@@ -221,4 +221,13 @@ All colors MUST be HSL.
   .smooth-transition {
     @apply transition-all duration-300 ease-out;
   }
+  
+  /* Image Loading States */
+  .image-blur-up {
+    @apply scale-110 blur-2xl opacity-60 transition-all duration-700;
+  }
+  
+  .image-loaded {
+    @apply scale-100 blur-0 opacity-100 transition-all duration-700;
+  }
 }
