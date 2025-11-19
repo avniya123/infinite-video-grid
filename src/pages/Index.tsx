@@ -64,6 +64,7 @@ const Index = () => {
     selectedAspectRatios,
     selectedPriceRanges,
     selectedSubcategory,
+    selectedMainCategory,
     searchQuery,
     sortBy,
     filteredVideos,
@@ -75,6 +76,7 @@ const Index = () => {
     handleAspectRatioToggle,
     handlePriceRangeToggle,
     handleSubcategorySelect,
+    handleMainCategorySelect,
     handleSelectAllCategories,
     handleClearCategories,
     handleSelectAllDurations,
@@ -195,7 +197,9 @@ const Index = () => {
       {/* Header */}
       <Header 
         selectedSubcategory={selectedSubcategory}
+        selectedMainCategory={selectedMainCategory}
         onSubcategorySelect={handleSubcategorySelect}
+        onMainCategorySelect={handleMainCategorySelect}
       />
       
       {/* Main Content */}

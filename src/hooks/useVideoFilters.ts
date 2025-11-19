@@ -39,6 +39,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
   const [selectedAspectRatios, setSelectedAspectRatios] = useState<AspectRatioFilter[]>([]);
   const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRangeFilter[]>([]);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
+  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [sortBy, setSortBy] = useState<SortOption>('newest');
 
@@ -69,6 +70,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
   const filteredVideos = useMemo(() => {
     return videos
       .filter(video => selectedCategories.length === 0 || selectedCategories.includes(video.category))
+      .filter(video => !selectedMainCategory || video.mainCategory === selectedMainCategory)
       .filter(filterByDuration)
       .filter(video => {
         if (selectedAspectRatios.length === 0) return true;
@@ -92,7 +94,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
       })
       .filter(video => {
         if (!selectedSubcategory) return true;
-        return video.title.toLowerCase().includes(selectedSubcategory.toLowerCase());
+        return video.subcategory === selectedSubcategory;
       })
       .sort((a, b) => {
         switch (sortBy) {
@@ -107,7 +109,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
             return b.id - a.id;
         }
       });
-  }, [videos, selectedCategories, selectedDurations, selectedAspectRatios, selectedPriceRanges, selectedSubcategory, searchQuery, sortBy, filterByDuration]);
+  }, [videos, selectedCategories, selectedMainCategory, selectedDurations, selectedAspectRatios, selectedPriceRanges, selectedSubcategory, searchQuery, sortBy, filterByDuration]);
 
   // Toggle handlers
   const handleCategoryToggle = useCallback((category: VideoCategory) => {
@@ -136,6 +138,11 @@ export const useVideoFilters = (videos: VideoItem[]) => {
 
   const handleSubcategorySelect = useCallback((subcategory: string | null) => {
     setSelectedSubcategory(subcategory);
+  }, []);
+
+  const handleMainCategorySelect = useCallback((mainCategory: string | null) => {
+    setSelectedMainCategory(mainCategory);
+    setSelectedSubcategory(null); // Clear subcategory when main category changes
   }, []);
 
   // Select/Clear all handlers
@@ -178,6 +185,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     setSelectedAspectRatios([]);
     setSelectedPriceRanges([]);
     setSelectedSubcategory(null);
+    setSelectedMainCategory(null);
     setSearchQuery('');
     toast.success('All filters cleared');
   }, []);
@@ -187,6 +195,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     selectedAspectRatios.length > 0 || 
     selectedPriceRanges.length > 0 || 
     selectedSubcategory !== null ||
+    selectedMainCategory !== null ||
     searchQuery !== '';
 
   return {
@@ -196,6 +205,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     selectedAspectRatios,
     selectedPriceRanges,
     selectedSubcategory,
+    selectedMainCategory,
     searchQuery,
     sortBy,
     filteredVideos,
@@ -209,6 +219,7 @@ export const useVideoFilters = (videos: VideoItem[]) => {
     handleAspectRatioToggle,
     handlePriceRangeToggle,
     handleSubcategorySelect,
+    handleMainCategorySelect,
     // Bulk handlers
     handleSelectAllCategories,
     handleClearCategories,
