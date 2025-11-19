@@ -238,16 +238,16 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {/* Bottom Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
             {/* Title */}
-            <h3 className="text-sm font-semibold text-white line-clamp-2 mb-2">
+            <h3 className="text-[10px] font-semibold text-white line-clamp-2 mb-2 leading-tight">
               {video.title}
             </h3>
 
             {/* Metadata Row */}
             <div className="flex items-center gap-2 text-xs">
-              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px]">
+              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[9px]">
                 {video.orientation}
               </span>
-              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[11px] flex items-center gap-1">
+              <span className="px-2 py-0.5 bg-black/40 backdrop-blur-sm rounded text-white/90 text-[9px] flex items-center gap-1">
                 <span>⏱</span> {video.duration}
               </span>
             </div>
