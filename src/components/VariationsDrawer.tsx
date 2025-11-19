@@ -4,93 +4,56 @@ import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
 import { ShoppingCart, Edit, Share2, Play } from "lucide-react";
 import { AspectRatio } from "@/components/ui/aspect-ratio";
-import { useState } from "react";
-
-interface VideoVariation {
-  id: string;
-  thumbnail: string;
-  duration: string;
-  aspectRatio: string;
-  quality: string;
-  platforms: string[];
-}
+import { useVideoVariations } from "@/hooks/useVideoVariations";
+import { toast } from "sonner";
+import { Skeleton } from "@/components/ui/skeleton";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onPlayVariation?: (variation: { video_url?: string; thumbnail_url?: string; title: string }) => void;
 }
 
-const mockVariations: VideoVariation[] = [
-  {
-    id: "1",
-    thumbnail: "",
-    duration: "Teaser 30 SEC",
-    aspectRatio: "LandScape 16:9",
-    quality: "",
-    platforms: ["Youtube", "Facebook"]
-  },
-  {
-    id: "2",
-    thumbnail: "",
-    duration: "Teaser 10 SEC",
-    aspectRatio: "Portrait 9:16",
-    quality: "",
-    platforms: ["Reels", "Instamgram"]
-  },
-  {
-    id: "3",
-    thumbnail: "",
-    duration: "30 SEC",
-    aspectRatio: "16:9",
-    quality: "Full hd",
-    platforms: ["Youtube", "Facebook", "Instamgram"]
-  },
-  {
-    id: "4",
-    thumbnail: "",
-    duration: "30 SEC",
-    aspectRatio: "16:9",
-    quality: "Full hd",
-    platforms: ["Youtube", "Facebook", "Instamgram"]
-  },
-  {
-    id: "5",
-    thumbnail: "",
-    duration: "30 SEC",
-    aspectRatio: "Full hd",
-    quality: "16:9",
-    platforms: ["Youtube", "Facebook", "Instamgram"]
-  },
-  {
-    id: "6",
-    thumbnail: "",
-    duration: "30 SEC",
-    aspectRatio: "16:9",
-    quality: "Full hd",
-    platforms: ["Youtube", "Facebook", "Instamgram"]
-  },
-  {
-    id: "7",
-    thumbnail: "",
-    duration: "30 SEC",
-    aspectRatio: "16:9",
-    quality: "",
-    platforms: []
-  }
-];
-
-export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawerProps) => {
-  const [variations] = useState<VideoVariation[]>(mockVariations);
+export const VariationsDrawer = ({ video, open, onOpenChange, onPlayVariation }: VariationsDrawerProps) => {
+  const { data: variations, isLoading } = useVideoVariations(video?.id || 0);
 
   if (!video) return null;
 
-  const handleShare = (variationId: string) => {
-    console.log("Share variation:", variationId);
+  const handleShare = async (variation: any) => {
+    const shareData = {
+      title: `${video.title} - ${variation.title}`,
+      text: `Check out this video variation: ${variation.title}`,
+      url: window.location.href,
+    };
+
+    try {
+      if (navigator.share) {
+        await navigator.share(shareData);
+        toast.success("Shared successfully!");
+      } else {
+        // Fallback: Copy to clipboard
+        await navigator.clipboard.writeText(shareData.url);
+        toast.success("Link copied to clipboard!");
+      }
+    } catch (error) {
+      if (error instanceof Error && error.name !== 'AbortError') {
+        toast.error("Failed to share");
+      }
+    }
   };
 
-  const handlePlay = (variationId: string) => {
-    console.log("Play variation:", variationId);
+  const handlePlay = (variation: any) => {
+    if (onPlayVariation) {
+      onPlayVariation({
+        video_url: variation.video_url || video.videoUrl,
+        thumbnail_url: variation.thumbnail_url || video.image,
+        title: `${video.title} - ${variation.title}`
+      });
+      onOpenChange(false);
+    } else {
+      toast.info("Playing " + variation.title);
+    }
   };
 
   return (
@@ -125,10 +88,10 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
 
             <div className="flex items-center gap-2 flex-wrap">
               <Badge variant="secondary" className="text-xs">
-                Teaser 30 SEC
+                {video.duration}
               </Badge>
               <Badge variant="outline" className="text-xs">
-                Standred
+                {video.resolution}
               </Badge>
               <div className="flex items-center gap-1 text-xs text-muted-foreground">
                 <span className="line-through">MRP: ₹ {video.mrp}</span>
@@ -151,65 +114,87 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
 
           {/* Variations List */}
           <div className="space-y-3 pb-6">
-            {variations.map((variation) => (
-              <div
-                key={variation.id}
-                className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
-              >
-                {/* Thumbnail */}
-                <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
-                  <img
-                    src={video.image}
-                    alt={variation.duration}
-                    className="w-full h-full object-cover"
-                  />
-                </div>
-
-                {/* Variation Info */}
-                <div className="flex-1 min-w-0 space-y-1">
-                  <div className="flex items-center gap-2 flex-wrap text-sm">
-                    <span className="font-medium">{variation.duration}</span>
-                    {variation.aspectRatio && (
-                      <span className="text-muted-foreground">{variation.aspectRatio}</span>
-                    )}
-                    {variation.quality && (
-                      <span className="text-muted-foreground">{variation.quality}</span>
-                    )}
+            {isLoading ? (
+              // Loading skeleton
+              Array.from({ length: 3 }).map((_, i) => (
+                <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
+                  <Skeleton className="w-16 h-16 rounded-md" />
+                  <div className="flex-1 space-y-2">
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-24" />
                   </div>
-                  <div className="flex items-center gap-2 flex-wrap">
-                    {variation.platforms.map((platform) => (
-                      <Badge
-                        key={platform}
-                        variant="secondary"
-                        className="text-xs px-2 py-0"
-                      >
-                        {platform}
-                      </Badge>
-                    ))}
+                  <div className="flex gap-2">
+                    <Skeleton className="h-8 w-8 rounded-md" />
+                    <Skeleton className="h-8 w-8 rounded-md" />
                   </div>
                 </div>
+              ))
+            ) : variations && variations.length > 0 ? (
+              variations.map((variation) => (
+                <div
+                  key={variation.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                >
+                  {/* Thumbnail */}
+                  <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0">
+                    <img
+                      src={variation.thumbnail_url || video.image}
+                      alt={variation.title}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
 
-                {/* Action Buttons */}
-                <div className="flex items-center gap-2 flex-shrink-0">
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={() => handleShare(variation.id)}
-                  >
-                    <Share2 className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    size="icon"
-                    variant="ghost"
-                    className="h-8 w-8"
-                    onClick={() => handlePlay(variation.id)}
-                  >
-                    <Play className="h-4 w-4" />
-                  </Button>
+                  {/* Variation Info */}
+                  <div className="flex-1 min-w-0 space-y-1">
+                    <div className="flex items-center gap-2 flex-wrap text-sm">
+                      <span className="font-medium">{variation.title}</span>
+                      <span className="text-muted-foreground">{variation.duration}</span>
+                      {variation.aspect_ratio && (
+                        <span className="text-muted-foreground">{variation.aspect_ratio}</span>
+                      )}
+                      {variation.quality && (
+                        <span className="text-muted-foreground">{variation.quality}</span>
+                      )}
+                    </div>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      {variation.platforms.map((platform) => (
+                        <Badge
+                          key={platform}
+                          variant="secondary"
+                          className="text-xs px-2 py-0"
+                        >
+                          {platform}
+                        </Badge>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2 flex-shrink-0">
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={() => handleShare(variation)}
+                    >
+                      <Share2 className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      size="icon"
+                      variant="ghost"
+                      className="h-8 w-8"
+                      onClick={() => handlePlay(variation)}
+                    >
+                      <Play className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                No variations available for this video
               </div>
-            ))}
+            )}
           </div>
         </div>
       </SheetContent>
