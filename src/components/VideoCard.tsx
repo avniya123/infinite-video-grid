@@ -11,6 +11,7 @@ import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
 import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -238,11 +239,22 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
           {/* Bottom Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 py-4">
-            {/* Title */}
-            <h3 className="text-xs font-bold text-white line-clamp-2 mb-1 leading-relaxed">
-              {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '').substring(0, 30)}
-              {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '').length > 30 ? '...' : ''}
-            </h3>
+            {/* Title with Tooltip */}
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <h3 className="text-xs font-bold text-white line-clamp-2 mb-1 leading-relaxed cursor-help">
+                    {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '').substring(0, 30)}
+                    {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '').length > 30 ? '...' : ''}
+                  </h3>
+                </TooltipTrigger>
+                <TooltipContent className="max-w-xs bg-gray-900 text-white border-gray-700">
+                  <p className="text-sm">{video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}</p>
+                  <p className="text-xs text-gray-400 mt-1">Stock Video #{video.id}</p>
+                  <p className="text-xs text-gray-400">Price: ₹{video.price}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             {/* Caption */}
             <p className="text-[9px] text-gray-400 font-medium">
               Stock Video #{video.id}
@@ -252,8 +264,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {/* Variations Button */}
           <Button
             size="sm"
-            variant="outline"
-            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-white/95 backdrop-blur-sm hover:bg-gray-100 text-gray-800 border-gray-200"
+            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900 hover:bg-gray-800 text-white border-0"
             onClick={(e) => {
               e.stopPropagation();
               setVariationsOpen(true);

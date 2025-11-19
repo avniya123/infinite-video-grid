@@ -33,18 +33,17 @@ export const FilterChips = ({
 }: FilterChipsProps) => {
   return (
     <div className="flex flex-wrap gap-2 items-center animate-fade-in">
-      <span className="text-sm text-muted-foreground font-medium">Filters:</span>
+      <span className="text-sm text-gray-600 font-medium">Filters:</span>
       
       {/* Main Category Chip */}
       {selectedMainCategory && (
         <Badge 
-          variant="secondary" 
-          className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
+          className="pl-3 pr-2 py-1.5 gap-1.5 bg-gray-200 text-gray-800 hover:bg-gray-300 border-0 transition-all duration-200 hover:scale-105"
         >
           <span className="text-xs font-medium">{selectedMainCategory}</span>
           <button
             onClick={() => onMainCategorySelect(null)}
-            className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+            className="ml-1 hover:bg-white/60 rounded-full p-0.5 transition-all duration-200"
             aria-label={`Remove ${selectedMainCategory} filter`}
           >
             <X className="w-3 h-3" />
@@ -55,13 +54,12 @@ export const FilterChips = ({
       {/* Subcategory Chip */}
       {selectedSubcategory && (
         <Badge 
-          variant="secondary" 
-          className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
+          className="pl-3 pr-2 py-1.5 gap-1.5 bg-gray-200 text-gray-800 hover:bg-gray-300 border-0 transition-all duration-200 hover:scale-105"
         >
           <span className="text-xs font-medium">{selectedSubcategory}</span>
           <button
             onClick={() => onSubcategorySelect(null)}
-            className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+            className="ml-1 hover:bg-white/60 rounded-full p-0.5 transition-all duration-200"
             aria-label={`Remove ${selectedSubcategory} filter`}
           >
             <X className="w-3 h-3" />
@@ -73,13 +71,12 @@ export const FilterChips = ({
       {selectedDurations.map((duration) => (
         <Badge 
           key={duration} 
-          variant="secondary" 
-          className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
+          className="pl-3 pr-2 py-1.5 gap-1.5 bg-gray-200 text-gray-800 hover:bg-gray-300 border-0 transition-all duration-200 hover:scale-105"
         >
           <span className="text-xs font-medium">{durationFilters.find(d => d.value === duration)?.label}</span>
           <button
             onClick={() => onDurationToggle(duration)}
-            className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+            className="ml-1 hover:bg-white/60 rounded-full p-0.5 transition-all duration-200"
             aria-label={`Remove ${duration} filter`}
           >
             <X className="w-3 h-3" />
@@ -91,13 +88,12 @@ export const FilterChips = ({
       {selectedAspectRatios.map((ratio) => (
         <Badge 
           key={ratio} 
-          variant="secondary" 
-          className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
+          className="pl-3 pr-2 py-1.5 gap-1.5 bg-gray-200 text-gray-800 hover:bg-gray-300 border-0 transition-all duration-200 hover:scale-105"
         >
           <span className="text-xs font-medium">{aspectRatioFilters.find(r => r.value === ratio)?.label}</span>
           <button
             onClick={() => onAspectRatioToggle(ratio)}
-            className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+            className="ml-1 hover:bg-white/60 rounded-full p-0.5 transition-all duration-200"
             aria-label={`Remove ${ratio} filter`}
           >
             <X className="w-3 h-3" />
@@ -109,13 +105,12 @@ export const FilterChips = ({
       {selectedPriceRanges.map((price) => (
         <Badge 
           key={price} 
-          variant="secondary" 
-          className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
+          className="pl-3 pr-2 py-1.5 gap-1.5 bg-gray-200 text-gray-800 hover:bg-gray-300 border-0 transition-all duration-200 hover:scale-105"
         >
           <span className="text-xs font-medium">{price}</span>
           <button
             onClick={() => onPriceRangeToggle(price)}
-            className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+            className="ml-1 hover:bg-white/60 rounded-full p-0.5 transition-all duration-200"
             aria-label={`Remove ${price} filter`}
           >
             <X className="w-3 h-3" />
@@ -126,13 +121,12 @@ export const FilterChips = ({
       {/* Search Query Chip */}
       {searchQuery && (
         <Badge 
-          variant="secondary" 
-          className="pl-3 pr-2 py-1.5 gap-1.5 hover:bg-secondary/80 transition-all duration-200 hover:scale-105"
+          className="pl-3 pr-2 py-1.5 gap-1.5 bg-gray-200 text-gray-800 hover:bg-gray-300 border-0 transition-all duration-200 hover:scale-105"
         >
           <span className="text-xs font-medium">Search: "{searchQuery}"</span>
           <button
             onClick={onClearSearch}
-            className="ml-1 hover:bg-background/50 rounded-full p-0.5 transition-all duration-200"
+            className="ml-1 hover:bg-white/60 rounded-full p-0.5 transition-all duration-200"
             aria-label="Clear search"
           >
             <X className="w-3 h-3" />
