@@ -1,7 +1,8 @@
 import { useState, useRef } from 'react';
-import { Upload, Monitor, Heart, Bell, User } from 'lucide-react';
+import { Upload, Monitor, Heart, User } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
+import { NotificationsPanel } from '@/components/NotificationsPanel';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -111,10 +112,8 @@ export const Header = () => {
               <Heart className="w-5 h-5 text-muted-foreground" />
             </Button>
             
-            <Button variant="ghost" size="icon" className="relative">
-              <Bell className="w-5 h-5 text-muted-foreground" />
-              <span className="absolute top-1 right-1 w-2 h-2 bg-red-500 rounded-full" />
-            </Button>
+            {/* Notifications Panel */}
+            <NotificationsPanel />
 
             {/* Profile Avatar */}
             <DropdownMenu>
