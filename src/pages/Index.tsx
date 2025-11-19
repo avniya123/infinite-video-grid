@@ -16,6 +16,7 @@ import { toast } from 'sonner';
 import { Leaf, Briefcase, Building2, Users, List, Columns3, Search, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { useVideoFilters } from '@/hooks/useVideoFilters';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
@@ -49,6 +50,7 @@ const Index = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [videoStartTime, setVideoStartTime] = useState(0);
+  const [columnCount, setColumnCount] = useState(3);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Use custom filter hook
@@ -240,6 +242,21 @@ const Index = () => {
                 <List className="w-4 h-4" />
               </Button>
             </div>
+
+            {/* Column Count Slider (only visible in masonry view) */}
+            {viewMode === 'masonry' && (
+              <div className="flex items-center gap-3 bg-muted px-4 py-2 rounded-lg min-w-[180px]">
+                <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Columns: {columnCount}</span>
+                <Slider
+                  value={[columnCount]}
+                  onValueChange={(value) => setColumnCount(value[0])}
+                  min={2}
+                  max={6}
+                  step={1}
+                  className="w-24"
+                />
+              </div>
+            )}
           </div>
         </div>
 
@@ -325,7 +342,10 @@ const Index = () => {
       <main className="max-w-7xl mx-auto px-4 pb-8">
         {/* Masonry Layout */}
         {viewMode === 'masonry' && (
-          <div className="columns-1 sm:columns-2 lg:columns-3 xl:columns-4 gap-5 [column-fill:balance]">
+          <div 
+            className="gap-5 [column-fill:balance]"
+            style={{ columnCount }}
+          >
             {filteredVideos.map((video, index) => (
               <div 
                 key={video.id}
