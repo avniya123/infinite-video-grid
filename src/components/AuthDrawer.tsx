@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Chrome, AlertCircle, Facebook, Twitter, Github } from 'lucide-react';
+import { X, Chrome, AlertCircle, Facebook, Twitter, Github, Eye, EyeOff } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -52,6 +52,10 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
   // Phone login state
   const [phoneNumber, setPhoneNumber] = useState('');
   const [phoneOTP, setPhoneOTP] = useState('');
+
+  // Password visibility state
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleLoginChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -547,16 +551,30 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
                 <div className="space-y-2">
                   <Label htmlFor="signup-password">Password</Label>
-                  <Input
-                    id="signup-password"
-                    name="password"
-                    type="password"
-                    placeholder="Create a strong password"
-                    value={signupData.password}
-                    onChange={handleSignupChange}
-                    className="h-11 rounded-xl"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="signup-password"
+                      name="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Create a strong password"
+                      value={signupData.password}
+                      onChange={handleSignupChange}
+                      className="h-11 rounded-xl pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={showPassword ? "Hide password" : "Show password"}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                   <p className="text-xs text-muted-foreground">
                     Must be at least 8 characters with uppercase, lowercase, and numbers
                   </p>
@@ -564,16 +582,30 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
                 <div className="space-y-2">
                   <Label htmlFor="confirmPassword">Confirm Password</Label>
-                  <Input
-                    id="confirmPassword"
-                    name="confirmPassword"
-                    type="password"
-                    placeholder="Re-enter your password"
-                    value={signupData.confirmPassword}
-                    onChange={handleSignupChange}
-                    className="h-11 rounded-xl"
-                    required
-                  />
+                  <div className="relative">
+                    <Input
+                      id="confirmPassword"
+                      name="confirmPassword"
+                      type={showConfirmPassword ? "text" : "password"}
+                      placeholder="Re-enter your password"
+                      value={signupData.confirmPassword}
+                      onChange={handleSignupChange}
+                      className="h-11 rounded-xl pr-10"
+                      required
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                      aria-label={showConfirmPassword ? "Hide password" : "Show password"}
+                    >
+                      {showConfirmPassword ? (
+                        <EyeOff className="h-5 w-5" />
+                      ) : (
+                        <Eye className="h-5 w-5" />
+                      )}
+                    </button>
+                  </div>
                 </div>
 
                 <div className="space-y-2">
