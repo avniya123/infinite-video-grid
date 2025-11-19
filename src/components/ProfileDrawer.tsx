@@ -113,6 +113,16 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
           pincode: data.pincode || '',
         });
         setAvatarUrl(data.avatar_url);
+        
+        // Load existing location data if available
+        if (data.city && data.state && data.country) {
+          setLocationData({
+            city: data.city,
+            district: data.district || undefined,
+            state: data.state,
+            country: data.country,
+          });
+        }
       }
     } catch (error: any) {
       console.error('Error loading profile:', error);
@@ -253,6 +263,10 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
           phone: validatedData.phone,
           date_of_birth: validatedData.dateOfBirth,
           pincode: validatedData.pincode,
+          city: locationData?.city || null,
+          district: locationData?.district || null,
+          state: locationData?.state || null,
+          country: locationData?.country || null,
         })
         .eq('id', user.id);
 
