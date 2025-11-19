@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Bell, Check, Download, Heart, MessageSquare, Share2, Upload, X } from 'lucide-react';
+import { Bell, Check, Download, Heart, MessageSquare, Settings, Share2, Upload, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -9,6 +9,7 @@ import {
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { cn } from '@/lib/utils';
+import { useNavigate } from 'react-router-dom';
 
 interface Notification {
   id: string;
@@ -78,6 +79,7 @@ const mockNotifications: Notification[] = [
 ];
 
 export const NotificationsPanel = () => {
+  const navigate = useNavigate();
   const [notifications, setNotifications] = useState<Notification[]>(mockNotifications);
   const [open, setOpen] = useState(false);
 
@@ -223,8 +225,8 @@ export const NotificationsPanel = () => {
         </ScrollArea>
 
         {/* Footer */}
-        {notifications.length > 0 && (
-          <div className="p-3 border-t border-border">
+        <div className="p-3 border-t border-border space-y-2">
+          {notifications.length > 0 && (
             <Button
               variant="ghost"
               className="w-full text-sm"
@@ -232,8 +234,19 @@ export const NotificationsPanel = () => {
             >
               View all notifications
             </Button>
-          </div>
-        )}
+          )}
+          <Button
+            variant="ghost"
+            className="w-full text-sm"
+            onClick={() => {
+              setOpen(false);
+              navigate('/settings/notifications');
+            }}
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            Notification Settings
+          </Button>
+        </div>
       </DropdownMenuContent>
     </DropdownMenu>
   );
