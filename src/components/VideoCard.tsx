@@ -246,7 +246,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           {/* Bottom Overlay */}
           <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 via-black/50 to-transparent px-3 py-3">
             {/* Title */}
-            <h3 className="text-[10px] font-semibold text-white line-clamp-2 mb-2 leading-tight">
+            <h3 className="text-[11px] font-semibold text-white line-clamp-2 mb-2 leading-relaxed">
               {video.title}
             </h3>
 
