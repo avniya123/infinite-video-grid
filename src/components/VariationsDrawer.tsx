@@ -247,23 +247,25 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
           {/* Video Info */}
           <div className="space-y-3">
             <div className="flex items-start justify-between gap-4">
-              <h3 className="text-lg font-semibold">{video.title}</h3>
-              <div className="text-right">
-                <div className="text-2xl font-bold text-primary">₹ {video.price}</div>
+              <h3 className="text-sm font-medium text-foreground">{video.title}</h3>
+              <div className="text-right shrink-0">
+                <div className="flex items-baseline gap-2">
+                  <div className="text-lg font-bold text-foreground">₹ {video.price}</div>
+                </div>
+                <div className="flex items-center justify-end gap-1.5 mt-0.5">
+                  <span className="text-xs text-muted-foreground line-through">MRP: ₹ {video.mrp}</span>
+                  <span className="text-xs text-destructive font-medium">( {video.discount} Off )</span>
+                </div>
               </div>
             </div>
 
             <div className="flex items-center gap-2 flex-wrap">
-              <Badge variant="secondary" className="text-xs">
+              <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
                 {video.duration}
               </Badge>
-              <Badge variant="outline" className="text-xs">
+              <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
                 {video.resolution}
               </Badge>
-              <div className="flex items-center gap-1 text-xs text-muted-foreground">
-                <span className="line-through">MRP: ₹ {video.mrp}</span>
-                <span className="text-destructive font-medium">( {video.discount} Off )</span>
-              </div>
             </div>
 
             {/* Action Buttons */}
