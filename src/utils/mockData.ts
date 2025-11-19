@@ -1,26 +1,41 @@
 import { VideoItem } from '@/types/video';
 
+// Import real thumbnail images
+import video1 from '@/assets/thumbnails/video-1.jpg';
+import video2 from '@/assets/thumbnails/video-2.jpg';
+import video3 from '@/assets/thumbnails/video-3.jpg';
+import video4 from '@/assets/thumbnails/video-4.jpg';
+import video5 from '@/assets/thumbnails/video-5.jpg';
+import video6 from '@/assets/thumbnails/video-6.jpg';
+import video7 from '@/assets/thumbnails/video-7.jpg';
+import video8 from '@/assets/thumbnails/video-8.jpg';
+
 const TOTAL_MOCK_ITEMS = 32;
 
-function generatePlaceholderImage(id: number): string {
-  const heights = [300, 400, 350, 450, 380, 420, 340, 460];
-  const h = heights[id % heights.length];
-  const colors = ['#fef3c7', '#ddd6fe', '#fecaca', '#bfdbfe', '#d1fae5', '#fed7aa'];
-  const color = colors[id % colors.length];
-  
-  const svg = `<svg xmlns="http://www.w3.org/2000/svg" width="600" height="${h}">
-    <defs>
-      <linearGradient id="grad${id}" x1="0%" y1="0%" x2="100%" y2="100%">
-        <stop offset="0%" style="stop-color:${color};stop-opacity:1" />
-        <stop offset="100%" style="stop-color:${color};stop-opacity:0.7" />
-      </linearGradient>
-    </defs>
-    <rect width="100%" height="100%" fill="url(#grad${id})"/>
-    <text x="50%" y="50%" alignment-baseline="middle" text-anchor="middle" font-family="Arial" font-size="24" fill="#374151" font-weight="600">Video ${id}</text>
-  </svg>`;
-  
-  return 'data:image/svg+xml;utf8,' + encodeURIComponent(svg);
-}
+// Array of real thumbnail images
+const thumbnails = [
+  video1, video2, video3, video4, video5, video6, video7, video8
+];
+
+// Sample video titles matching the thumbnails
+const videoTitles = [
+  'Aerial City Skyline at Golden Hour',
+  'Professional Business Woman Working in Office',
+  'Ocean Waves on Tropical Beach at Sunrise',
+  'Colorful Hot Air Balloons Floating at Dawn',
+  'Majestic Mountain Landscape with Snow Peaks',
+  'Hands Typing on Laptop in Cozy Workspace',
+  'Urban Traffic Light Trails at Night',
+  'Fresh Organic Vegetables and Fruits Display',
+  'Modern Architecture and Glass Buildings',
+  'Nature Wildlife in Natural Habitat',
+  'Fitness Training and Exercise Routine',
+  'Food Preparation in Professional Kitchen',
+  'Technology and Digital Innovation',
+  'Travel Adventure and Exploration',
+  'Family Lifestyle and Activities',
+  'Creative Art and Design Process',
+];
 
 export function generateMockVideos(page: number, pageSize: number): { items: VideoItem[]; total: number } {
   const start = (page - 1) * pageSize;
@@ -37,17 +52,19 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
     const basePrice = 99 + (id * 3);
     const baseMrp = 149 + (id * 3);
     const discountPercent = Math.floor((1 - (basePrice / baseMrp)) * 100);
+    const thumbnailIndex = (id - 1) % thumbnails.length;
     
     items.push({
       id,
-      title: `Professional Video Clip #${id} - High Quality Stock Footage`,
-      duration: `${String(Math.floor(id % 5) + 1).padStart(2, '0')}:${String((id * 7) % 60).padStart(2, '0')}`,
+      title: videoTitles[(id - 1) % videoTitles.length] + ` - Stock Video #${id}`,
+      duration: `${String(Math.floor((id % 5) + 1)).padStart(2, '0')}:${String((id * 7) % 60).padStart(2, '0')}`,
       price: basePrice.toFixed(2),
       mrp: baseMrp.toFixed(2),
       discount: `${discountPercent}% OFF`,
       orientation: (['Landscape', 'Portrait', 'Square'] as const)[id % 3],
       trending: id % 7 === 0,
-      image: generatePlaceholderImage(id),
+      image: thumbnails[thumbnailIndex],
+      videoUrl: `/videos/sample-video-${id}.mp4`,
     });
   }
   
