@@ -15,6 +15,7 @@ import {
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { AuthDrawer } from '@/components/AuthDrawer';
 import ProfileDrawer from '@/components/ProfileDrawer';
+import { SubcategorySlider } from '@/components/SubcategorySlider';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -41,7 +42,7 @@ export const Header = () => {
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   useEffect(() => {
     // Check current session
@@ -67,12 +68,8 @@ export const Header = () => {
     }
   };
 
-  const toggleCategory = (category: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
+  const selectCategory = (category: string) => {
+    setSelectedCategory(category);
   };
 
   return (
@@ -114,11 +111,11 @@ export const Header = () => {
                       {personalCategories.map((category) => (
                         <DropdownMenuItem
                           key={category}
-                          onClick={() => toggleCategory(category)}
+                          onClick={() => selectCategory(category)}
                           className="cursor-pointer flex items-center justify-between px-2 py-2 hover:bg-accent/50 rounded"
                         >
                           <span className="text-sm">{category}</span>
-                          {selectedCategories.includes(category) && (
+                          {selectedCategory === category && (
                             <Check className="w-4 h-4 text-primary" />
                           )}
                         </DropdownMenuItem>
@@ -150,11 +147,11 @@ export const Header = () => {
                       {businessCategories.map((category) => (
                         <DropdownMenuItem
                           key={category}
-                          onClick={() => toggleCategory(category)}
+                          onClick={() => selectCategory(category)}
                           className="cursor-pointer flex items-center justify-between px-2 py-2 hover:bg-accent/50 rounded"
                         >
                           <span className="text-sm">{category}</span>
-                          {selectedCategories.includes(category) && (
+                          {selectedCategory === category && (
                             <Check className="w-4 h-4 text-primary" />
                           )}
                         </DropdownMenuItem>
@@ -238,6 +235,8 @@ export const Header = () => {
           </div>
         </div>
       </header>
+
+      {selectedCategory && <SubcategorySlider category={selectedCategory} />}
 
       <AuthDrawer open={authDrawerOpen} onOpenChange={setAuthDrawerOpen} />
       <ProfileDrawer open={profileDrawerOpen} onOpenChange={setProfileDrawerOpen} />
