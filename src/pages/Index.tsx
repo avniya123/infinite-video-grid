@@ -2,12 +2,11 @@ import { useEffect, useRef, useState } from 'react';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
-import { CompareDrawer } from '@/components/CompareDrawer';
 import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock, Search, ChevronDown, X, Filter } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, Clock, Search, ChevronDown, X, Filter, DollarSign, Maximize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -17,6 +16,8 @@ import { Checkbox } from '@/components/ui/checkbox';
 const PAGE_SIZE = 8;
 
 type DurationFilter = 'All' | 'Teaser' | 'Trailer' | 'Gimbel' | 'Document';
+type AspectRatioFilter = 'Landscape' | 'Portrait' | 'Square';
+type PriceRangeFilter = 'Under $50' | '$50-$100' | '$100-$200' | 'Over $200';
 
 const categories: { value: VideoCategory; label: string; icon: React.ReactNode }[] = [
   { value: 'All', label: 'All Videos', icon: null },
@@ -27,11 +28,23 @@ const categories: { value: VideoCategory; label: string; icon: React.ReactNode }
 ];
 
 const durationFilters: { value: DurationFilter; label: string; range: string }[] = [
-  { value: 'All', label: 'All Duration', range: '' },
   { value: 'Teaser', label: 'Teaser', range: '0-1 min' },
   { value: 'Trailer', label: 'Trailer', range: '1-3 min' },
   { value: 'Gimbel', label: 'Gimbel', range: '3-5 min' },
   { value: 'Document', label: 'Document', range: '5+ min' },
+];
+
+const aspectRatioFilters: { value: AspectRatioFilter; label: string }[] = [
+  { value: 'Landscape', label: 'Landscape (16:9)' },
+  { value: 'Portrait', label: 'Portrait (9:16)' },
+  { value: 'Square', label: 'Square (1:1)' },
+];
+
+const priceRangeFilters: { value: PriceRangeFilter; label: string; range: [number, number] }[] = [
+  { value: 'Under $50', label: 'Under $50', range: [0, 50] },
+  { value: '$50-$100', label: '$50 - $100', range: [50, 100] },
+  { value: '$100-$200', label: '$100 - $200', range: [100, 200] },
+  { value: 'Over $200', label: 'Over $200', range: [200, Infinity] },
 ];
 
 type ViewMode = 'masonry' | 'grid' | 'list';
@@ -46,11 +59,10 @@ const Index = () => {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [selectedCategories, setSelectedCategories] = useState<VideoCategory[]>([]);
   const [selectedDurations, setSelectedDurations] = useState<DurationFilter[]>([]);
+  const [selectedAspectRatios, setSelectedAspectRatios] = useState<AspectRatioFilter[]>([]);
+  const [selectedPriceRanges, setSelectedPriceRanges] = useState<PriceRangeFilter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
-  const [compareMode, setCompareMode] = useState(false);
-  const [selectedForCompare, setSelectedForCompare] = useState<VideoItem[]>([]);
-  const [compareDrawerOpen, setCompareDrawerOpen] = useState(false);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   const loadNextPage = async () => {
@@ -155,6 +167,44 @@ const Index = () => {
     setSelectedDurations([]);
   };
 
+  const handleAspectRatioToggle = (ratio: AspectRatioFilter) => {
+    setSelectedAspectRatios(prev => {
+      if (prev.includes(ratio)) {
+        return prev.filter(r => r !== ratio);
+      } else {
+        return [...prev, ratio];
+      }
+    });
+  };
+
+  const handleSelectAllAspectRatios = () => {
+    const allRatios = aspectRatioFilters.map(r => r.value);
+    setSelectedAspectRatios(allRatios);
+  };
+
+  const handleClearAspectRatios = () => {
+    setSelectedAspectRatios([]);
+  };
+
+  const handlePriceRangeToggle = (priceRange: PriceRangeFilter) => {
+    setSelectedPriceRanges(prev => {
+      if (prev.includes(priceRange)) {
+        return prev.filter(p => p !== priceRange);
+      } else {
+        return [...prev, priceRange];
+      }
+    });
+  };
+
+  const handleSelectAllPriceRanges = () => {
+    const allRanges = priceRangeFilters.map(p => p.value);
+    setSelectedPriceRanges(allRanges);
+  };
+
+  const handleClearPriceRanges = () => {
+    setSelectedPriceRanges([]);
+  };
+
   const parseDuration = (durationStr: string): number => {
     // Parse "MM:SS" format to total seconds
     const [minutes, seconds] = durationStr.split(':').map(Number);
@@ -185,55 +235,31 @@ const Index = () => {
   const filteredVideos = videos
     .filter(video => selectedCategories.length === 0 || selectedCategories.includes(video.category))
     .filter(filterByDuration)
+    .filter(video => selectedAspectRatios.length === 0 || selectedAspectRatios.includes(video.orientation))
+    .filter(video => {
+      if (selectedPriceRanges.length === 0) return true;
+      const price = parseFloat(video.price.replace('$', ''));
+      return selectedPriceRanges.some(range => {
+        const [min, max] = priceRangeFilters.find(f => f.value === range)!.range;
+        return price >= min && price < max;
+      });
+    })
     .filter(video => {
       if (!searchQuery.trim()) return true;
       const query = searchQuery.toLowerCase().trim();
       return video.title.toLowerCase().includes(query);
     });
 
-  const handleSelectForCompare = (video: VideoItem) => {
-    setSelectedForCompare(prev => {
-      const isAlreadySelected = prev.some(v => v.id === video.id);
-      
-      if (isAlreadySelected) {
-        return prev.filter(v => v.id !== video.id);
-      } else {
-        if (prev.length >= 4) {
-          toast.error('You can only compare up to 4 videos');
-          return prev;
-        }
-        return [...prev, video];
-      }
-    });
-  };
-
-  const handleRemoveFromCompare = (video: VideoItem) => {
-    setSelectedForCompare(prev => prev.filter(v => v.id !== video.id));
-  };
-
-  const handleToggleCompareMode = () => {
-    setCompareMode(!compareMode);
-    if (compareMode) {
-      setSelectedForCompare([]);
-    }
-  };
-
-  const handleOpenCompare = () => {
-    if (selectedForCompare.length < 2) {
-      toast.error('Select at least 2 videos to compare');
-      return;
-    }
-    setCompareDrawerOpen(true);
-  };
-
   const handleResetFilters = () => {
     setSelectedCategories([]);
     setSelectedDurations([]);
+    setSelectedAspectRatios([]);
+    setSelectedPriceRanges([]);
     setSearchQuery('');
     toast.success('All filters cleared');
   };
 
-  const hasActiveFilters = selectedCategories.length > 0 || selectedDurations.length > 0 || searchQuery !== '';
+  const hasActiveFilters = selectedCategories.length > 0 || selectedDurations.length > 0 || selectedAspectRatios.length > 0 || selectedPriceRanges.length > 0 || searchQuery !== '';
 
   return (
     <div className="min-h-screen bg-background">
@@ -273,33 +299,6 @@ const Index = () => {
           )}
           
           <div className="flex items-center gap-2">
-            {/* Compare Mode Toggle */}
-            <Button
-              variant={compareMode ? 'default' : 'outline'}
-              size="sm"
-              onClick={handleToggleCompareMode}
-              className="h-9"
-            >
-              <GitCompare className="w-4 h-4 mr-2" />
-              Compare
-              {selectedForCompare.length > 0 && (
-                <Badge variant="secondary" className="ml-2">
-                  {selectedForCompare.length}
-                </Badge>
-              )}
-            </Button>
-
-            {compareMode && selectedForCompare.length >= 2 && (
-              <Button
-                variant="default"
-                size="sm"
-                onClick={handleOpenCompare}
-                className="h-9"
-              >
-                View Comparison
-              </Button>
-            )}
-            
             {/* View Mode Toggle */}
             <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
               <Button
@@ -437,6 +436,110 @@ const Index = () => {
               ))}
             </DropdownMenuContent>
           </DropdownMenu>
+
+          {/* Aspect Ratio Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
+                <Maximize className="w-4 h-4 mr-2" />
+                Aspect Ratio
+                {selectedAspectRatios.length > 0 && (
+                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {selectedAspectRatios.length}
+                  </Badge>
+                )}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+              <DropdownMenuLabel className="font-semibold">Filter by Aspect Ratio</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {/* Quick Actions */}
+              <div className="flex gap-1 px-2 py-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleSelectAllAspectRatios}
+                >
+                  Select All
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleClearAspectRatios}
+                >
+                  Clear
+                </Button>
+              </div>
+              <DropdownMenuSeparator />
+              
+              {aspectRatioFilters.map((filter) => (
+                <DropdownMenuCheckboxItem
+                  key={filter.value}
+                  checked={selectedAspectRatios.includes(filter.value)}
+                  onCheckedChange={() => handleAspectRatioToggle(filter.value)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <span>{filter.label}</span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Price Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
+                <DollarSign className="w-4 h-4 mr-2" />
+                Price
+                {selectedPriceRanges.length > 0 && (
+                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {selectedPriceRanges.length}
+                  </Badge>
+                )}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+              <DropdownMenuLabel className="font-semibold">Filter by Price Range</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              
+              {/* Quick Actions */}
+              <div className="flex gap-1 px-2 py-1.5">
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleSelectAllPriceRanges}
+                >
+                  Select All
+                </Button>
+                <Button 
+                  variant="ghost" 
+                  size="sm" 
+                  className="h-7 flex-1 text-xs"
+                  onClick={handleClearPriceRanges}
+                >
+                  Clear
+                </Button>
+              </div>
+              <DropdownMenuSeparator />
+              
+              {priceRangeFilters.map((filter) => (
+                <DropdownMenuCheckboxItem
+                  key={filter.value}
+                  checked={selectedPriceRanges.includes(filter.value)}
+                  onCheckedChange={() => handlePriceRangeToggle(filter.value)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  <span>{filter.label}</span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </header>
 
@@ -451,8 +554,6 @@ const Index = () => {
                 video={video}
                 onPlay={handlePlayVideo}
                 onClick={handleVideoClick}
-                isSelected={selectedForCompare.some(v => v.id === video.id)}
-                onSelect={compareMode ? handleSelectForCompare : undefined}
               />
             ))}
             {loading && Array.from({ length: 4 }).map((_, i) => (
@@ -474,8 +575,6 @@ const Index = () => {
                   video={video}
                   onPlay={handlePlayVideo}
                   onClick={handleVideoClick}
-                  isSelected={selectedForCompare.some(v => v.id === video.id)}
-                  onSelect={compareMode ? handleSelectForCompare : undefined}
                 />
               </div>
             ))}
@@ -595,14 +694,6 @@ const Index = () => {
         video={selectedVideo}
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
-      />
-
-      <CompareDrawer
-        videos={selectedForCompare}
-        open={compareDrawerOpen}
-        onClose={() => setCompareDrawerOpen(false)}
-        onRemove={handleRemoveFromCompare}
-        onPlayVideo={handlePlayVideo}
       />
     </div>
   );
