@@ -1,3 +1,5 @@
+export type VideoCategory = 'All' | 'Nature' | 'Business' | 'Urban' | 'Lifestyle';
+
 export interface VideoItem {
   id: number;
   title: string;
@@ -10,4 +12,5 @@ export interface VideoItem {
   image: string;
   videoUrl?: string;
   aspectRatio?: number;
+  category: VideoCategory;
 }
