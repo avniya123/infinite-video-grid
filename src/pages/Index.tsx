@@ -7,11 +7,12 @@ import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock, Search, ChevronDown, X } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock, Search, ChevronDown, X, Filter } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuCheckboxItem, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 
 const PAGE_SIZE = 8;
 
@@ -43,8 +44,8 @@ const Index = () => {
   const [total, setTotal] = useState<number | null>(null);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [selectedCategory, setSelectedCategory] = useState<VideoCategory>('All');
-  const [selectedDuration, setSelectedDuration] = useState<DurationFilter>('All');
+  const [selectedCategories, setSelectedCategories] = useState<VideoCategory[]>([]);
+  const [selectedDurations, setSelectedDurations] = useState<DurationFilter[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [compareMode, setCompareMode] = useState(false);
@@ -116,33 +117,24 @@ const Index = () => {
     });
   };
 
-  const handleCategoryChange = async (category: string) => {
-    setSelectedCategory(category as VideoCategory);
-    setVideos([]);
-    setCurrentPage(1);
-    setFinished(false);
-    setLoading(true);
-    
-    // Reload first page with new category
-    try {
-      const result = await fetchVideos(1, PAGE_SIZE);
-      setVideos(result.items);
-      setTotal(result.total);
-      setCurrentPage(2);
-      
-      if (result.total && result.items.length >= result.total) {
-        setFinished(true);
+  const handleCategoryToggle = (category: VideoCategory) => {
+    setSelectedCategories(prev => {
+      if (prev.includes(category)) {
+        return prev.filter(c => c !== category);
+      } else {
+        return [...prev, category];
       }
-    } catch (error) {
-      console.error('Error loading videos:', error);
-      toast.error('Failed to load videos. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    });
   };
 
-  const handleDurationChange = (duration: string) => {
-    setSelectedDuration(duration as DurationFilter);
+  const handleDurationToggle = (duration: DurationFilter) => {
+    setSelectedDurations(prev => {
+      if (prev.includes(duration)) {
+        return prev.filter(d => d !== duration);
+      } else {
+        return [...prev, duration];
+      }
+    });
   };
 
   const parseDuration = (durationStr: string): number => {
@@ -152,26 +144,28 @@ const Index = () => {
   };
 
   const filterByDuration = (video: VideoItem): boolean => {
-    if (selectedDuration === 'All') return true;
+    if (selectedDurations.length === 0) return true;
     
     const durationInSeconds = parseDuration(video.duration);
     
-    switch (selectedDuration) {
-      case 'Teaser': // 0-1 min
-        return durationInSeconds <= 60;
-      case 'Trailer': // 1-3 min
-        return durationInSeconds > 60 && durationInSeconds <= 180;
-      case 'Gimbel': // 3-5 min
-        return durationInSeconds > 180 && durationInSeconds <= 300;
-      case 'Document': // 5+ min
-        return durationInSeconds > 300;
-      default:
-        return true;
-    }
+    return selectedDurations.some(duration => {
+      switch (duration) {
+        case 'Teaser': // 0-1 min
+          return durationInSeconds <= 60;
+        case 'Trailer': // 1-3 min
+          return durationInSeconds > 60 && durationInSeconds <= 180;
+        case 'Gimbel': // 3-5 min
+          return durationInSeconds > 180 && durationInSeconds <= 300;
+        case 'Document': // 5+ min
+          return durationInSeconds > 300;
+        default:
+          return true;
+      }
+    });
   };
 
   const filteredVideos = videos
-    .filter(video => selectedCategory === 'All' || video.category === selectedCategory)
+    .filter(video => selectedCategories.length === 0 || selectedCategories.includes(video.category))
     .filter(filterByDuration)
     .filter(video => {
       if (!searchQuery.trim()) return true;
@@ -215,13 +209,13 @@ const Index = () => {
   };
 
   const handleResetFilters = () => {
-    setSelectedCategory('All');
-    setSelectedDuration('All');
+    setSelectedCategories([]);
+    setSelectedDurations([]);
     setSearchQuery('');
     toast.success('All filters cleared');
   };
 
-  const hasActiveFilters = selectedCategory !== 'All' || selectedDuration !== 'All' || searchQuery !== '';
+  const hasActiveFilters = selectedCategories.length > 0 || selectedDurations.length > 0 || searchQuery !== '';
 
   return (
     <div className="min-h-screen bg-background">
@@ -318,42 +312,70 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Category Filter Tabs */}
-        <Tabs value={selectedCategory} onValueChange={handleCategoryChange} className="w-full">
-          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
-            {categories.map((category) => (
-              <TabsTrigger 
-                key={category.value} 
-                value={category.value}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                {category.icon}
-                {category.label}
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+        {/* Filter Dropdowns */}
+        <div className="flex gap-3 items-center flex-wrap">
+          {/* Category Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
+                <Filter className="w-4 h-4 mr-2" />
+                Categories
+                {selectedCategories.length > 0 && (
+                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {selectedCategories.length}
+                  </Badge>
+                )}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+              <DropdownMenuLabel className="font-semibold">Filter by Category</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {categories.filter(cat => cat.value !== 'All').map((category) => (
+                <DropdownMenuCheckboxItem
+                  key={category.value}
+                  checked={selectedCategories.includes(category.value)}
+                  onCheckedChange={() => handleCategoryToggle(category.value)}
+                  className="flex items-center gap-2 cursor-pointer"
+                >
+                  {category.icon}
+                  <span>{category.label}</span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
 
-        {/* Duration Filter Tabs */}
-        <Tabs value={selectedDuration} onValueChange={handleDurationChange} className="w-full">
-          <TabsList className="w-full justify-start overflow-x-auto flex-nowrap">
-            {durationFilters.map((filter) => (
-              <TabsTrigger 
-                key={filter.value} 
-                value={filter.value}
-                className="flex items-center gap-2 whitespace-nowrap"
-              >
-                <Clock className="w-4 h-4" />
-                <div className="flex flex-col items-start">
+          {/* Duration Filter */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 border-2 hover:bg-accent">
+                <Clock className="w-4 h-4 mr-2" />
+                Duration
+                {selectedDurations.length > 0 && (
+                  <Badge variant="secondary" className="ml-2 rounded-full h-5 w-5 p-0 flex items-center justify-center text-xs">
+                    {selectedDurations.length}
+                  </Badge>
+                )}
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+              <DropdownMenuLabel className="font-semibold">Filter by Duration</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {durationFilters.filter(filter => filter.value !== 'All').map((filter) => (
+                <DropdownMenuCheckboxItem
+                  key={filter.value}
+                  checked={selectedDurations.includes(filter.value)}
+                  onCheckedChange={() => handleDurationToggle(filter.value)}
+                  className="flex items-center justify-between cursor-pointer"
+                >
                   <span>{filter.label}</span>
-                  {filter.range && (
-                    <span className="text-[10px] text-muted-foreground">{filter.range}</span>
-                  )}
-                </div>
-              </TabsTrigger>
-            ))}
-          </TabsList>
-        </Tabs>
+                  <span className="text-xs text-muted-foreground">{filter.range}</span>
+                </DropdownMenuCheckboxItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -495,13 +517,13 @@ const Index = () => {
               <>
                 <p className="font-medium">No more videos</p>
                 <p className="text-sm mt-1">
-                  {selectedCategory === 'All' 
+                  {selectedCategories.length === 0 
                     ? `Showing all ${total} items` 
-                    : `Showing ${filteredVideos.length} ${selectedCategory} videos`}
+                    : `Showing ${filteredVideos.length} filtered videos`}
                 </p>
               </>
             ) : (
-              <p>No videos available in this category</p>
+              <p>No videos match your filters</p>
             )}
           </div>
         )}
