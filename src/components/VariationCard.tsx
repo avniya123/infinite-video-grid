@@ -2,6 +2,7 @@ import { Play, Volume2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
+import { UploadThumbnailButton } from "@/components/UploadThumbnailButton";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { VideoVariation } from "@/hooks/useVideoVariations";
 
@@ -41,13 +42,18 @@ export const VariationCard = ({
         />
         
         {!variation.thumbnail_url && (
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
+          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
             <GenerateThumbnailButton
               variationId={variation.id}
               videoTitle={videoTitle}
               variationTitle={variation.title}
               aspectRatio={variation.aspect_ratio}
               onGenerated={(url) => onThumbnailGenerated(variation.id, url)}
+            />
+            <div className="text-xs text-white/60">or</div>
+            <UploadThumbnailButton
+              variationId={variation.id}
+              onUploaded={(url) => onThumbnailGenerated(variation.id, url)}
             />
           </div>
         )}
