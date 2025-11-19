@@ -18,6 +18,7 @@ import ProfileDrawer from '@/components/ProfileDrawer';
 import { toast } from 'sonner';
 import { supabase } from '@/integrations/supabase/client';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { useCategories } from '@/contexts/CategoryContext';
 
 const personalCategories = [
   'Personal Celebrations',
@@ -41,7 +42,7 @@ export const Header = () => {
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([]);
+  const { selectedCategories, toggleCategory } = useCategories();
 
   useEffect(() => {
     // Check current session
@@ -65,14 +66,6 @@ export const Header = () => {
     } catch (error: any) {
       toast.error(error.message || 'Failed to log out');
     }
-  };
-
-  const toggleCategory = (category: string) => {
-    setSelectedCategories(prev => 
-      prev.includes(category) 
-        ? prev.filter(c => c !== category)
-        : [...prev, category]
-    );
   };
 
   return (
