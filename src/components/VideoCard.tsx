@@ -143,7 +143,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   return (
     <article 
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1 hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
+      className={`group relative overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
       onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
