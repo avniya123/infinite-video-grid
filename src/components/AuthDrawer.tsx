@@ -232,6 +232,10 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
             phone: signupData.phone,
             dob: signupData.dob,
             pincode: signupData.pincode,
+            city: locationData?.city || null,
+            district: locationData?.district || null,
+            state: locationData?.state || null,
+            country: locationData?.country || null,
           },
         },
       });

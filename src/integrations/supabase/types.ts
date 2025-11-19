@@ -18,37 +18,49 @@ export type Database = {
         Row: {
           address: string | null
           avatar_url: string | null
+          city: string | null
+          country: string | null
           created_at: string
           date_of_birth: string | null
+          district: string | null
           email: string | null
           full_name: string | null
           id: string
           phone: string | null
           pincode: string | null
+          state: string | null
           updated_at: string
         }
         Insert: {
           address?: string | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          district?: string | null
           email?: string | null
           full_name?: string | null
           id: string
           phone?: string | null
           pincode?: string | null
+          state?: string | null
           updated_at?: string
         }
         Update: {
           address?: string | null
           avatar_url?: string | null
+          city?: string | null
+          country?: string | null
           created_at?: string
           date_of_birth?: string | null
+          district?: string | null
           email?: string | null
           full_name?: string | null
           id?: string
           phone?: string | null
           pincode?: string | null
+          state?: string | null
           updated_at?: string
         }
         Relationships: []
