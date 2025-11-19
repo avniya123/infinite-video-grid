@@ -397,6 +397,8 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       value={formData.email}
                       onChange={handleChange}
                       placeholder="john@example.com"
+                      disabled
+                      className="bg-muted cursor-not-allowed"
                     />
                     {errors.email && (
                       <p className="text-sm text-destructive">{errors.email}</p>
@@ -411,6 +413,8 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       value={formData.phone}
                       onChange={handleChange}
                       placeholder="+1234567890"
+                      disabled
+                      className="bg-muted cursor-not-allowed"
                     />
                     {errors.phone && (
                       <p className="text-sm text-destructive">{errors.phone}</p>
