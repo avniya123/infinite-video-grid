@@ -23,7 +23,7 @@ export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
 
   return (
     <article 
-      className="group relative overflow-hidden rounded-2xl bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5"
+      className="group relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5"
       onClick={handleCardClick}
     >
       <div className="relative">
