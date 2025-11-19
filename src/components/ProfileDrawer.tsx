@@ -1,5 +1,4 @@
 import { useState, useEffect } from 'react';
-import { useTranslation } from 'react-i18next';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -28,7 +27,6 @@ interface ProfileDrawerProps {
 }
 
 export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps) {
-  const { t, i18n } = useTranslation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -60,14 +58,13 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
   });
 
   // Language preference state
-  const [language, setLanguage] = useState(i18n.language || 'en');
+  const [language, setLanguage] = useState('en');
 
   useEffect(() => {
     if (open) {
       checkUser();
-      setLanguage(i18n.language || 'en');
     }
-  }, [open, i18n.language]);
+  }, [open]);
 
   const checkUser = async () => {
     const { data: { session } } = await supabase.auth.getSession();
@@ -102,7 +99,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
       }
     } catch (error: any) {
       console.error('Error loading profile:', error);
-      toast.error(t('toast.profileLoadError'));
+      toast.error('Failed to load profile');
     } finally {
       setLoading(false);
     }
@@ -121,12 +118,12 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     if (!file || !user) return;
 
     if (!file.type.startsWith('image/')) {
-      toast.error(t('toast.uploadImageFile'));
+      toast.error('Please upload an image file');
       return;
     }
 
     if (file.size > 2 * 1024 * 1024) {
-      toast.error(t('toast.imageMaxSize'));
+      toast.error('Image must be less than 2MB');
       return;
     }
 
@@ -211,12 +208,12 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     e.preventDefault();
 
     if (passwordData.newPassword !== passwordData.confirmPassword) {
-      toast.error(t('toast.passwordsNoMatch'));
+      toast.error('New passwords do not match');
       return;
     }
 
     if (passwordData.newPassword.length < 8) {
-      toast.error(t('toast.passwordTooShort'));
+      toast.error('Password must be at least 8 characters');
       return;
     }
 
@@ -228,14 +225,14 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
       if (error) throw error;
 
-      toast.success(t('toast.passwordUpdated'));
+      toast.success('Password updated successfully');
       setPasswordData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
       });
     } catch (error: any) {
-      toast.error(error.message || t('toast.passwordUpdateError'));
+      toast.error(error.message || 'Failed to update password');
     } finally {
       setSaving(false);
     }
@@ -246,11 +243,11 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
       const newState = { ...prev, [key]: !prev[key] };
       
       if (key === 'twoFactorEnabled' && newState[key]) {
-        toast.success(t('toast.twoFactorEnabled'));
+        toast.success('Two-factor authentication enabled');
       } else if (key === 'twoFactorEnabled') {
-        toast.success(t('toast.twoFactorDisabled'));
+        toast.success('Two-factor authentication disabled');
       } else {
-        toast.success(t('toast.securityUpdated'));
+        toast.success('Security settings updated');
       }
       
       return newState;
@@ -261,10 +258,10 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     setSaving(true);
     try {
       await supabase.auth.signOut({ scope: 'global' });
-      toast.success(t('toast.signedOutAllDevices'));
+      toast.success('Signed out from all devices');
       onOpenChange(false);
     } catch (error: any) {
-      toast.error(error.message || t('toast.signOutError'));
+      toast.error(error.message || 'Failed to sign out');
     } finally {
       setSaving(false);
     }
@@ -272,15 +269,13 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
   const handleLanguageChange = (newLanguage: string) => {
     setLanguage(newLanguage);
-    i18n.changeLanguage(newLanguage);
-    localStorage.setItem('language', newLanguage);
-    toast.success(t('toast.languageUpdated'));
+    toast.success('Language preference updated');
   };
 
   const handleSignOut = async () => {
     await supabase.auth.signOut();
     onOpenChange(false);
-    toast.success(t('toast.signedOut'));
+    toast.success('Signed out successfully');
   };
 
   if (loading) {
@@ -299,8 +294,8 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     <Sheet open={open} onOpenChange={onOpenChange}>
       <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
         <SheetHeader className="p-6 pb-4 border-b">
-          <SheetTitle className="text-xl">{t('profile.settings')}</SheetTitle>
-          <SheetDescription>{t('profile.manageSettings')}</SheetDescription>
+          <SheetTitle className="text-xl">Settings</SheetTitle>
+          <SheetDescription>Manage your account settings and preferences</SheetDescription>
         </SheetHeader>
 
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -308,11 +303,11 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
             <TabsList className="grid w-full grid-cols-2">
               <TabsTrigger value="profile" className="flex items-center gap-2">
                 <User className="h-4 w-4" />
-                {t('profile.profileTab')}
+                Profile
               </TabsTrigger>
               <TabsTrigger value="account" className="flex items-center gap-2">
                 <Shield className="h-4 w-4" />
-                {t('profile.accountSettingsTab')}
+                Account Settings
               </TabsTrigger>
             </TabsList>
           </div>
@@ -322,8 +317,8 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
             <TabsContent value="profile" className="space-y-6 mt-0">
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('profile.profilePicture')}</CardTitle>
-                  <CardDescription>{t('profile.uploadProfilePicture')}</CardDescription>
+                  <CardTitle>Profile Picture</CardTitle>
+                  <CardDescription>Upload a profile picture (max 2MB)</CardDescription>
                 </CardHeader>
                 <CardContent className="flex flex-col items-center gap-4">
                   <Avatar className="h-24 w-24">
@@ -350,12 +345,12 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       {uploading ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('profile.uploading')}
+                          Uploading...
                         </>
                       ) : (
                         <>
                           <Camera className="mr-2 h-4 w-4" />
-                          {t('profile.changeAvatar')}
+                          Change Avatar
                         </>
                       )}
                     </Button>
@@ -365,13 +360,13 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
               <Card>
                 <CardHeader>
-                  <CardTitle>{t('profile.personalInformation')}</CardTitle>
-                  <CardDescription>{t('profile.updatePersonalDetails')}</CardDescription>
+                  <CardTitle>Personal Information</CardTitle>
+                  <CardDescription>Update your personal details</CardDescription>
                 </CardHeader>
                 <CardContent>
                   <form onSubmit={handleSubmit} className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="fullName">{t('profile.fullName')}</Label>
+                    <Label htmlFor="fullName">Full Name</Label>
                     <Input
                       id="fullName"
                       name="fullName"
@@ -385,7 +380,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="email">{t('profile.email')}</Label>
+                    <Label htmlFor="email">Email</Label>
                     <Input
                       id="email"
                       name="email"
@@ -402,7 +397,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="phone">{t('profile.phone')}</Label>
+                    <Label htmlFor="phone">Phone</Label>
                     <Input
                       id="phone"
                       name="phone"
@@ -418,7 +413,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="dateOfBirth">{t('profile.dateOfBirth')}</Label>
+                    <Label htmlFor="dateOfBirth">Date of Birth</Label>
                     <Input
                       id="dateOfBirth"
                       name="dateOfBirth"
@@ -432,7 +427,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="address">{t('profile.address')}</Label>
+                    <Label htmlFor="address">Address</Label>
                     <Input
                       id="address"
                       name="address"
@@ -446,7 +441,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   </div>
 
                   <div className="space-y-2">
-                    <Label htmlFor="pincode">{t('profile.pincode')}</Label>
+                    <Label htmlFor="pincode">Pincode</Label>
                     <Input
                       id="pincode"
                       name="pincode"
@@ -463,10 +458,10 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       {saving ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('profile.savingChanges')}
+                          Saving Changes...
                         </>
                       ) : (
-                        t('profile.saveChanges')
+                        'Save Changes'
                       )}
                     </Button>
                   </form>
@@ -481,52 +476,52 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Shield className="h-5 w-5 text-primary" />
-                    <CardTitle>{t('profile.securityInformation')}</CardTitle>
+                    <CardTitle>Security Information</CardTitle>
                   </div>
-                  <CardDescription>{t('profile.managePassword')}</CardDescription>
+                  <CardDescription>Manage your password and security settings</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <form onSubmit={handlePasswordChange} className="space-y-4">
                     <div className="space-y-2">
-                      <Label htmlFor="currentPassword">{t('profile.currentPassword')}</Label>
+                      <Label htmlFor="currentPassword">Current Password</Label>
                       <Input
                         id="currentPassword"
                         type="password"
                         value={passwordData.currentPassword}
                         onChange={(e) => setPasswordData(prev => ({ ...prev, currentPassword: e.target.value }))}
-                        placeholder={t('profile.enterCurrentPassword')}
+                        placeholder="Enter current password"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="newPassword">{t('profile.newPassword')}</Label>
+                      <Label htmlFor="newPassword">New Password</Label>
                       <Input
                         id="newPassword"
                         type="password"
                         value={passwordData.newPassword}
                         onChange={(e) => setPasswordData(prev => ({ ...prev, newPassword: e.target.value }))}
-                        placeholder={t('profile.enterNewPassword')}
+                        placeholder="Enter new password (min 8 characters)"
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="confirmPassword">{t('profile.confirmPassword')}</Label>
+                      <Label htmlFor="confirmPassword">Confirm New Password</Label>
                       <Input
                         id="confirmPassword"
                         type="password"
                         value={passwordData.confirmPassword}
                         onChange={(e) => setPasswordData(prev => ({ ...prev, confirmPassword: e.target.value }))}
-                        placeholder={t('profile.confirmNewPassword')}
+                        placeholder="Confirm new password"
                       />
                     </div>
                     <Button type="submit" variant="outline" className="w-full" disabled={saving}>
                       {saving ? (
                         <>
                           <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                          {t('profile.updating')}
+                          Updating...
                         </>
                       ) : (
                         <>
                           <Key className="mr-2 h-4 w-4" />
-                          {t('profile.updatePassword')}
+                          Update Password
                         </>
                       )}
                     </Button>
@@ -537,8 +532,8 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label htmlFor="twoFactor">{t('profile.twoFactorAuth')}</Label>
-                        <p className="text-sm text-muted-foreground">{t('profile.addExtraSecurity')}</p>
+                        <Label htmlFor="twoFactor">Two-Factor Authentication</Label>
+                        <p className="text-sm text-muted-foreground">Add an extra layer of security</p>
                       </div>
                       <Switch
                         id="twoFactor"
@@ -549,8 +544,8 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     <Separator />
                     <div className="flex items-center justify-between">
                       <div className="space-y-0.5">
-                        <Label htmlFor="loginAlerts">{t('profile.loginAlerts')}</Label>
-                        <p className="text-sm text-muted-foreground">{t('profile.getNotifiedSignIns')}</p>
+                        <Label htmlFor="loginAlerts">Login Alerts</Label>
+                        <p className="text-sm text-muted-foreground">Get notified of new sign-ins</p>
                       </div>
                       <Switch
                         id="loginAlerts"
@@ -571,12 +566,12 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     {saving ? (
                       <>
                         <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                        {t('profile.signingOut')}
+                        Signing out...
                       </>
                     ) : (
                       <>
                         <LogOut className="mr-2 h-4 w-4" />
-                        {t('profile.signOutAllDevices')}
+                        Sign Out All Devices
                       </>
                     )}
                   </Button>
@@ -588,16 +583,16 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Globe className="h-5 w-5 text-primary" />
-                    <CardTitle>{t('profile.languagePreference')}</CardTitle>
+                    <CardTitle>Language Preference</CardTitle>
                   </div>
-                  <CardDescription>{t('profile.chooseLanguage')}</CardDescription>
+                  <CardDescription>Choose your preferred language for the interface</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="space-y-2">
-                    <Label htmlFor="language">{t('profile.interfaceLanguage')}</Label>
+                    <Label htmlFor="language">Interface Language</Label>
                     <Select value={language} onValueChange={handleLanguageChange}>
                       <SelectTrigger id="language" className="w-full">
-                        <SelectValue placeholder={t('profile.selectLanguage')} />
+                        <SelectValue placeholder="Select a language" />
                       </SelectTrigger>
                       <SelectContent className="bg-popover z-50">
                         <SelectItem value="en">English</SelectItem>
@@ -615,7 +610,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                       </SelectContent>
                     </Select>
                     <p className="text-sm text-muted-foreground">
-                      {t('profile.languageDescription')}
+                      Select your preferred language. This will update the interface language for your account.
                     </p>
                   </div>
                 </CardContent>
@@ -626,55 +621,41 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                 <CardHeader>
                   <div className="flex items-center gap-2">
                     <Info className="h-5 w-5 text-primary" />
-                    <CardTitle>{t('profile.accountInformation')}</CardTitle>
+                    <CardTitle>Account Information</CardTitle>
                   </div>
-                  <CardDescription>{t('profile.viewAccountDetails')}</CardDescription>
+                  <CardDescription>View your account details</CardDescription>
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <div className="flex items-center justify-between py-2">
                     <div className="space-y-0.5">
-                      <p className="text-sm font-medium">{t('profile.accountId')}</p>
+                      <p className="text-sm font-medium">Account ID</p>
                       <p className="text-sm text-muted-foreground">{user?.id.substring(0, 18)}...</p>
                     </div>
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between py-2">
                     <div className="space-y-0.5">
-                      <p className="text-sm font-medium">{t('profile.emailVerified')}</p>
+                      <p className="text-sm font-medium">Email Verified</p>
                       <p className="text-sm text-muted-foreground">
-                        {user?.email_confirmed_at ? t('profile.yes') : t('profile.no')}
+                        {user?.email_confirmed_at ? 'Yes' : 'No'}
                       </p>
                     </div>
                     {!user?.email_confirmed_at && (
                       <Button variant="outline" size="sm">
                         <Mail className="mr-2 h-4 w-4" />
-                        {t('profile.verifyEmail')}
+                        Verify Email
                       </Button>
                     )}
                   </div>
                   <Separator />
                   <div className="flex items-center justify-between py-2">
                     <div className="space-y-0.5">
-                      <p className="text-sm font-medium">{t('profile.accountCreated')}</p>
+                      <p className="text-sm font-medium">Account Created</p>
                       <p className="text-sm text-muted-foreground">
                         {user?.created_at ? new Date(user.created_at).toLocaleDateString() : 'N/A'}
                       </p>
                     </div>
                   </div>
-                </CardContent>
-              </Card>
-
-              {/* Sign Out Button */}
-              <Card className="border-destructive/50">
-                <CardContent className="pt-6">
-                  <Button
-                    variant="destructive"
-                    className="w-full"
-                    onClick={handleSignOut}
-                  >
-                    <LogOut className="mr-2 h-4 w-4" />
-                    {t('profile.signOut')}
-                  </Button>
                 </CardContent>
               </Card>
 
