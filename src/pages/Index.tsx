@@ -14,6 +14,7 @@ import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, Search, 
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { useVideoFilters } from '@/hooks/useVideoFilters';
+import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 
 const PAGE_SIZE = 8;
 
@@ -148,6 +149,35 @@ const Index = () => {
       description: `${video.duration} • ${video.category} • ${video.price}`,
     });
   }, []);
+
+  // Navigate between videos with arrow keys
+  const navigateToVideo = useCallback((direction: 'prev' | 'next') => {
+    if (!selectedVideo || !drawerOpen) return;
+    
+    const currentIndex = filteredVideos.findIndex(v => v.id === selectedVideo.id);
+    if (currentIndex === -1) return;
+    
+    const newIndex = direction === 'prev' 
+      ? Math.max(0, currentIndex - 1)
+      : Math.min(filteredVideos.length - 1, currentIndex + 1);
+    
+    if (newIndex !== currentIndex) {
+      setSelectedVideo(filteredVideos[newIndex]);
+      setVideoStartTime(0);
+    }
+  }, [selectedVideo, drawerOpen, filteredVideos]);
+
+  // Keyboard shortcuts
+  useKeyboardShortcuts({
+    onEscape: () => {
+      if (drawerOpen) {
+        handleDrawerChange(false);
+      }
+    },
+    onArrowLeft: () => navigateToVideo('prev'),
+    onArrowRight: () => navigateToVideo('next'),
+    enabled: true,
+  });
 
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
