@@ -283,14 +283,10 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
         video={video}
         open={variationsOpen}
         onOpenChange={setVariationsOpen}
-        onPlayVariation={(variation) => {
-          setSelectedVariation(variation);
-          setPlayerOpen(true);
-        }}
       />
 
       <VideoPlayerDrawer
-        video={selectedVariation || video}
+        video={video}
         open={playerOpen}
         onOpenChange={setPlayerOpen}
       />
