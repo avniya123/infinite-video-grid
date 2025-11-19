@@ -1,15 +1,18 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
-import { Play } from 'lucide-react';
+import { Play, Check } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface VideoCardProps {
   video: VideoItem;
   onPlay: (video: VideoItem) => void;
   onClick: (video: VideoItem) => void;
+  isSelected?: boolean;
+  onSelect?: (video: VideoItem) => void;
 }
 
-export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -23,6 +26,11 @@ export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
 
   const handleCardClick = () => {
     onClick(video);
+  };
+
+  const handleSelectClick = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onSelect?.(video);
   };
 
   const handleMouseEnter = () => {
@@ -58,12 +66,24 @@ export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
 
   return (
     <article 
-      className="group relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5"
+      className={`group relative overflow-hidden rounded-none bg-card shadow-[var(--shadow-card)] transition-all duration-300 hover:-translate-y-1.5 hover:scale-[1.02] hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
       onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
     >
       <div className="relative">
+        {/* Selection Checkbox */}
+        {onSelect && (
+          <div 
+            className="absolute top-3 left-3 z-10"
+            onClick={handleSelectClick}
+          >
+            <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'bg-white/90 border-white backdrop-blur-sm'}`}>
+              {isSelected && <Check className="w-4 h-4 text-primary-foreground" />}
+            </div>
+          </div>
+        )}
+
         {/* Image */}
         <img
           src={video.image}
@@ -92,10 +112,21 @@ export function VideoCard({ video, onPlay, onClick }: VideoCardProps) {
 
         {/* Trending Badge */}
         {video.trending && (
-          <Badge className="absolute top-3 left-3 bg-trending text-trending-foreground font-semibold text-xs px-2 py-1 shadow-lg">
+          <Badge className="absolute top-3 right-3 bg-trending text-trending-foreground font-semibold text-xs px-2 py-1 shadow-lg z-10">
             TRENDING
           </Badge>
         )}
+
+        {/* Resolution Badge */}
+        <div className="absolute top-12 right-3 z-10">
+          <Badge className={`font-semibold text-xs px-2 py-1 shadow-lg ${
+            video.resolution === '8K' ? 'bg-purple-600 text-white' :
+            video.resolution === '4K' ? 'bg-blue-600 text-white' :
+            'bg-green-600 text-white'
+          }`}>
+            {video.resolution}
+          </Badge>
+        </div>
 
         {/* Price Badge */}
         <div className="absolute top-3 right-3 bg-black/60 backdrop-blur-sm text-white px-2.5 py-1 rounded-md text-xs font-semibold">
