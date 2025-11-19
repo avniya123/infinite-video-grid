@@ -23,6 +23,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
+  const [selectedVariation, setSelectedVariation] = useState<any>(null);
   
   const {
     videoRef,
@@ -59,6 +60,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
         title: video.title,
         thumbnail: video.image
       });
+      setSelectedVariation(null); // Reset to main video when opening
     }
   }, [open, video, setCurrentVideo]);
 
@@ -72,6 +74,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
   };
 
   const handlePlayVariation = (variation: any) => {
+    setSelectedVariation(variation);
     playVideo({
       url: variation.video_url || video.videoUrl || '',
       title: `${video.title} - ${variation.title}`,
@@ -131,11 +134,32 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
               <h3 className="text-sm font-medium text-foreground">{currentVideo?.title || video.title}</h3>
               <div className="flex items-center gap-2 flex-wrap">
                 <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground">
-                  {video.duration}
+                  {selectedVariation ? selectedVariation.duration : video.duration}
                 </Badge>
-                <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
-                  {video.resolution}
-                </Badge>
+                {selectedVariation && selectedVariation.quality && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
+                    {selectedVariation.quality}
+                  </Badge>
+                )}
+                {selectedVariation && selectedVariation.aspect_ratio && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
+                    {selectedVariation.aspect_ratio}
+                  </Badge>
+                )}
+                {!selectedVariation && (
+                  <Badge variant="outline" className="text-xs text-muted-foreground border-muted">
+                    {video.resolution}
+                  </Badge>
+                )}
+                {selectedVariation && selectedVariation.platforms && selectedVariation.platforms.length > 0 && (
+                  <div className="flex gap-1">
+                    {selectedVariation.platforms.map((platform: string) => (
+                      <Badge key={platform} variant="secondary" className="text-[10px] bg-muted/30 text-muted-foreground px-1.5 py-0.5">
+                        {platform}
+                      </Badge>
+                    ))}
+                  </div>
+                )}
               </div>
             </div>
             
