@@ -106,10 +106,10 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
             {/* Logo and Brand */}
             <div className="flex items-center gap-6">
               <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-gray-600 flex items-center justify-center shadow-md">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-gray-600 dark:from-gray-700 dark:to-gray-500 flex items-center justify-center shadow-md">
                   <span className="text-white font-bold text-lg">V</span>
                 </div>
-                <span className="text-xl font-bold text-foreground hidden sm:inline">VideoStudio</span>
+                <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:inline">VideoStudio</span>
               </div>
 
               {/* Category Navigation */}
@@ -196,27 +196,27 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+                    className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                   >
-                    <Monitor className="w-5 h-5 text-muted-foreground" />
+                    <Monitor className="w-5 h-5" />
                   </Button>
 
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="hidden sm:flex h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+                    className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                   >
-                    <ShoppingCart className="w-5 h-5 text-muted-foreground" />
+                    <ShoppingCart className="w-5 h-5" />
                   </Button>
 
                   {/* Notification Bell */}
                   <Button
                     variant="ghost"
                     size="icon"
-                    className="relative h-9 w-9 rounded-lg hover:bg-muted/50 transition-all"
+                    className="relative h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                   >
-                    <Bell className="w-5 h-5 text-muted-foreground" />
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full">
+                    <Bell className="w-5 h-5" />
+                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full border-2 border-white dark:border-gray-900">
                       3
                     </Badge>
                   </Button>
@@ -230,20 +230,20 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
               {user ? (
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
-                    <Avatar className="w-9 h-9 border-2 border-primary/20 hover:border-primary/50 transition-all cursor-pointer">
+                    <Avatar className="w-9 h-9 border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all cursor-pointer">
                       <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || 'User'} />
-                      <AvatarFallback className="bg-gradient-to-br from-primary to-accent text-white text-sm">
+                      <AvatarFallback className="bg-gradient-to-br from-gray-800 to-gray-600 text-white text-sm">
                         <User className="w-4 h-4" />
                       </AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56">
-                    <DropdownMenuItem onClick={() => setProfileDrawerOpen(true)}>
+                  <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                    <DropdownMenuItem onClick={() => setProfileDrawerOpen(true)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
                     </DropdownMenuItem>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleLogout}>
+                    <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
+                    <DropdownMenuItem onClick={handleLogout} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                       <LogOut className="mr-2 h-4 w-4" />
                       <span>Log out</span>
                     </DropdownMenuItem>
@@ -252,7 +252,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
               ) : (
                 <Button
                   onClick={() => setAuthDrawerOpen(true)}
-                  className="h-9 px-6 rounded-lg bg-success hover:bg-success/90 text-success-foreground font-medium shadow-sm hover:shadow-md transition-all"
+                  className="h-9 px-6 rounded-lg bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium shadow-sm hover:shadow-md transition-all border-0"
                 >
                   Sign In
                 </Button>
