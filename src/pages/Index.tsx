@@ -7,7 +7,7 @@ import { VideoItem, VideoCategory } from '@/types/video';
 import { fetchVideos } from '@/utils/mockData';
 import { toast } from 'sonner';
 import { Tabs, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock, Search, ChevronDown } from 'lucide-react';
+import { Leaf, Briefcase, Building2, Users, LayoutGrid, List, Columns3, GitCompare, Clock, Search, ChevronDown, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
@@ -214,6 +214,15 @@ const Index = () => {
     setCompareDrawerOpen(true);
   };
 
+  const handleResetFilters = () => {
+    setSelectedCategory('All');
+    setSelectedDuration('All');
+    setSearchQuery('');
+    toast.success('All filters cleared');
+  };
+
+  const hasActiveFilters = selectedCategory !== 'All' || selectedDuration !== 'All' || searchQuery !== '';
+
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
@@ -237,6 +246,19 @@ const Index = () => {
               className="pl-10 pr-4 h-9"
             />
           </div>
+
+          {/* Reset Filters Button */}
+          {hasActiveFilters && (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleResetFilters}
+              className="h-9"
+            >
+              <X className="w-4 h-4 mr-2" />
+              Reset Filters
+            </Button>
+          )}
           
           <div className="flex items-center gap-2">
             {/* Compare Mode Toggle */}
