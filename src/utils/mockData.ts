@@ -37,6 +37,26 @@ const videoTitles = [
   'Creative Art and Design Process',
 ];
 
+// Video categories mapping
+const videoCategories = [
+  'Urban',      // Aerial City
+  'Business',   // Professional Business Woman
+  'Nature',     // Ocean Waves
+  'Lifestyle',  // Hot Air Balloons
+  'Nature',     // Mountain Landscape
+  'Business',   // Typing on Laptop
+  'Urban',      // Traffic Light Trails
+  'Lifestyle',  // Vegetables and Fruits
+  'Urban',      // Modern Architecture
+  'Nature',     // Wildlife
+  'Lifestyle',  // Fitness Training
+  'Lifestyle',  // Food Preparation
+  'Business',   // Technology
+  'Nature',     // Travel Adventure
+  'Lifestyle',  // Family Lifestyle
+  'Business',   // Creative Art
+] as const;
+
 export function generateMockVideos(page: number, pageSize: number): { items: VideoItem[]; total: number } {
   const start = (page - 1) * pageSize;
   
@@ -65,6 +85,7 @@ export function generateMockVideos(page: number, pageSize: number): { items: Vid
       trending: id % 7 === 0,
       image: thumbnails[thumbnailIndex],
       videoUrl: `/videos/sample-video-${id}.mp4`,
+      category: videoCategories[(id - 1) % videoCategories.length],
     });
   }
   
