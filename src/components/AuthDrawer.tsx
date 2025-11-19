@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Chrome, AlertCircle } from 'lucide-react';
+import { X, Chrome, AlertCircle, Facebook, Twitter, Github } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
@@ -190,10 +190,10 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
     }
   };
 
-  const handleGoogleAuth = async () => {
+  const handleSocialAuth = async (provider: 'google' | 'facebook' | 'twitter' | 'github') => {
     try {
       const { error } = await supabase.auth.signInWithOAuth({
-        provider: 'google',
+        provider,
         options: {
           redirectTo: `${window.location.origin}/`,
         },
@@ -201,9 +201,15 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
       if (error) throw error;
     } catch (error: any) {
-      toast.error('Google authentication is not configured yet');
+      const providerName = provider.charAt(0).toUpperCase() + provider.slice(1);
+      toast.error(`${providerName} authentication failed. Please ensure it's configured in your backend settings.`);
     }
   };
+
+  const handleGoogleAuth = () => handleSocialAuth('google');
+  const handleFacebookAuth = () => handleSocialAuth('facebook');
+  const handleTwitterAuth = () => handleSocialAuth('twitter');
+  const handleGithubAuth = () => handleSocialAuth('github');
 
   const handlePhoneLogin = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -348,7 +354,61 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                   {loading ? 'Signing in...' : 'Sign In'}
                 </Button>
 
-                <div className="text-center text-sm text-muted-foreground">
+                {/* Social Login */}
+                <div className="space-y-3">
+                  <div className="relative">
+                    <div className="absolute inset-0 flex items-center">
+                      <span className="w-full border-t border-border" />
+                    </div>
+                    <div className="relative flex justify-center text-xs uppercase">
+                      <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleGoogleAuth}
+                    >
+                      <Chrome className="mr-2 h-5 w-5" />
+                      Google
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleFacebookAuth}
+                    >
+                      <Facebook className="mr-2 h-5 w-5" />
+                      Facebook
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleTwitterAuth}
+                    >
+                      <Twitter className="mr-2 h-5 w-5" />
+                      Twitter
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleGithubAuth}
+                    >
+                      <Github className="mr-2 h-5 w-5" />
+                      GitHub
+                    </Button>
+                  </div>
+                </div>
+
+                <p className="text-center text-sm text-muted-foreground">
                   Don't have an account?{' '}
                   <button
                     type="button"
@@ -357,32 +417,77 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                   >
                     Sign up
                   </button>
+                </p>
+
+                <div className="text-center">
+                  <button
+                    type="button"
+                    onClick={() => setView('phone-login')}
+                    className="text-sm text-primary hover:underline font-medium"
+                  >
+                    Login with Phone Number
+                  </button>
                 </div>
               </form>
             )}
 
             {view === 'signup' && (
               <form onSubmit={handleSignup} className="space-y-4">
-                <p className="text-sm text-muted-foreground text-center">
-                  Your Social Campaigns
-                </p>
+                {/* Social Signup Buttons */}
+                <div className="space-y-3">
+                  <p className="text-sm text-muted-foreground text-center">
+                    Sign up with your social account
+                  </p>
 
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={handleGoogleAuth}
-                  className="w-full h-11 rounded-xl border-2 hover:bg-muted/50 transition-all"
-                >
-                  <Chrome className="w-5 h-5 mr-2" />
-                  Sign up with Google
-                </Button>
+                  <div className="grid grid-cols-2 gap-3">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleGoogleAuth}
+                    >
+                      <Chrome className="mr-2 h-5 w-5" />
+                      Google
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleFacebookAuth}
+                    >
+                      <Facebook className="mr-2 h-5 w-5" />
+                      Facebook
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleTwitterAuth}
+                    >
+                      <Twitter className="mr-2 h-5 w-5" />
+                      Twitter
+                    </Button>
+
+                    <Button
+                      type="button"
+                      variant="outline"
+                      className="h-11 rounded-lg"
+                      onClick={handleGithubAuth}
+                    >
+                      <Github className="mr-2 h-5 w-5" />
+                      GitHub
+                    </Button>
+                  </div>
+                </div>
 
                 <div className="relative">
                   <div className="absolute inset-0 flex items-center">
                     <span className="w-full border-t border-border" />
                   </div>
                   <div className="relative flex justify-center text-xs uppercase">
-                    <span className="bg-card px-2 text-muted-foreground">Or continue with</span>
+                    <span className="bg-card px-2 text-muted-foreground">Or continue with email</span>
                   </div>
                 </div>
 
