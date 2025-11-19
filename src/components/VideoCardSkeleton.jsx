@@ -1,11 +1,7 @@
 import { Skeleton } from '@/components/ui/skeleton';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 
-interface VideoCardSkeletonProps {
-  aspectRatio?: number;
-}
-
-export function VideoCardSkeleton({ aspectRatio = 16 / 9 }: VideoCardSkeletonProps) {
+export function VideoCardSkeleton({ aspectRatio = 16 / 9 }) {
   return (
     <article className="relative overflow-hidden rounded-lg bg-card shadow-[var(--shadow-card)] break-inside-avoid mb-5 animate-fade-in">
       <AspectRatio ratio={aspectRatio}>
