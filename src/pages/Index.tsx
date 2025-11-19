@@ -2,6 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+import { Header } from '@/components/Header';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FilterChips } from '@/components/FilterChips';
 import { FilterDropdowns } from '@/components/FilterDropdowns';
@@ -182,40 +183,34 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
       {/* Header */}
-      <header className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        {/* Title and Search Row */}
+      <Header />
+      
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+        {/* Search and Controls */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          <div className="flex-1 min-w-0">
-            <h1 className="text-3xl font-bold text-foreground">Video Gallery</h1>
-            <p className="text-sm text-muted-foreground mt-1 truncate">
-              Professional stock video footage with real thumbnails • Infinite scroll • Click to preview
-            </p>
+          {/* Search Bar */}
+          <div className="relative flex-1 sm:w-96">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+            <Input
+              type="text"
+              placeholder="Search videos by title..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
+              className="pl-10 pr-4 h-10 w-full transition-all duration-200 focus:ring-2"
+            />
+
           </div>
           
-          {/* Search and Controls */}
-          <div className="flex items-center gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
-            {/* Search Bar */}
-            <div className="relative flex-1 sm:flex-initial sm:w-64">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-              <Input
-                type="text"
-                placeholder="Search videos by title..."
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
-                className="pl-10 pr-4 h-9 w-full transition-all duration-200 focus:ring-2"
-              />
-            </div>
-
-            {/* Theme Toggle */}
-            <ThemeToggle />
-
+          {/* Controls */}
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
             {/* Reset Filters Button */}
             {hasActiveFilters && (
               <Button
                 variant="outline"
                 size="sm"
                 onClick={handleResetFilters}
-                className="h-9 whitespace-nowrap transition-all duration-200 hover:scale-105"
+                className="h-10 whitespace-nowrap transition-all duration-200 hover:scale-105"
               >
                 <X className="w-4 h-4 mr-2" />
                 Reset
@@ -304,7 +299,7 @@ const Index = () => {
             {hasActiveFilters && ' with filters applied'}
           </p>
         </div>
-      </header>
+      </div>
 
       {/* Main Content */}
       <main className="max-w-7xl mx-auto px-4 pb-8">
