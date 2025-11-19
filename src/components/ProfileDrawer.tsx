@@ -3,6 +3,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -69,6 +76,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     district?: string;
   } | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
+  const [selectedCountry, setSelectedCountry] = useState('US');
 
   useEffect(() => {
     if (open) {
@@ -120,6 +128,33 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
     setFormData(prev => ({ ...prev, [name]: value }));
     if (errors[name as keyof ProfileFormData]) {
       setErrors(prev => ({ ...prev, [name]: undefined }));
+    }
+
+    // Trigger location lookup when pincode changes
+    if (name === 'pincode' && value.length >= 4) {
+      lookupPincode(value);
+    } else if (name === 'pincode' && value.length < 4) {
+      setLocationData(null);
+    }
+  };
+
+  const lookupPincode = async (pincode: string) => {
+    setLocationLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('lookup-pincode', {
+        body: { pincode, countryCode: selectedCountry }
+      });
+
+      if (error) throw error;
+
+      if (data) {
+        setLocationData(data);
+      }
+    } catch (error: any) {
+      console.error('Error looking up pincode:', error);
+      setLocationData(null);
+    } finally {
+      setLocationLoading(false);
     }
   };
 
@@ -443,6 +478,29 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
                     {errors.address && (
                       <p className="text-sm text-destructive">{errors.address}</p>
                     )}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="country">Country</Label>
+                    <Select value={selectedCountry} onValueChange={setSelectedCountry}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select country" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-background">
+                        <SelectItem value="US">United States 🇺🇸</SelectItem>
+                        <SelectItem value="IN">India 🇮🇳</SelectItem>
+                        <SelectItem value="GB">United Kingdom 🇬🇧</SelectItem>
+                        <SelectItem value="CA">Canada 🇨🇦</SelectItem>
+                        <SelectItem value="AU">Australia 🇦🇺</SelectItem>
+                        <SelectItem value="DE">Germany 🇩🇪</SelectItem>
+                        <SelectItem value="FR">France 🇫🇷</SelectItem>
+                        <SelectItem value="ES">Spain 🇪🇸</SelectItem>
+                        <SelectItem value="IT">Italy 🇮🇹</SelectItem>
+                        <SelectItem value="MX">Mexico 🇲🇽</SelectItem>
+                        <SelectItem value="BR">Brazil 🇧🇷</SelectItem>
+                        <SelectItem value="JP">Japan 🇯🇵</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
 
                   <div className="space-y-2">
