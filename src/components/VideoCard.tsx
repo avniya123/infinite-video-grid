@@ -1,10 +1,12 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, Check } from 'lucide-react';
+import { Play, Check, List } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
+import { VariationsDrawer } from '@/components/VariationsDrawer';
+import { Button } from '@/components/ui/button';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -21,6 +23,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [variationsOpen, setVariationsOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -256,8 +259,28 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               </div>
             </div>
           </div>
+
+          {/* Variations Button */}
+          <Button
+            size="sm"
+            variant="outline"
+            className="absolute bottom-3 left-3 z-20 gap-1.5 bg-background/95 backdrop-blur-sm hover:bg-background text-foreground"
+            onClick={(e) => {
+              e.stopPropagation();
+              setVariationsOpen(true);
+            }}
+          >
+            <List className="h-3.5 w-3.5" />
+            Variations
+          </Button>
         </div>
       </AspectRatio>
+
+      <VariationsDrawer
+        video={video}
+        open={variationsOpen}
+        onOpenChange={setVariationsOpen}
+      />
     </article>
   );
 }
