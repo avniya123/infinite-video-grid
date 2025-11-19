@@ -278,14 +278,22 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
 
           {/* Variations List */}
           <div className="space-y-3 pb-6">
+            <div className="flex items-center justify-between mb-4">
+              <h4 className="text-sm font-semibold">Available Variations ({variations?.length || 0})</h4>
+              <Badge variant="secondary" className="text-xs">
+                {variations?.filter(v => v.thumbnail_url).length || 0} with thumbnails
+              </Badge>
+            </div>
+
             {isLoading ? (
               // Loading skeleton
               Array.from({ length: 3 }).map((_, i) => (
                 <div key={i} className="flex items-center gap-3 p-3 rounded-lg border">
-                  <Skeleton className="w-16 h-16 rounded-md" />
+                  <Skeleton className="w-20 h-20 rounded-md" />
                   <div className="flex-1 space-y-2">
                     <Skeleton className="h-4 w-32" />
                     <Skeleton className="h-3 w-24" />
+                    <Skeleton className="h-3 w-full" />
                   </div>
                   <div className="flex gap-2">
                     <Skeleton className="h-8 w-8 rounded-md" />
@@ -297,10 +305,11 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
               variations.map((variation) => (
                 <div
                   key={variation.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border bg-card hover:bg-accent/50 transition-colors"
+                  className="flex items-start gap-3 p-4 rounded-lg border bg-card hover:bg-accent/50 transition-all duration-200 cursor-pointer"
+                  onClick={() => handlePlayVariation(variation)}
                 >
                   {/* Thumbnail */}
-                  <div className="w-16 h-16 rounded-md overflow-hidden bg-muted flex-shrink-0 relative group">
+                  <div className="w-20 h-20 rounded-md overflow-hidden bg-muted flex-shrink-0 relative group">
                     <img
                       src={variation.thumbnail_url || video.image}
                       alt={variation.title}
@@ -317,40 +326,76 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                         />
                       </div>
                     )}
+                    {/* Play overlay icon */}
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/0 group-hover:bg-black/30 transition-all">
+                      <Play className="h-8 w-8 text-white opacity-0 group-hover:opacity-100 transition-opacity" fill="white" />
+                    </div>
                   </div>
 
                   {/* Variation Info */}
-                  <div className="flex-1 min-w-0 space-y-1">
-                    <div className="flex items-center gap-2 flex-wrap text-sm">
-                      <span className="font-medium">{variation.title}</span>
-                      <span className="text-muted-foreground">{variation.duration}</span>
-                      {variation.aspect_ratio && (
-                        <span className="text-muted-foreground">{variation.aspect_ratio}</span>
-                      )}
-                      {variation.quality && (
-                        <span className="text-muted-foreground">{variation.quality}</span>
-                      )}
+                  <div className="flex-1 min-w-0 space-y-2">
+                    <div className="space-y-1">
+                      <h5 className="font-semibold text-sm leading-tight">{variation.title}</h5>
+                      <div className="flex items-center gap-2 flex-wrap text-xs text-muted-foreground">
+                        <span className="px-2 py-0.5 bg-muted rounded font-medium">
+                          {variation.duration}
+                        </span>
+                        {variation.aspect_ratio && (
+                          <span className="px-2 py-0.5 bg-muted rounded">
+                            {variation.aspect_ratio}
+                          </span>
+                        )}
+                        {variation.quality && (
+                          <Badge variant="outline" className="text-xs h-5">
+                            {variation.quality}
+                          </Badge>
+                        )}
+                      </div>
                     </div>
-                    <div className="flex items-center gap-2 flex-wrap">
-                      {variation.platforms.map((platform) => (
-                        <Badge
-                          key={platform}
-                          variant="secondary"
-                          className="text-xs px-2 py-0"
-                        >
-                          {platform}
-                        </Badge>
-                      ))}
+                    
+                    {/* Platforms */}
+                    {variation.platforms && variation.platforms.length > 0 && (
+                      <div className="flex items-center gap-1.5 flex-wrap">
+                        <span className="text-xs text-muted-foreground">For:</span>
+                        {variation.platforms.map((platform) => (
+                          <Badge
+                            key={platform}
+                            variant="secondary"
+                            className="text-xs px-2 py-0 h-5"
+                          >
+                            {platform}
+                          </Badge>
+                        ))}
+                      </div>
+                    )}
+
+                    {/* Status indicators */}
+                    <div className="flex items-center gap-2 text-xs">
+                      {variation.video_url && (
+                        <span className="text-green-600 dark:text-green-400 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-600 dark:bg-green-400" />
+                          Video ready
+                        </span>
+                      )}
+                      {variation.thumbnail_url && (
+                        <span className="text-blue-600 dark:text-blue-400 flex items-center gap-1">
+                          <span className="w-1.5 h-1.5 rounded-full bg-blue-600 dark:bg-blue-400" />
+                          Has thumbnail
+                        </span>
+                      )}
                     </div>
                   </div>
 
                   {/* Action Buttons */}
-                  <div className="flex items-center gap-2 flex-shrink-0">
+                  <div className="flex items-center gap-1 flex-shrink-0">
                     <Button
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8"
-                      onClick={() => handleShare(variation)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleShare(variation);
+                      }}
                     >
                       <Share2 className="h-4 w-4" />
                     </Button>
@@ -358,7 +403,10 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                       size="icon"
                       variant="ghost"
                       className="h-8 w-8"
-                      onClick={() => handlePlayVariation(variation)}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handlePlayVariation(variation);
+                      }}
                     >
                       <Play className="h-4 w-4" />
                     </Button>
@@ -366,8 +414,10 @@ export const VariationsDrawer = ({ video, open, onOpenChange }: VariationsDrawer
                 </div>
               ))
             ) : (
-              <div className="text-center py-8 text-muted-foreground">
-                No variations available for this video
+              <div className="text-center py-12 text-muted-foreground space-y-2">
+                <div className="text-4xl mb-2">📹</div>
+                <p className="font-medium">No variations available</p>
+                <p className="text-sm">This video doesn't have any variations yet</p>
               </div>
             )}
           </div>
