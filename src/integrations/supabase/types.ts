@@ -75,6 +75,7 @@ export type Database = {
           is_enabled: boolean
           updated_at: string
           user_id: string
+          user_type: string | null
         }
         Insert: {
           created_at?: string
@@ -85,6 +86,7 @@ export type Database = {
           is_enabled?: boolean
           updated_at?: string
           user_id: string
+          user_type?: string | null
         }
         Update: {
           created_at?: string
@@ -95,6 +97,7 @@ export type Database = {
           is_enabled?: boolean
           updated_at?: string
           user_id?: string
+          user_type?: string | null
         }
         Relationships: []
       }

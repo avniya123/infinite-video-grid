@@ -363,30 +363,78 @@ export default function MyUsers() {
         open={usersDrawerOpen}
         onOpenChange={setUsersDrawerOpen}
         editingUser={null}
-        onAddUser={(userData) => {
+        onAddUser={async (userData) => {
           const success = addUser(userData);
           if (success) {
+            // Also save to Supabase
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            if (currentUser) {
+              await supabase.from('saved_enrolled_users').insert({
+                user_id: currentUser.id,
+                enrolled_user_name: userData.name,
+                enrolled_user_email: userData.email,
+                enrolled_user_phone: userData.phone,
+                user_type: userData.userType,
+                is_enabled: true
+              });
+            }
             toast.success('User added successfully');
             fetchSavedUsers();
           }
         }}
-        onUpdateUser={(userData) => {
+        onUpdateUser={async (userData) => {
           const success = updateUser(userData);
           if (success) {
+            // Update in Supabase
+            await supabase
+              .from('saved_enrolled_users')
+              .update({
+                enrolled_user_name: userData.name,
+                enrolled_user_email: userData.email,
+                enrolled_user_phone: userData.phone,
+                user_type: userData.userType
+              })
+              .eq('id', userData.id);
             toast.success('User updated successfully');
             fetchSavedUsers();
           }
         }}
-        onImportCsv={(users) => {
+        onImportCsv={async (users) => {
           const success = importUsersFromCsv(users);
           if (success) {
+            // Save all to Supabase
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            if (currentUser) {
+              const usersToInsert = users.map(u => ({
+                user_id: currentUser.id,
+                enrolled_user_name: u.name,
+                enrolled_user_email: u.email,
+                enrolled_user_phone: u.phone,
+                user_type: u.userType,
+                is_enabled: true
+              }));
+              await supabase.from('saved_enrolled_users').insert(usersToInsert);
+            }
             toast.success('Users imported successfully');
             fetchSavedUsers();
           }
         }}
-        onAddEnrolledUsers={(users) => {
+        onAddEnrolledUsers={async (users) => {
           const success = addEnrolledUsers(users);
           if (success) {
+            // Save all to Supabase
+            const { data: { user: currentUser } } = await supabase.auth.getUser();
+            if (currentUser) {
+              const usersToInsert = users.map(u => ({
+                user_id: currentUser.id,
+                enrolled_user_name: u.name,
+                enrolled_user_email: u.email,
+                enrolled_user_phone: u.phone,
+                user_type: u.userType,
+                is_enabled: true
+              }));
+              await supabase.from('saved_enrolled_users').insert(usersToInsert);
+            }
             toast.success('Enrolled users added successfully');
             fetchSavedUsers();
           }
