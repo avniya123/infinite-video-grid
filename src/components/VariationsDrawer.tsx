@@ -92,13 +92,22 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
     toast.success('Added to cart');
   };
 
-  const handleEdit = () => {
+  const handleEdit = (variationId?: string) => {
     if (!user) {
       toast.error('Please sign in to edit videos');
       onRequestAuth?.();
       return;
     }
-    window.location.href = `/template-editor/${video.id}`;
+    
+    // Use provided variationId or the first variation's ID
+    const targetVariationId = variationId || (variations && variations.length > 0 ? variations[0].id : null);
+    
+    if (!targetVariationId) {
+      toast.error('No variation available to edit');
+      return;
+    }
+    
+    window.location.href = `/template-editor/${targetVariationId}`;
   };
 
   return (
@@ -180,7 +189,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
                   <ShoppingCart className="h-3.5 w-3.5" />
                   Share Cart
                 </Button>
-                <Button size="sm" onClick={handleEdit} variant="outline" className="gap-2">
+                <Button size="sm" onClick={() => handleEdit()} variant="outline" className="gap-2">
                   <Edit className="h-3.5 w-3.5" />
                   Edit
                 </Button>
@@ -249,6 +258,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
                       onThumbnailGenerated={handleThumbnailGenerated}
+                      onEdit={handleEdit}
                     />
                   ))}
                 </div>

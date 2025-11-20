@@ -1,10 +1,11 @@
-import { Play, Volume2 } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
 import { UploadThumbnailButton } from "@/components/UploadThumbnailButton";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { VideoVariation } from "@/hooks/useVideoVariations";
+import { Button } from "@/components/ui/button";
 
 interface VariationCardProps {
   variation: VideoVariation;
@@ -13,6 +14,7 @@ interface VariationCardProps {
   isCurrentlyPlaying: boolean;
   onPlay: (variation: VideoVariation) => void;
   onThumbnailGenerated: (variationId: string, url: string) => void;
+  onEdit?: (variationId: string) => void;
 }
 
 export const VariationCard = ({
@@ -22,6 +24,7 @@ export const VariationCard = ({
   isCurrentlyPlaying,
   onPlay,
   onThumbnailGenerated,
+  onEdit,
 }: VariationCardProps) => {
   return (
     <div
@@ -144,6 +147,20 @@ export const VariationCard = ({
 
       {/* Action Buttons */}
       <div className="flex flex-col gap-2 flex-shrink-0">
+        {onEdit && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(variation.id);
+            }}
+            className="gap-2"
+          >
+            <EditIcon className="h-3.5 w-3.5" />
+            Edit
+          </Button>
+        )}
         <div onClick={(e) => e.stopPropagation()}>
           <SocialShareButtons
             title={`${videoTitle} - ${variation.title}`}

@@ -7,6 +7,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 interface TemplateEditorLayoutProps {
   variationId?: string;
+  variationData: {
+    id: string;
+    title: string;
+    video_id: number;
+    thumbnail_url: string | null;
+    aspect_ratio: string;
+    duration: string;
+  };
 }
 
 export interface Layer {
@@ -27,7 +35,7 @@ export interface Card {
   layers: Layer[];
 }
 
-export const TemplateEditorLayout = ({ variationId }: TemplateEditorLayoutProps) => {
+export const TemplateEditorLayout = ({ variationId, variationData }: TemplateEditorLayoutProps) => {
   const navigate = useNavigate();
   const [activeCard, setActiveCard] = useState<string>("card-1");
   
@@ -101,13 +109,15 @@ export const TemplateEditorLayout = ({ variationId }: TemplateEditorLayoutProps)
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/")}
+                onClick={() => navigate("/my-templates")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
               <div>
-                <h1 className="text-xl font-bold">Template Design 000001</h1>
-                <p className="text-sm text-muted-foreground">Video Generate - Editable Cards</p>
+                <h1 className="text-xl font-bold">{variationData.title}</h1>
+                <p className="text-sm text-muted-foreground">
+                  Video #{variationData.video_id} - {variationData.aspect_ratio} - {variationData.duration}
+                </p>
               </div>
             </div>
             <div className="flex items-center gap-2">

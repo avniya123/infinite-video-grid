@@ -4,23 +4,75 @@ import { supabase } from "@/integrations/supabase/client";
 import { TemplateEditorLayout } from "@/components/template-editor/TemplateEditorLayout";
 import { toast } from "sonner";
 
+interface VariationData {
+  id: string;
+  title: string;
+  video_id: number;
+  thumbnail_url: string | null;
+  aspect_ratio: string;
+  duration: string;
+}
+
 export default function TemplateEditor() {
   const { variationId } = useParams();
   const navigate = useNavigate();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
+  const [variationData, setVariationData] = useState<VariationData | null>(null);
 
   useEffect(() => {
-    // Check authentication
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    const initializeEditor = async () => {
+      // Check authentication
+      const { data: { session } } = await supabase.auth.getSession();
+      
       if (!session?.user) {
         toast.error("Please sign in to edit templates");
         navigate("/");
         return;
       }
+      
       setUser(session.user);
+
+      // Load variation data
+      if (variationId) {
+        const { data: variation, error } = await supabase
+          .from('video_variations')
+          .select('*')
+          .eq('id', variationId)
+          .single();
+
+        if (error) {
+          console.error('Error loading variation:', error);
+          toast.error('Failed to load template');
+          navigate('/videos');
+          return;
+        }
+
+        setVariationData(variation);
+
+        // Automatically save to My Templates
+        const { error: saveError } = await supabase
+          .from('user_templates')
+          .upsert({
+            user_id: session.user.id,
+            variation_id: variationId,
+            custom_title: variation.title,
+          }, {
+            onConflict: 'user_id,variation_id',
+            ignoreDuplicates: false
+          });
+
+        if (saveError) {
+          console.error('Error saving to templates:', saveError);
+        } else {
+          toast.success('Template saved to My Templates');
+        }
+      }
+
       setLoading(false);
-    });
+    };
+
+    initializeEditor();
 
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       if (!session?.user) {
@@ -32,7 +84,7 @@ export default function TemplateEditor() {
     });
 
     return () => subscription.unsubscribe();
-  }, [navigate]);
+  }, [navigate, variationId]);
 
   if (loading) {
     return (
@@ -45,7 +97,7 @@ export default function TemplateEditor() {
     );
   }
 
-  if (!user) return null;
+  if (!user || !variationData) return null;
 
-  return <TemplateEditorLayout variationId={variationId} />;
+  return <TemplateEditorLayout variationId={variationId} variationData={variationData} />;
 }

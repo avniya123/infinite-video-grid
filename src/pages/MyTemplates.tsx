@@ -6,7 +6,7 @@ import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2 } from 'lucide-react';
+import { Loader2, ArrowLeft, Trash2, Edit } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 
@@ -201,17 +201,29 @@ export default function MyTemplates() {
                     onPlay={handlePlayVideo}
                     onClick={handlePlayVideo}
                   />
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTemplate(template.id);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="default"
+                      size="icon"
+                      className="bg-primary hover:bg-primary/90"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/template-editor/${template.variation_id}`);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTemplate(template.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
