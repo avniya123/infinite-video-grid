@@ -409,13 +409,13 @@ export default function ShareCartCheckout() {
               </div>
             </Card>
 
-            {/* Shared Users Management */}
+            {/* Published Users Management */}
             <Card className="p-6 shadow-sm border-border/50">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-lg font-semibold">Shared Users</h2>
+                  <h2 className="text-lg font-semibold">Published Users</h2>
                   <p className="text-sm text-muted-foreground mt-1">
-                    Manage users who can access this template
+                    Manage users who will receive this published template
                   </p>
                 </div>
                 <Button
@@ -594,9 +594,9 @@ export default function ShareCartCheckout() {
           <div className="space-y-8">
             {/* Render Process */}
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Render Process</h3>
+              <h3 className="font-semibold mb-4">Publishing Method</h3>
               <p className="text-xs text-muted-foreground mb-4">
-                {isQuickMode ? 'Quick cart mode - Shared user access only' : 'Choose how to render the template'}
+                {isQuickMode ? 'Quick publish mode - Published user access only' : 'Choose how to publish the template'}
               </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
@@ -612,7 +612,7 @@ export default function ShareCartCheckout() {
                   }`}
                 >
                   <Users className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className="text-sm font-medium">Shared User</p>
+                  <p className="text-sm font-medium">Published User</p>
                 </button>
                 
                 <TooltipProvider>
@@ -668,7 +668,7 @@ export default function ShareCartCheckout() {
               <div className="space-y-3 text-sm">
                 {/* Render Process Indicator */}
                 <div className="flex justify-between items-center pb-3 border-b">
-                  <span className="text-muted-foreground font-medium">Render Process</span>
+                  <span className="text-muted-foreground font-medium">Publishing Method</span>
                   <div className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 ${
                     shareMethod === 'cart' 
                       ? 'bg-primary/10 text-primary border border-primary/20' 
@@ -677,7 +677,7 @@ export default function ShareCartCheckout() {
                     {shareMethod === 'cart' ? (
                       <>
                         <Users className="w-3.5 h-3.5" />
-                        Shared User
+                        Published User
                       </>
                     ) : (
                       <>
@@ -692,7 +692,7 @@ export default function ShareCartCheckout() {
                   <span className="font-medium">₹ {pricing.mrp.toFixed(2)}</span>
                 </div>
                 <div className="flex justify-between">
-                  <span className="text-muted-foreground">No Of Shared Users</span>
+                  <span className="text-muted-foreground">No Of Published Users</span>
                   <span className="font-medium">X {sharedUsers.length || 1}</span>
                 </div>
                 <div className="flex justify-between">
@@ -799,7 +799,7 @@ export default function ShareCartCheckout() {
                   <div className="flex items-center justify-between p-3 bg-background/80 rounded-lg">
                     <div className="flex items-center gap-2">
                       <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Shared Users</span>
+                      <span className="text-sm font-medium">Published Users</span>
                     </div>
                     <Badge variant="default" className="bg-primary">
                       {sharedUsers.length || 0} {sharedUsers.length === 1 ? 'user' : 'users'}
@@ -902,13 +902,13 @@ export default function ShareCartCheckout() {
 
             {/* Render Process */}
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm text-muted-foreground">Render Process</h4>
+              <h4 className="font-semibold text-sm text-muted-foreground">Publishing Method</h4>
               <div className="p-4 bg-muted/30 rounded-lg">
                 <div className="flex items-center gap-2">
                   {shareMethod === 'cart' ? (
                     <>
                       <Users className="h-5 w-5 text-primary" />
-                      <span className="font-medium">Shared User Access</span>
+                      <span className="font-medium">Published User Access</span>
                     </>
                   ) : (
                     <>
@@ -919,17 +919,17 @@ export default function ShareCartCheckout() {
                 </div>
                 <p className="text-sm text-muted-foreground mt-2">
                   {shareMethod === 'cart' 
-                    ? `Template will be shared with ${sharedUsers.length} user(s). Each user will receive individual access.`
+                    ? `Template will be published to ${sharedUsers.length} user(s). Each user will receive individual access.`
                     : 'You will have full editing and rendering rights for this template.'}
                 </p>
               </div>
             </div>
 
-            {/* Shared Users Summary */}
+            {/* Published Users Summary */}
             {shareMethod === 'cart' && sharedUsers.length > 0 && (
               <div className="space-y-2">
                 <h4 className="font-semibold text-sm text-muted-foreground">
-                  Shared Users ({sharedUsers.length})
+                  Published Users ({sharedUsers.length})
                 </h4>
                 <div className="p-4 bg-muted/30 rounded-lg max-h-40 overflow-y-auto">
                   <div className="space-y-2">
