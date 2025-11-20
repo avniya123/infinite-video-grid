@@ -82,8 +82,8 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
   };
 
   const selectCategory = (category: string) => {
-    // If on landing page or my-templates page, navigate to videos page
-    if (location.pathname === '/' || location.pathname === '/my-templates') {
+    // If NOT on videos page, navigate to videos page with category
+    if (location.pathname !== '/videos') {
       navigate('/videos');
       // Set category after navigation
       setTimeout(() => {
@@ -95,7 +95,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
       return;
     }
 
-    // Toggle category selection on videos page
+    // If on videos page, toggle category selection
     if (selectedCategory === category) {
       setSelectedCategory(null);
       if (onSubcategorySelect) {
