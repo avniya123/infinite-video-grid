@@ -320,13 +320,18 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </p>
           </div>
 
-          {/* Variations Badge - Shows on hover */}
-          <div className="absolute bottom-3 right-3 z-20 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Badge className="bg-gray-900/95 hover:bg-gray-800/95 dark:bg-white/95 dark:hover:bg-gray-100/95 text-white dark:text-gray-900 font-semibold text-[10px] px-2.5 py-1.5 shadow-lg border-0 gap-1.5">
-              <List className="h-3 w-3" />
-              {variationsCount + 1} Variations
-            </Badge>
-          </div>
+          {/* Variations Button */}
+          <Button
+            size="sm"
+            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              setVariationsOpen(true);
+            }}
+          >
+            <List className="h-3.5 w-3.5" />
+            Variations
+          </Button>
         </div>
       </AspectRatio>
 
