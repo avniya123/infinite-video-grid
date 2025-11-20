@@ -3,7 +3,8 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
-import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+import { VariationsDrawer } from '@/components/VariationsDrawer';
+import { AuthDrawer } from '@/components/AuthDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -11,7 +12,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { FilterChips } from '@/components/FilterChips';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2, Edit, ArrowUpDown, ChevronDown, List, Columns3, Search, X } from 'lucide-react';
+import { Loader2, ArrowLeft, Trash2, ArrowUpDown, ChevronDown, List, Columns3, Search, X } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 import { useVideoFilters } from '@/hooks/useVideoFilters';
@@ -49,7 +50,8 @@ export default function MyTemplates() {
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<UserTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [variationsOpen, setVariationsOpen] = useState(false);
+  const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [columnCount, setColumnCount] = useState(3);
 
@@ -181,7 +183,7 @@ export default function MyTemplates() {
 
   const handlePlayVideo = (video: VideoItem) => {
     setSelectedVideo(video);
-    setDrawerOpen(true);
+    setVariationsOpen(true);
   };
 
   const handlePublishConfirm = async (video: VideoItem) => {
@@ -441,21 +443,8 @@ export default function MyTemplates() {
                         onClick={handlePlayVideo}
                         showShareButton={false}
                       />
-                      {/* Edit and Delete buttons */}
+                      {/* Delete button */}
                       <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                        <Button
-                          variant="default"
-                          size="icon"
-                          className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (video.variationId) {
-                              navigate(`/template-editor/${video.variationId}`);
-                            }
-                          }}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
                         <Button
                           variant="destructive"
                           size="icon"
@@ -490,21 +479,8 @@ export default function MyTemplates() {
                         alt={video.title}
                         className="w-full h-40 object-cover rounded-lg"
                       />
-                      {/* Action buttons */}
+                      {/* Delete button */}
                       <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                        <Button
-                          variant="default"
-                          size="icon"
-                          className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            if (video.variationId) {
-                              navigate(`/template-editor/${video.variationId}`);
-                            }
-                          }}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
                         <Button
                           variant="destructive"
                           size="icon"
@@ -547,12 +523,18 @@ export default function MyTemplates() {
       </div>
 
       {selectedVideo && (
-        <VideoPlayerDrawer
-          open={drawerOpen}
-          onOpenChange={setDrawerOpen}
+        <VariationsDrawer
           video={selectedVideo}
+          open={variationsOpen}
+          onOpenChange={setVariationsOpen}
+          onRequestAuth={() => setAuthDrawerOpen(true)}
         />
       )}
+
+      <AuthDrawer 
+        open={authDrawerOpen} 
+        onOpenChange={setAuthDrawerOpen}
+      />
     </div>
   );
 }
