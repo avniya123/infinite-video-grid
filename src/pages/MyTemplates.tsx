@@ -634,9 +634,9 @@ export default function MyTemplates() {
                         hideVariationsShareButton={true}
                       />
                       
-                      {/* Publish Card Badge */}
+                      {/* Publish Card Badge - Top Center */}
                       {template.published && (
-                        <Badge className="absolute top-3 left-3 bg-green-500 text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-20 border-0">
+                        <Badge className="absolute top-3 left-1/2 -translate-x-1/2 bg-green-500 text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-20 border-0">
                           <ShoppingCart className="h-3 w-3 mr-1" />
                           Publish Card
                         </Badge>
@@ -655,7 +655,7 @@ export default function MyTemplates() {
                             }}
                             title="Remove from Publish Cart"
                           >
-                            <X className="h-3.5 w-3.5" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
                         ) : (
                           <>
@@ -736,9 +736,9 @@ export default function MyTemplates() {
                         alt={video.title}
                         className="w-full h-40 object-cover rounded-lg"
                       />
-                      {/* Publish Card Badge for List View */}
+                      {/* Publish Card Badge for List View - Top Center */}
                       {template.published && (
-                        <Badge className="absolute top-2 left-2 bg-green-500 text-white font-semibold text-xs px-2 py-1 shadow-lg border-0">
+                        <Badge className="absolute top-2 left-1/2 -translate-x-1/2 bg-green-500 text-white font-semibold text-xs px-2 py-1 shadow-lg border-0">
                           <ShoppingCart className="h-3.5 w-3.5 mr-1" />
                           Publish Card
                         </Badge>
@@ -756,16 +756,16 @@ export default function MyTemplates() {
                         {template.published ? (
                           <div className="flex gap-2">
                             <Button
-                              variant="secondary"
+                              variant="destructive"
                               size="icon"
-                              className="h-8 w-8 bg-red-500 hover:bg-red-600 text-white transition-transform hover:scale-110"
+                              className="h-8 w-8 transition-transform hover:scale-110"
                               onClick={(e) => {
                                 e.stopPropagation();
                                 handleRemoveFromPublishCart(template.id);
                               }}
                               title="Remove from Publish Cart"
                             >
-                              <X className="h-4 w-4" />
+                              <Trash2 className="h-4 w-4" />
                             </Button>
                           </div>
                         ) : (
