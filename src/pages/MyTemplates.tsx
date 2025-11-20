@@ -601,17 +601,17 @@ export default function MyTemplates() {
                         hideVariationsShareButton={true}
                       />
                       
-                      {/* In Cart Badge */}
+                      {/* Publish Card Badge */}
                       {template.published && (
-                        <Badge className="absolute top-3 left-3 bg-cyan-500 text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-20 border-0">
+                        <Badge className="absolute top-3 left-3 bg-green-500 text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-20 border-0">
                           <ShoppingCart className="h-3 w-3 mr-1" />
-                          In Cart
+                          Publish Card
                         </Badge>
                       )}
                       
-                      {/* Action buttons */}
-                      <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                        {!template.published && (
+                      {/* Action buttons - only show if not published */}
+                      {!template.published && (
+                        <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
                           <Button
                             variant="secondary"
                             size="icon"
@@ -624,30 +624,30 @@ export default function MyTemplates() {
                           >
                             <ShoppingCart className="h-3.5 w-3.5" />
                           </Button>
-                        )}
-                        <Button
-                          variant="default"
-                          size="icon"
-                          className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            navigate(`/template-editor/${template.variation_id}`);
-                          }}
-                        >
-                          <Edit className="h-3.5 w-3.5" />
-                        </Button>
-                        <Button
-                          variant="destructive"
-                          size="icon"
-                          className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteTemplate(template.id);
-                          }}
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </Button>
-                      </div>
+                          <Button
+                            variant="default"
+                            size="icon"
+                            className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/template-editor/${template.variation_id}`);
+                            }}
+                          >
+                            <Edit className="h-3.5 w-3.5" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTemplate(template.id);
+                            }}
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   </div>
                 );
@@ -688,11 +688,11 @@ export default function MyTemplates() {
                         alt={video.title}
                         className="w-full h-40 object-cover rounded-lg"
                       />
-                      {/* In Cart Badge for List View */}
+                      {/* Publish Card Badge for List View */}
                       {template.published && (
-                        <Badge className="absolute top-2 left-2 bg-cyan-500 text-white font-semibold text-xs px-2 py-1 shadow-lg border-0">
+                        <Badge className="absolute top-2 left-2 bg-green-500 text-white font-semibold text-xs px-2 py-1 shadow-lg border-0">
                           <ShoppingCart className="h-3.5 w-3.5 mr-1" />
-                          In Cart
+                          Publish Card
                         </Badge>
                       )}
                     </div>
@@ -704,8 +704,9 @@ export default function MyTemplates() {
                             {video.duration} • {video.orientation} • {video.resolution}
                           </p>
                         </div>
-                        <div className="flex gap-2">
-                          {!template.published && (
+                        {/* Action buttons - only show if not published */}
+                        {!template.published && (
+                          <div className="flex gap-2">
                             <Button
                               variant="secondary"
                               size="icon"
@@ -718,32 +719,32 @@ export default function MyTemplates() {
                             >
                               <ShoppingCart className="h-4 w-4" />
                             </Button>
-                          )}
-                          <Button
-                            variant="default"
-                            size="icon"
-                            className="h-8 w-8 transition-transform hover:scale-110"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/template-editor/${template.variation_id}`);
-                            }}
-                            title="Edit template"
-                          >
-                            <Edit className="h-4 w-4" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-8 w-8 transition-transform hover:scale-110"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteTemplate(template.id);
-                            }}
-                            title="Delete template"
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </div>
+                            <Button
+                              variant="default"
+                              size="icon"
+                              className="h-8 w-8 transition-transform hover:scale-110"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/template-editor/${template.variation_id}`);
+                              }}
+                              title="Edit template"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8 transition-transform hover:scale-110"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteTemplate(template.id);
+                              }}
+                              title="Delete template"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        )}
                       </div>
                     </div>
                   </div>
