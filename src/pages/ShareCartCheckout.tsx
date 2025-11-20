@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X, Upload, Download } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface SharedUser {
@@ -58,6 +59,17 @@ export default function ShareCartCheckout() {
   const [userToDelete, setUserToDelete] = useState<SharedUser | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  
+  // Edit user states
+  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<SharedUser | null>(null);
+  const [editUserName, setEditUserName] = useState('');
+  const [editUserPhone, setEditUserPhone] = useState('');
+  const [editUserEmail, setEditUserEmail] = useState('');
+  const [editUserType, setEditUserType] = useState('');
+  
+  // CSV import states
+  const [csvImportDrawerOpen, setCsvImportDrawerOpen] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -153,6 +165,80 @@ export default function ShareCartCheckout() {
     setBulkDeleteDialogOpen(false);
   };
 
+  const handleEditUser = (user: SharedUser) => {
+    setEditingUser(user);
+    setEditUserName(user.name);
+    setEditUserPhone(user.phone);
+    setEditUserEmail(user.email);
+    setEditUserType(user.userType);
+    setEditDrawerOpen(true);
+  };
+
+  const handleUpdateUser = () => {
+    if (!editingUser || !editUserName || !editUserPhone || !editUserEmail || !editUserType) {
+      toast.error('Please fill all required fields');
+      return;
+    }
+
+    setSharedUsers(sharedUsers.map(u => 
+      u.id === editingUser.id 
+        ? { ...u, name: editUserName, phone: editUserPhone, email: editUserEmail, userType: editUserType }
+        : u
+    ));
+    
+    toast.success('User updated successfully');
+    setEditDrawerOpen(false);
+    setEditingUser(null);
+  };
+
+  const handleDownloadTemplate = () => {
+    const csvContent = "name,phone,email,userType\nJohn Doe,+91 9876543210,john@example.com,Family\nJane Smith,+91 9876543211,jane@example.com,Friend";
+    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'shared_users_template.csv';
+    a.click();
+    window.URL.revokeObjectURL(url);
+    toast.success('CSV template downloaded');
+  };
+
+  const handleCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const text = e.target?.result as string;
+      const lines = text.split('\n');
+      const headers = lines[0].split(',').map(h => h.trim());
+      
+      const newUsers: SharedUser[] = [];
+      for (let i = 1; i < lines.length; i++) {
+        const values = lines[i].split(',').map(v => v.trim());
+        if (values.length >= 4 && values[0]) {
+          newUsers.push({
+            id: Date.now().toString() + i,
+            name: values[0],
+            phone: values[1],
+            email: values[2],
+            userType: values[3],
+            hasAccess: true,
+          });
+        }
+      }
+      
+      if (newUsers.length > 0) {
+        setSharedUsers([...sharedUsers, ...newUsers]);
+        toast.success(`${newUsers.length} user(s) imported successfully`);
+        setCsvImportDrawerOpen(false);
+      } else {
+        toast.error('No valid users found in CSV file');
+      }
+    };
+    reader.readAsText(file);
+  };
+
   const handleToggleAccess = (userId: string) => {
     setSharedUsers(sharedUsers.map(u => 
       u.id === userId ? { ...u, hasAccess: !u.hasAccess } : u
@@ -225,10 +311,20 @@ export default function ShareCartCheckout() {
         {/* Header */}
         <div className="flex items-center justify-between mb-8">
           <h1 className="text-3xl font-bold">Share Cart Place Order</h1>
-          <Button onClick={() => setDrawerOpen(true)} className="gap-2">
-            <UserPlus className="w-5 h-5" />
-            Add Share Users
-          </Button>
+          <div className="flex gap-3">
+            <Button 
+              variant="outline" 
+              onClick={() => setCsvImportDrawerOpen(true)} 
+              className="gap-2"
+            >
+              <Upload className="w-5 h-5" />
+              Import CSV
+            </Button>
+            <Button onClick={() => setDrawerOpen(true)} className="gap-2">
+              <UserPlus className="w-5 h-5" />
+              Add Share Users
+            </Button>
+          </div>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-6">
@@ -341,7 +437,12 @@ export default function ShareCartCheckout() {
                         </div>
                       </div>
                       <div className="col-span-3 flex gap-2">
-                        <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <Button 
+                          variant="ghost" 
+                          size="icon" 
+                          className="h-8 w-8"
+                          onClick={() => handleEditUser(sharedUser)}
+                        >
                           <Edit className="w-4 h-4" />
                         </Button>
                         <Button 
@@ -622,6 +723,151 @@ export default function ShareCartCheckout() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Edit User Drawer */}
+      <Sheet open={editDrawerOpen} onOpenChange={setEditDrawerOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="border-b pb-4 mb-6">
+            <SheetTitle>Edit Shared User</SheetTitle>
+          </SheetHeader>
+
+          <div className="space-y-4">
+            <div>
+              <label className="text-sm font-medium">
+                Select Type Of User <span className="text-destructive">*</span>
+              </label>
+              <Select value={editUserType} onValueChange={setEditUserType}>
+                <SelectTrigger className="mt-2">
+                  <SelectValue placeholder="Select a User..." />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="family">Family</SelectItem>
+                  <SelectItem value="friend">Friend</SelectItem>
+                  <SelectItem value="colleague">Colleague</SelectItem>
+                  <SelectItem value="client">Client</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            <div>
+              <label className="text-sm font-medium">
+                User name <span className="text-destructive">*</span>
+              </label>
+              <Input
+                placeholder="Enter the user name"
+                value={editUserName}
+                onChange={(e) => setEditUserName(e.target.value)}
+                className="mt-2"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="text-sm font-medium">
+                  User Phone Number <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  placeholder="+91 0000000000"
+                  value={editUserPhone}
+                  onChange={(e) => setEditUserPhone(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+              <div>
+                <label className="text-sm font-medium">
+                  Email Id <span className="text-destructive">*</span>
+                </label>
+                <Input
+                  type="email"
+                  placeholder="yourmail@mail.com"
+                  value={editUserEmail}
+                  onChange={(e) => setEditUserEmail(e.target.value)}
+                  className="mt-2"
+                />
+              </div>
+            </div>
+
+            <Button 
+              onClick={handleUpdateUser}
+              className="w-full mt-6"
+            >
+              <Edit className="w-4 h-4 mr-2" />
+              Update User
+            </Button>
+          </div>
+        </SheetContent>
+      </Sheet>
+
+      {/* CSV Import Drawer */}
+      <Sheet open={csvImportDrawerOpen} onOpenChange={setCsvImportDrawerOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="border-b pb-4 mb-6">
+            <SheetTitle>Import Users from CSV</SheetTitle>
+          </SheetHeader>
+
+          <div className="space-y-6">
+            {/* Instructions */}
+            <div className="bg-muted/50 p-4 rounded-lg">
+              <h3 className="font-semibold mb-2">CSV Format Instructions</h3>
+              <p className="text-sm text-muted-foreground mb-3">
+                Your CSV file should have the following columns in order:
+              </p>
+              <div className="bg-background p-3 rounded font-mono text-xs mb-3">
+                name,phone,email,userType
+              </div>
+              <p className="text-sm text-muted-foreground">
+                <span className="font-medium">User Types:</span> Family, Friend, Colleague, or Client
+              </p>
+            </div>
+
+            {/* Download Template */}
+            <div className="flex flex-col gap-3">
+              <Button
+                variant="outline"
+                onClick={handleDownloadTemplate}
+                className="gap-2"
+              >
+                <Download className="w-4 h-4" />
+                Download CSV Template
+              </Button>
+
+              {/* File Upload */}
+              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                <p className="text-sm font-medium mb-2">Upload CSV File</p>
+                <p className="text-xs text-muted-foreground mb-4">
+                  Click to select a CSV file from your computer
+                </p>
+                <label className="cursor-pointer">
+                  <input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCsvImport}
+                    className="hidden"
+                  />
+                  <Button variant="default" asChild>
+                    <span>
+                      <Upload className="w-4 h-4 mr-2" />
+                      Choose File
+                    </span>
+                  </Button>
+                </label>
+              </div>
+            </div>
+
+            {/* Example */}
+            <div className="bg-muted/30 p-4 rounded-lg">
+              <h4 className="text-sm font-semibold mb-2">Example CSV Content:</h4>
+              <pre className="text-xs bg-background p-3 rounded overflow-x-auto">
+{`name,phone,email,userType
+John Doe,+91 9876543210,john@example.com,Family
+Jane Smith,+91 9876543211,jane@example.com,Friend
+Bob Johnson,+91 9876543212,bob@example.com,Colleague`}
+              </pre>
+            </div>
+          </div>
+        </SheetContent>
+      </Sheet>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
