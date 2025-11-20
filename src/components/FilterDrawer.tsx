@@ -1,6 +1,6 @@
 import { Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription, SheetClose } from '@/components/ui/sheet';
 import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
@@ -147,18 +147,25 @@ export const FilterDrawer = ({
             Filter videos by categories, subcategories, duration, aspect ratio, and price range
           </SheetDescription>
           <div className="flex items-center justify-between">
-            <SheetTitle className="text-2xl">Filters</SheetTitle>
-            {hasActiveFilters && (
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={onResetFilters}
-                className="text-destructive hover:text-destructive hover:bg-destructive/10"
-              >
-                <X className="w-4 h-4 mr-1" />
-                Clear All
+            <div className="flex items-center gap-3">
+              <SheetTitle className="text-2xl">Filters</SheetTitle>
+              {hasActiveFilters && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={onResetFilters}
+                  className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7"
+                >
+                  <X className="w-4 h-4 mr-1" />
+                  Clear All
+                </Button>
+              )}
+            </div>
+            <SheetClose asChild>
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                <X className="w-4 h-4" />
               </Button>
-            )}
+            </SheetClose>
           </div>
         </SheetHeader>
         
