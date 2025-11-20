@@ -217,6 +217,7 @@ export default function PublishCart() {
                       onClick={handlePlayVideo}
                       showShareButton={false}
                       showSaveButton={false}
+                      showPrice={false}
                       publishMode={false}
                     />
                     {/* Remove from cart button */}
@@ -236,55 +237,6 @@ export default function PublishCart() {
                   </div>
                 );
               })}
-            </div>
-
-            {/* Checkout Section */}
-            <div className="mt-8 max-w-md ml-auto">
-              <div className="bg-card border border-border rounded-lg p-6 shadow-lg">
-                <h3 className="text-lg font-semibold text-foreground mb-4">Order Summary</h3>
-                <div className="space-y-3">
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Templates</span>
-                    <span className="font-medium">{publishedTemplates.length}</span>
-                  </div>
-                  <div className="flex justify-between text-sm">
-                    <span className="text-muted-foreground">Subtotal</span>
-                    <span className="font-medium">₹{calculateTotalPrice()}</span>
-                  </div>
-                  <div className="border-t border-border pt-3">
-                    <div className="flex justify-between">
-                      <span className="font-semibold text-foreground">Total</span>
-                      <span className="font-bold text-xl text-primary">₹{calculateTotalPrice()}</span>
-                    </div>
-                  </div>
-                </div>
-                <Button 
-                  className="w-full mt-6" 
-                  size="lg"
-                  onClick={() => {
-                    if (publishedTemplates.length > 0) {
-                      const template = publishedTemplates[0];
-                      navigate('/share-cart-checkout', {
-                        state: {
-                          template: {
-                            id: template.id,
-                            title: template.video_variations.title,
-                            price: 450,
-                            mrp: 1000,
-                            discount: '55% Off',
-                            duration: template.video_variations.duration,
-                            orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
-                            resolution: 'HD',
-                            thumbnailUrl: template.video_variations.thumbnail_url,
-                          }
-                        }
-                      });
-                    }
-                  }}
-                >
-                  Proceed to Checkout
-                </Button>
-              </div>
             </div>
           </>
         )}
