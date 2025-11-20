@@ -437,15 +437,6 @@ export default function PublishCart() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/my-templates')}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-            
             <div className="p-2.5 bg-primary/10 rounded-xl">
               <ShoppingCart className="h-6 w-6 text-primary" />
             </div>
