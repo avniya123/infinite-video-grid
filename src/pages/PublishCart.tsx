@@ -201,9 +201,9 @@ export default function PublishCart() {
                   subcategory: '',
                   orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
                               template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                  price: '$0',
-                  mrp: '$0',
-                  discount: '0%',
+                  price: '₹450',
+                  mrp: '₹1000',
+                  discount: '55% Off',
                   trending: false,
                   resolution: 'HD',
                   videoUrl: template.video_variations.video_url || undefined,
@@ -217,7 +217,7 @@ export default function PublishCart() {
                       onClick={handlePlayVideo}
                       showShareButton={false}
                       showSaveButton={false}
-                      showPrice={false}
+                      showPrice={true}
                       publishMode={false}
                     />
                     {/* Remove from cart button */}
