@@ -98,6 +98,28 @@ export default function ShareCartCheckout() {
       return;
     }
 
+    // Check for duplicate email
+    const duplicateEmail = sharedUsers.find(
+      user => user.email.toLowerCase() === newUserEmail.toLowerCase()
+    );
+    if (duplicateEmail) {
+      toast.error('User with this email already exists', {
+        description: `${duplicateEmail.name} is already in the shared users list.`,
+      });
+      return;
+    }
+
+    // Check for duplicate phone
+    const duplicatePhone = sharedUsers.find(
+      user => user.phone === newUserPhone
+    );
+    if (duplicatePhone) {
+      toast.error('User with this phone number already exists', {
+        description: `${duplicatePhone.name} is already in the shared users list.`,
+      });
+      return;
+    }
+
     const newUser: SharedUser = {
       id: Date.now().toString(),
       name: newUserName,
@@ -179,6 +201,28 @@ export default function ShareCartCheckout() {
       return;
     }
 
+    // Check for duplicate email (excluding current user)
+    const duplicateEmail = sharedUsers.find(
+      user => user.id !== editingUser.id && user.email.toLowerCase() === editUserEmail.toLowerCase()
+    );
+    if (duplicateEmail) {
+      toast.error('User with this email already exists', {
+        description: `${duplicateEmail.name} already has this email address.`,
+      });
+      return;
+    }
+
+    // Check for duplicate phone (excluding current user)
+    const duplicatePhone = sharedUsers.find(
+      user => user.id !== editingUser.id && user.phone === editUserPhone
+    );
+    if (duplicatePhone) {
+      toast.error('User with this phone number already exists', {
+        description: `${duplicatePhone.name} already has this phone number.`,
+      });
+      return;
+    }
+
     setSharedUsers(sharedUsers.map(u => 
       u.id === editingUser.id 
         ? { ...u, name: editUserName, phone: editUserPhone, email: editUserEmail, userType: editUserType }
@@ -213,26 +257,70 @@ export default function ShareCartCheckout() {
       const headers = lines[0].split(',').map(h => h.trim());
       
       const newUsers: SharedUser[] = [];
+      const duplicates: string[] = [];
+      const skipped: string[] = [];
+      
       for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',').map(v => v.trim());
         if (values.length >= 4 && values[0]) {
+          const email = values[2];
+          const phone = values[1];
+          const name = values[0];
+          
+          // Check for duplicates in existing shared users
+          const duplicateEmail = sharedUsers.find(
+            user => user.email.toLowerCase() === email.toLowerCase()
+          );
+          const duplicatePhone = sharedUsers.find(
+            user => user.phone === phone
+          );
+          
+          // Check for duplicates within the CSV being imported
+          const csvDuplicateEmail = newUsers.find(
+            user => user.email.toLowerCase() === email.toLowerCase()
+          );
+          const csvDuplicatePhone = newUsers.find(
+            user => user.phone === phone
+          );
+          
+          if (duplicateEmail || duplicatePhone || csvDuplicateEmail || csvDuplicatePhone) {
+            duplicates.push(name);
+            continue;
+          }
+          
           newUsers.push({
             id: Date.now().toString() + i,
-            name: values[0],
-            phone: values[1],
-            email: values[2],
+            name: name,
+            phone: phone,
+            email: email,
             userType: values[3],
             hasAccess: true,
           });
+        } else {
+          skipped.push(`Row ${i + 1}`);
         }
       }
       
       if (newUsers.length > 0) {
         setSharedUsers([...sharedUsers, ...newUsers]);
-        toast.success(`${newUsers.length} user(s) imported successfully`);
+        
+        let message = `${newUsers.length} user(s) imported successfully`;
+        if (duplicates.length > 0) {
+          message += `. ${duplicates.length} duplicate(s) skipped: ${duplicates.slice(0, 3).join(', ')}${duplicates.length > 3 ? '...' : ''}`;
+        }
+        
+        toast.success('CSV Import Complete', {
+          description: message,
+        });
         setCsvImportDrawerOpen(false);
       } else {
-        toast.error('No valid users found in CSV file');
+        if (duplicates.length > 0) {
+          toast.error('All users in CSV already exist', {
+            description: `${duplicates.length} duplicate user(s) were skipped.`,
+          });
+        } else {
+          toast.error('No valid users found in CSV file');
+        }
       }
     };
     reader.readAsText(file);
