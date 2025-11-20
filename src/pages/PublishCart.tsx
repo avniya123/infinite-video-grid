@@ -109,8 +109,55 @@ export default function PublishCart() {
     setDrawerOpen(true);
   };
 
+  const calculateTemplatePrice = (template: PublishedTemplate) => {
+    // Base price calculation based on aspect ratio
+    let basePrice = 350;
+    const aspectRatio = template.video_variations.aspect_ratio;
+    
+    // Aspect ratio pricing
+    if (aspectRatio === '16:9') {
+      basePrice = 450; // Landscape (YouTube, presentations)
+    } else if (aspectRatio === '9:16') {
+      basePrice = 550; // Portrait (Instagram Stories, TikTok)
+    } else if (aspectRatio === '1:1') {
+      basePrice = 400; // Square (Instagram Posts)
+    }
+    
+    // Platform multiplier
+    const platforms = template.video_variations.platforms || [];
+    if (platforms.length > 3) {
+      basePrice += 100; // Multi-platform support
+    }
+    
+    // Duration multiplier (parse duration like "0:30" or "1:45")
+    const duration = template.video_variations.duration;
+    const [minutes, seconds] = duration.split(':').map(Number);
+    const totalSeconds = (minutes * 60) + seconds;
+    
+    if (totalSeconds > 60) {
+      basePrice += 150; // Longer videos cost more
+    } else if (totalSeconds > 30) {
+      basePrice += 75;
+    }
+    
+    // Calculate MRP (base price + 120% markup)
+    const mrp = Math.round(basePrice * 2.2);
+    
+    // Calculate discount percentage
+    const discountPercent = Math.round(((mrp - basePrice) / mrp) * 100);
+    
+    return {
+      price: basePrice,
+      mrp: mrp,
+      discount: `${discountPercent}% Off`
+    };
+  };
+
   const calculateTotalPrice = () => {
-    return publishedTemplates.length * 0; // Currently free
+    return publishedTemplates.reduce((total, template) => {
+      const pricing = calculateTemplatePrice(template);
+      return total + pricing.price;
+    }, 0);
   };
 
   if (loading) {
@@ -166,7 +213,7 @@ export default function PublishCart() {
                 {publishedTemplates.length} {publishedTemplates.length === 1 ? 'template' : 'templates'}
               </div>
               <div className="text-2xl font-bold text-primary">
-                ₹{calculateTotalPrice()}
+                ₹{calculateTotalPrice().toLocaleString()}
               </div>
             </div>
           </div>
@@ -191,6 +238,7 @@ export default function PublishCart() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {publishedTemplates.map((template) => {
+                const pricing = calculateTemplatePrice(template);
                 const video: VideoItem = {
                   id: template.video_variations.video_id,
                   title: template.custom_title || template.video_variations.title,
@@ -201,9 +249,9 @@ export default function PublishCart() {
                   subcategory: '',
                   orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
                               template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                  price: '₹450',
-                  mrp: '₹1000',
-                  discount: '55% Off',
+                  price: `₹${pricing.price}`,
+                  mrp: `₹${pricing.mrp}`,
+                  discount: pricing.discount,
                   trending: false,
                   resolution: 'HD',
                   videoUrl: template.video_variations.video_url || undefined,
@@ -247,14 +295,15 @@ export default function PublishCart() {
                 onClick={() => {
                   if (publishedTemplates.length > 0) {
                     const template = publishedTemplates[0];
+                    const pricing = calculateTemplatePrice(template);
                     navigate('/share-cart-checkout', {
                       state: {
                         template: {
                           id: template.id,
                           title: template.video_variations.title,
-                          price: 450,
-                          mrp: 1000,
-                          discount: '55% Off',
+                          price: pricing.price,
+                          mrp: pricing.mrp,
+                          discount: pricing.discount,
                           duration: template.video_variations.duration,
                           orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
                           resolution: 'HD',
