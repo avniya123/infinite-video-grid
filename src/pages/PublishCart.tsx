@@ -130,6 +130,16 @@ export default function PublishCart() {
   };
 
   const handleRemoveFromCart = async (templateId: string) => {
+    // Optimistic update - immediately remove from UI
+    const templateToRemove = publishedTemplates.find(t => t.id === templateId);
+    const previousTemplates = [...publishedTemplates];
+    
+    // Update UI immediately with fade-out animation
+    setPublishedTemplates(publishedTemplates.filter(t => t.id !== templateId));
+    
+    // Show optimistic feedback
+    toast.success('Removing from cart...', { duration: 1000 });
+    
     try {
       const { error } = await supabase
         .from('user_templates')
@@ -138,9 +148,11 @@ export default function PublishCart() {
 
       if (error) throw error;
 
-      setPublishedTemplates(publishedTemplates.filter(t => t.id !== templateId));
+      // Confirm success
       toast.success('Template removed from publish cart');
     } catch (error: any) {
+      // Revert on failure
+      setPublishedTemplates(previousTemplates);
       toast.error('Failed to remove template from cart');
       console.error('Error removing from cart:', error);
     }
@@ -703,11 +715,12 @@ export default function PublishCart() {
                         <Button
                           variant="destructive"
                           size="icon"
-                          className="h-8 w-8"
+                          className="h-8 w-8 transition-transform hover:scale-110"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleRemoveFromCart(template.id);
                           }}
+                          title="Remove from cart"
                         >
                           <Trash2 className="h-4 w-4" />
                         </Button>
