@@ -82,8 +82,8 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
   };
 
   const selectCategory = (category: string) => {
-    // If on landing page, navigate to videos page
-    if (location.pathname === '/') {
+    // If on landing page or my-templates page, navigate to videos page
+    if (location.pathname === '/' || location.pathname === '/my-templates') {
       navigate('/videos');
       // Set category after navigation
       setTimeout(() => {
