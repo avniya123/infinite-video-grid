@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+import { TemplateEditorDrawer } from '@/components/TemplateEditorDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -50,6 +51,8 @@ export default function MyTemplates() {
   const [templates, setTemplates] = useState<UserTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [editorDrawerOpen, setEditorDrawerOpen] = useState(false);
+  const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [columnCount, setColumnCount] = useState(3);
 
@@ -244,20 +247,19 @@ export default function MyTemplates() {
       />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/videos')}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Videos
-          </Button>
-
-          <h1 className="text-3xl font-bold text-foreground mb-2">My Templates</h1>
-          <p className="text-muted-foreground">
-            Manage your saved video templates
-          </p>
+      <div className="mb-6">
+          <div className="flex items-center justify-between mb-4">
+            <h1 className="text-3xl font-bold text-foreground">
+              My Templates ({templates.length})
+            </h1>
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/videos')}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to Videos
+            </Button>
+          </div>
         </div>
 
         {/* Search and Controls */}
@@ -397,14 +399,6 @@ export default function MyTemplates() {
             />
           )}
 
-          {/* Results Count */}
-          <div className="flex items-center justify-between">
-            <p className="text-sm text-muted-foreground">
-              Showing <span className="font-semibold text-foreground">{filteredVideos.length}</span> 
-              {' '}of {templates.length} templates
-              {hasActiveFilters && ' with filters applied'}
-            </p>
-          </div>
         </div>
 
         {filteredVideos.length === 0 ? (
@@ -458,7 +452,8 @@ export default function MyTemplates() {
                           className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/template-editor/${video.variationId}`);
+                            setSelectedVariationId(video.variationId || null);
+                            setEditorDrawerOpen(true);
                           }}
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -505,7 +500,8 @@ export default function MyTemplates() {
                           className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md"
                           onClick={(e) => {
                             e.stopPropagation();
-                            navigate(`/template-editor/${video.variationId}`);
+                            setSelectedVariationId(video.variationId || null);
+                            setEditorDrawerOpen(true);
                           }}
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -556,6 +552,14 @@ export default function MyTemplates() {
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
           video={selectedVideo}
+        />
+      )}
+
+      {selectedVariationId && (
+        <TemplateEditorDrawer
+          open={editorDrawerOpen}
+          onOpenChange={setEditorDrawerOpen}
+          variationId={selectedVariationId}
         />
       )}
     </div>
