@@ -183,8 +183,14 @@ export default function MyTemplates() {
 
       if (error) throw error;
 
-      // Confirm success
-      toast.success('Template added to publish cart');
+      // Confirm success with action button
+      toast.success('Template added to publish cart', {
+        duration: 4000,
+        action: {
+          label: 'View Cart',
+          onClick: () => navigate('/publish-cart')
+        }
+      });
     } catch (error: any) {
       // Revert on failure
       setTemplates(previousTemplates);
