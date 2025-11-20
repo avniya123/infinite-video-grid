@@ -10,10 +10,11 @@ import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { ArrowLeft, Search, Mail, Phone, Calendar, Trash2, Users, Filter, X } from 'lucide-react';
+import { ArrowLeft, Search, Mail, Phone, Calendar, Trash2, Users, Filter, X, Pencil } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { useSharedUsers } from '@/hooks/useSharedUsers';
+import type { SharedUser } from '@/hooks/useSharedUsers';
 
 interface SavedUser {
   id: string;
@@ -35,6 +36,7 @@ export default function MyUsers() {
   const [selectedUserType, setSelectedUserType] = useState<string>('all');
   const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [usersDrawerOpen, setUsersDrawerOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<SharedUser | null>(null);
   
   const {
     sharedUsers,
@@ -165,6 +167,19 @@ export default function MyUsers() {
   const clearFilters = () => {
     setSearchQuery('');
     setSelectedUserType('all');
+  };
+
+  const handleEditUser = (user: SavedUser) => {
+    const sharedUser: SharedUser = {
+      id: user.id,
+      name: user.enrolled_user_name,
+      email: user.enrolled_user_email,
+      phone: user.enrolled_user_phone || '',
+      userType: user.user_type || '',
+      hasAccess: user.is_enabled
+    };
+    setEditingUser(sharedUser);
+    setUsersDrawerOpen(true);
   };
 
   return (
@@ -341,14 +356,24 @@ export default function MyUsers() {
                         </div>
                       </TableCell>
                       <TableCell className="text-right">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          onClick={() => handleDeleteUser(savedUser.id)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleEditUser(savedUser)}
+                            className="hover:bg-primary/10"
+                          >
+                            <Pencil className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => handleDeleteUser(savedUser.id)}
+                            className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
                       </TableCell>
                     </TableRow>
                   ))}
@@ -361,8 +386,13 @@ export default function MyUsers() {
 
       <UsersManagementDrawer
         open={usersDrawerOpen}
-        onOpenChange={setUsersDrawerOpen}
-        editingUser={null}
+        onOpenChange={(open) => {
+          setUsersDrawerOpen(open);
+          if (!open) {
+            setEditingUser(null);
+          }
+        }}
+        editingUser={editingUser}
         onAddUser={async (userData) => {
           const success = addUser(userData);
           if (success) {
@@ -392,11 +422,14 @@ export default function MyUsers() {
                 enrolled_user_name: userData.name,
                 enrolled_user_email: userData.email,
                 enrolled_user_phone: userData.phone,
-                user_type: userData.userType
+                user_type: userData.userType,
+                is_enabled: userData.hasAccess
               })
               .eq('id', userData.id);
             toast.success('User updated successfully');
             fetchSavedUsers();
+            setEditingUser(null);
+            setUsersDrawerOpen(false);
           }
         }}
         onImportCsv={async (users) => {
