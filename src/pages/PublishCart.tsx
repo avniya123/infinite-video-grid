@@ -378,12 +378,14 @@ export default function PublishCart() {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
           {/* Page Header */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <ShoppingCart className="h-8 w-8 text-primary" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-primary/10 rounded-xl">
+                <ShoppingCart className="h-6 w-6 text-primary" />
+              </div>
               <div>
-                <h1 className="text-3xl font-bold text-foreground">Publish Cart</h1>
-                <p className="text-muted-foreground text-sm mt-1">
+                <h1 className="text-2xl font-bold text-foreground">Publish Cart</h1>
+                <p className="text-muted-foreground text-sm mt-0.5">
                   Loading your templates...
                 </p>
               </div>
@@ -422,28 +424,28 @@ export default function PublishCart() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Page Header */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <ShoppingCart className="h-8 w-8 text-primary" />
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <ShoppingCart className="h-6 w-6 text-primary" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-2xl font-bold text-foreground">
                 Publish Cart {publishedTemplates.length > 0 && `(${publishedTemplates.length})`}
               </h1>
-              <p className="text-muted-foreground text-sm mt-1">
+              <p className="text-muted-foreground text-sm mt-0.5">
                 Review and manage your templates ready for publishing
               </p>
             </div>
           </div>
-          <div className="flex items-center gap-4">
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/my-templates')}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back
-            </Button>
-          </div>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/my-templates')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back
+          </Button>
         </div>
 
         {publishedTemplates.length === 0 ? (

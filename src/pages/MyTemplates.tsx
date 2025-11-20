@@ -311,12 +311,14 @@ export default function MyTemplates() {
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
           {/* Page Header */}
-          <div className="flex items-center justify-between mb-2">
-            <div className="flex items-center gap-3">
-              <FileVideo className="h-8 w-8 text-primary" />
+          <div className="flex items-center justify-between mb-6">
+            <div className="flex items-center gap-4">
+              <div className="p-2.5 bg-primary/10 rounded-xl">
+                <FileVideo className="h-6 w-6 text-primary" />
+              </div>
               <div>
-                <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
-                <p className="text-muted-foreground text-sm mt-1">
+                <h1 className="text-2xl font-bold text-foreground">My Templates</h1>
+                <p className="text-muted-foreground text-sm mt-0.5">
                   Loading your templates...
                 </p>
               </div>
@@ -355,14 +357,16 @@ export default function MyTemplates() {
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Page Header */}
-        <div className="flex items-center justify-between mb-2">
-          <div className="flex items-center gap-3">
-            <FileVideo className="h-8 w-8 text-primary" />
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <FileVideo className="h-6 w-6 text-primary" />
+            </div>
             <div>
-              <h1 className="text-3xl font-bold text-foreground">
+              <h1 className="text-2xl font-bold text-foreground">
                 My Templates {templates.length > 0 && `(${templates.length})`}
               </h1>
-              <p className="text-muted-foreground text-sm mt-1">
+              <p className="text-muted-foreground text-sm mt-0.5">
                 Manage your saved video templates
               </p>
             </div>
