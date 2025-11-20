@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X, Upload, Download } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X, Upload, Download, Check, XCircle } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface SharedUser {
@@ -69,6 +69,12 @@ export default function ShareCartCheckout() {
   
   // CSV import states
   const [csvImportDrawerOpen, setCsvImportDrawerOpen] = useState(false);
+  
+  // Real-time validation states
+  const [isNewEmailValid, setIsNewEmailValid] = useState<boolean | null>(null);
+  const [isNewPhoneValid, setIsNewPhoneValid] = useState<boolean | null>(null);
+  const [isEditEmailValid, setIsEditEmailValid] = useState<boolean | null>(null);
+  const [isEditPhoneValid, setIsEditPhoneValid] = useState<boolean | null>(null);
 
   // Validation functions
   const validateEmail = (email: string): boolean => {
@@ -80,6 +86,43 @@ export default function ShareCartCheckout() {
     // Accepts formats: +91 9876543210, +919876543210, 9876543210, or 10-digit numbers
     const phoneRegex = /^(\+91[\s]?)?[6-9]\d{9}$/;
     return phoneRegex.test(phone.replace(/\s+/g, ''));
+  };
+
+  // Real-time validation handlers
+  const handleNewEmailChange = (value: string) => {
+    setNewUserEmail(value);
+    if (value.length === 0) {
+      setIsNewEmailValid(null);
+    } else {
+      setIsNewEmailValid(validateEmail(value));
+    }
+  };
+
+  const handleNewPhoneChange = (value: string) => {
+    setNewUserPhone(value);
+    if (value.length === 0) {
+      setIsNewPhoneValid(null);
+    } else {
+      setIsNewPhoneValid(validatePhone(value));
+    }
+  };
+
+  const handleEditEmailChange = (value: string) => {
+    setEditUserEmail(value);
+    if (value.length === 0) {
+      setIsEditEmailValid(null);
+    } else {
+      setIsEditEmailValid(validateEmail(value));
+    }
+  };
+
+  const handleEditPhoneChange = (value: string) => {
+    setEditUserPhone(value);
+    if (value.length === 0) {
+      setIsEditPhoneValid(null);
+    } else {
+      setIsEditPhoneValid(validatePhone(value));
+    }
   };
 
   useEffect(() => {
@@ -165,6 +208,8 @@ export default function ShareCartCheckout() {
     setNewUserPhone('');
     setNewUserEmail('');
     setSelectedUserType('');
+    setIsNewEmailValid(null);
+    setIsNewPhoneValid(null);
     setAddUserSheetOpen(false);
   };
 
@@ -220,6 +265,8 @@ export default function ShareCartCheckout() {
     setEditUserPhone(user.phone);
     setEditUserEmail(user.email);
     setEditUserType(user.userType);
+    setIsEditEmailValid(validateEmail(user.email));
+    setIsEditPhoneValid(validatePhone(user.phone));
     setEditDrawerOpen(true);
   };
 
@@ -276,6 +323,8 @@ export default function ShareCartCheckout() {
     toast.success('User updated successfully');
     setEditDrawerOpen(false);
     setEditingUser(null);
+    setIsEditEmailValid(null);
+    setIsEditPhoneValid(null);
   };
 
   const handleDownloadTemplate = () => {
@@ -843,25 +892,65 @@ export default function ShareCartCheckout() {
                   <label className="text-sm font-medium">
                     User Phone Number <span className="text-destructive">*</span>
                   </label>
-                  <Input
-                    placeholder="+91 0000000000"
-                    value={newUserPhone}
-                    onChange={(e) => setNewUserPhone(e.target.value)}
-                    className="mt-2"
-                  />
+                  <div className="relative">
+                    <Input
+                      placeholder="+91 0000000000"
+                      value={newUserPhone}
+                      onChange={(e) => handleNewPhoneChange(e.target.value)}
+                      className={`mt-2 pr-10 ${
+                        isNewPhoneValid === true 
+                          ? 'border-green-500 focus-visible:ring-green-500' 
+                          : isNewPhoneValid === false 
+                          ? 'border-red-500 focus-visible:ring-red-500' 
+                          : ''
+                      }`}
+                    />
+                    {isNewPhoneValid !== null && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                        {isNewPhoneValid ? (
+                          <Check className="w-5 h-5 text-green-500" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-500" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {isNewPhoneValid === false && newUserPhone.length > 0 && (
+                    <p className="text-xs text-red-500 mt-1">Invalid phone format</p>
+                  )}
                 </div>
 
                 <div>
                   <label className="text-sm font-medium">
                     User Email Id <span className="text-destructive">*</span>
                   </label>
-                  <Input
-                    type="email"
-                    placeholder="Example@gmail.com"
-                    value={newUserEmail}
-                    onChange={(e) => setNewUserEmail(e.target.value)}
-                    className="mt-2"
-                  />
+                  <div className="relative">
+                    <Input
+                      type="email"
+                      placeholder="Example@gmail.com"
+                      value={newUserEmail}
+                      onChange={(e) => handleNewEmailChange(e.target.value)}
+                      className={`mt-2 pr-10 ${
+                        isNewEmailValid === true 
+                          ? 'border-green-500 focus-visible:ring-green-500' 
+                          : isNewEmailValid === false 
+                          ? 'border-red-500 focus-visible:ring-red-500' 
+                          : ''
+                      }`}
+                    />
+                    {isNewEmailValid !== null && (
+                      <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                        {isNewEmailValid ? (
+                          <Check className="w-5 h-5 text-green-500" />
+                        ) : (
+                          <XCircle className="w-5 h-5 text-red-500" />
+                        )}
+                      </div>
+                    )}
+                  </div>
+                  {isNewEmailValid === false && newUserEmail.length > 0 && (
+                    <p className="text-xs text-red-500 mt-1">Invalid email format</p>
+                  )}
                 </div>
               </div>
 
@@ -915,24 +1004,64 @@ export default function ShareCartCheckout() {
                 <label className="text-sm font-medium">
                   User Phone Number <span className="text-destructive">*</span>
                 </label>
-                <Input
-                  placeholder="+91 0000000000"
-                  value={editUserPhone}
-                  onChange={(e) => setEditUserPhone(e.target.value)}
-                  className="mt-2"
-                />
+                <div className="relative">
+                  <Input
+                    placeholder="+91 0000000000"
+                    value={editUserPhone}
+                    onChange={(e) => handleEditPhoneChange(e.target.value)}
+                    className={`mt-2 pr-10 ${
+                      isEditPhoneValid === true 
+                        ? 'border-green-500 focus-visible:ring-green-500' 
+                        : isEditPhoneValid === false 
+                        ? 'border-red-500 focus-visible:ring-red-500' 
+                        : ''
+                    }`}
+                  />
+                  {isEditPhoneValid !== null && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                      {isEditPhoneValid ? (
+                        <Check className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                {isEditPhoneValid === false && editUserPhone.length > 0 && (
+                  <p className="text-xs text-red-500 mt-1">Invalid phone format</p>
+                )}
               </div>
               <div>
                 <label className="text-sm font-medium">
                   Email Id <span className="text-destructive">*</span>
                 </label>
-                <Input
-                  type="email"
-                  placeholder="yourmail@mail.com"
-                  value={editUserEmail}
-                  onChange={(e) => setEditUserEmail(e.target.value)}
-                  className="mt-2"
-                />
+                <div className="relative">
+                  <Input
+                    type="email"
+                    placeholder="yourmail@mail.com"
+                    value={editUserEmail}
+                    onChange={(e) => handleEditEmailChange(e.target.value)}
+                    className={`mt-2 pr-10 ${
+                      isEditEmailValid === true 
+                        ? 'border-green-500 focus-visible:ring-green-500' 
+                        : isEditEmailValid === false 
+                        ? 'border-red-500 focus-visible:ring-red-500' 
+                        : ''
+                    }`}
+                  />
+                  {isEditEmailValid !== null && (
+                    <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                      {isEditEmailValid ? (
+                        <Check className="w-5 h-5 text-green-500" />
+                      ) : (
+                        <XCircle className="w-5 h-5 text-red-500" />
+                      )}
+                    </div>
+                  )}
+                </div>
+                {isEditEmailValid === false && editUserEmail.length > 0 && (
+                  <p className="text-xs text-red-500 mt-1">Invalid email format</p>
+                )}
               </div>
             </div>
 
