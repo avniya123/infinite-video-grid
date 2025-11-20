@@ -1,18 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
+import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
-import { FilterDrawer } from '@/components/FilterDrawer';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Search, X, List, Columns3, ArrowUpDown, ChevronDown } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
-import { useVideoFilters } from '@/hooks/useVideoFilters';
+import { Loader2, ArrowLeft, Trash2, Edit } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import type { VideoItem, VideoCategory } from '@/types/video';
+import type { VideoItem } from '@/types/video';
 
 interface UserTemplate {
   id: string;
@@ -32,15 +28,6 @@ interface UserTemplate {
   };
 }
 
-type ViewMode = 'masonry' | 'list';
-
-const sortOptions: { value: string; label: string }[] = [
-  { value: 'newest', label: 'Newest First' },
-  { value: 'popular', label: 'Most Popular' },
-  { value: 'price-low', label: 'Price: Low to High' },
-  { value: 'price-high', label: 'Price: High to Low' },
-];
-
 export default function MyTemplates() {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -48,54 +35,6 @@ export default function MyTemplates() {
   const [templates, setTemplates] = useState<UserTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [viewMode, setViewMode] = useState<ViewMode>('masonry');
-  const [columnCount, setColumnCount] = useState(3);
-
-  // Convert templates to VideoItem format for filtering
-  const videosFromTemplates: VideoItem[] = templates.map(template => ({
-    id: template.video_variations.video_id,
-    title: template.custom_title || template.video_variations.title,
-    image: template.video_variations.thumbnail_url || '',
-    category: 'All' as VideoCategory,
-    subcategory: '',
-    duration: template.video_variations.duration,
-    aspectRatio: parseFloat(template.video_variations.aspect_ratio.split(':')[0]) / parseFloat(template.video_variations.aspect_ratio.split(':')[1]),
-    price: '0',
-    mrp: '0',
-    discount: '0%',
-    orientation: 'Landscape' as const,
-    trending: false,
-    resolution: 'HD' as const,
-    mainCategory: 'Personal Celebrations' as const,
-    videoUrl: template.video_variations.video_url || '',
-  }));
-
-  // Use filter hook
-  const {
-    selectedMainCategory,
-    selectedSubcategory,
-    selectedDurations,
-    selectedAspectRatios,
-    selectedPriceRanges,
-    searchQuery,
-    sortBy,
-    filteredVideos,
-    hasActiveFilters,
-    setSearchQuery,
-    setSortBy,
-    handleDurationToggle,
-    handleAspectRatioToggle,
-    handlePriceRangeToggle,
-    handleSubcategorySelect,
-    handleMainCategorySelect,
-    handleSelectAllDurations,
-    handleClearDurations,
-    handleSelectAllAspectRatios,
-    handleClearAspectRatios,
-    handleSelectAllPriceRanges,
-    handleClearPriceRanges,
-    handleResetFilters,
-  } = useVideoFilters(videosFromTemplates);
 
   useEffect(() => {
     checkUser();
@@ -159,10 +98,10 @@ export default function MyTemplates() {
       if (error) throw error;
 
       setTemplates(templates.filter(t => t.id !== templateId));
-      toast.success('Template deleted successfully');
-    } catch (error) {
+      toast.success('Template removed from your collection');
+    } catch (error: any) {
+      toast.error('Failed to remove template');
       console.error('Error deleting template:', error);
-      toast.error('Failed to delete template');
     }
   };
 
@@ -171,180 +110,157 @@ export default function MyTemplates() {
     setDrawerOpen(true);
   };
 
+  const handlePublishConfirm = async (video: VideoItem) => {
+    try {
+      // Find the template in the templates array
+      const template = templates.find(t => t.video_variations.video_id === video.id);
+      if (!template) {
+        toast.error('Template not found');
+        return;
+      }
+
+      // Update the template to mark it as published
+      const { error } = await supabase
+        .from('user_templates')
+        .update({ 
+          published: true, 
+          published_at: new Date().toISOString() 
+        })
+        .eq('id', template.id);
+
+      if (error) throw error;
+
+      toast.success('Template published successfully!');
+      
+      // Redirect to publish cart page
+      setTimeout(() => {
+        navigate('/publish-cart');
+      }, 1000);
+    } catch (error: any) {
+      toast.error('Failed to publish template');
+      console.error('Error publishing template:', error);
+    }
+  };
+
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background">
+        <Header 
+          selectedMainCategory={null}
+          selectedSubcategory={null}
+          onMainCategorySelect={() => {}}
+          onSubcategorySelect={() => {}}
+        />
+        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
+          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        </div>
       </div>
     );
   }
 
-  const gridCols = {
-    2: "grid-cols-1 sm:grid-cols-2",
-    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
-    4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
-  }[columnCount] || "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
+  if (!user) return null;
 
   return (
     <div className="min-h-screen bg-background">
+      <Header 
+        selectedMainCategory={null}
+        selectedSubcategory={null}
+        onMainCategorySelect={() => {}}
+        onSubcategorySelect={() => {}}
+      />
+      
       <div className="container mx-auto px-4 py-8">
-        {/* Header */}
-        <div className="flex items-center justify-between mb-4">
-          <div>
-            <h1 className="text-3xl font-bold">My Templates</h1>
-            <p className="text-sm text-muted-foreground mt-1">
-              {filteredVideos.length} {filteredVideos.length === 1 ? 'template' : 'templates'}
-            </p>
-          </div>
+        <div className="mb-8">
           <Button
-            variant="outline"
-            onClick={() => navigate('/')}
-            className="gap-2"
+            variant="ghost"
+            onClick={() => navigate('/videos')}
+            className="mb-4"
           >
-            <ArrowLeft className="h-4 w-4" />
+            <ArrowLeft className="mr-2 h-4 w-4" />
             Back to Videos
           </Button>
+
+          <div className="flex items-center justify-between">
+            <div>
+              <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
+              <p className="text-muted-foreground mt-2">
+                Manage your saved video templates
+              </p>
+            </div>
+            <div className="text-sm text-muted-foreground">
+              {templates.length} {templates.length === 1 ? 'template' : 'templates'}
+            </div>
+          </div>
         </div>
 
-        {/* Search and View Controls */}
-        <div className="mb-6 space-y-4">
-          {/* Search Bar */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              type="text"
-              placeholder="Search templates..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-9 pr-9"
-            />
-            {searchQuery && (
-              <button
-                onClick={() => setSearchQuery('')}
-                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
-              >
-                <X className="h-4 w-4" />
-              </button>
-            )}
-          </div>
-
-          {/* View Controls */}
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="flex items-center gap-2">
-              {/* View Mode Toggle */}
-              <div className="flex gap-1 border rounded-lg p-1">
-                <Button
-                  variant={viewMode === 'masonry' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('masonry')}
-                  className="gap-2"
-                >
-                  <Columns3 className="h-4 w-4" />
-                  Masonry
-                </Button>
-                <Button
-                  variant={viewMode === 'list' ? 'default' : 'ghost'}
-                  size="sm"
-                  onClick={() => setViewMode('list')}
-                  className="gap-2"
-                >
-                  <List className="h-4 w-4" />
-                  List
-                </Button>
-              </div>
-
-              {/* Filter Drawer */}
-              <FilterDrawer
-                selectedMainCategory={selectedMainCategory}
-                selectedSubcategory={selectedSubcategory}
-                selectedDurations={selectedDurations}
-                selectedAspectRatios={selectedAspectRatios}
-                selectedPriceRanges={selectedPriceRanges}
-                onMainCategorySelect={handleMainCategorySelect}
-                onSubcategorySelect={handleSubcategorySelect}
-                onDurationToggle={handleDurationToggle}
-                onAspectRatioToggle={handleAspectRatioToggle}
-                onPriceRangeToggle={handlePriceRangeToggle}
-                onSelectAllDurations={handleSelectAllDurations}
-                onClearDurations={handleClearDurations}
-                onSelectAllAspectRatios={handleSelectAllAspectRatios}
-                onClearAspectRatios={handleClearAspectRatios}
-                onSelectAllPriceRanges={handleSelectAllPriceRanges}
-                onClearPriceRanges={handleClearPriceRanges}
-                onResetFilters={handleResetFilters}
-                hasActiveFilters={hasActiveFilters}
-              />
-            </div>
-
-            {/* Sort Dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="gap-2">
-                  <ArrowUpDown className="h-4 w-4" />
-                  Sort by
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-48">
-                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {sortOptions.map((option) => (
-                  <DropdownMenuItem
-                    key={option.value}
-                    onClick={() => setSortBy(option.value as any)}
-                    className={sortBy === option.value ? 'bg-accent' : ''}
-                  >
-                    {option.label}
-                  </DropdownMenuItem>
-                ))}
-              </DropdownMenuContent>
-            </DropdownMenu>
-          </div>
-
-          {/* Column Count Slider (only for masonry view) */}
-          {viewMode === 'masonry' && (
-            <div className="flex items-center gap-4">
-              <span className="text-sm text-muted-foreground whitespace-nowrap">Columns: {columnCount}</span>
-              <Slider
-                value={[columnCount]}
-                onValueChange={(value) => setColumnCount(value[0])}
-                min={2}
-                max={4}
-                step={1}
-                className="w-32"
-              />
-            </div>
-          )}
-        </div>
-
-        {filteredVideos.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-muted-foreground mb-4">
-              {templates.length === 0 ? "You haven't saved any templates yet" : "No templates match your search"}
-            </p>
-            {templates.length === 0 && (
-              <Button onClick={() => navigate('/')}>
-                Browse Videos
+        {templates.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No templates yet
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Start exploring video templates and save the ones you like to your collection.
+              </p>
+              <Button onClick={() => navigate('/videos')}>
+                Browse Templates
               </Button>
-            )}
+            </div>
           </div>
         ) : (
-          <div className={viewMode === 'masonry' ? `grid ${gridCols} gap-6` : 'space-y-4'}>
-            {filteredVideos.map((video) => {
-              const template = templates.find(t => t.video_variations.video_id === video.id);
-              if (!template) return null;
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            {templates.map((template) => {
+              const video: VideoItem = {
+                id: template.video_variations.video_id,
+                title: template.custom_title || template.video_variations.title,
+                image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                duration: template.video_variations.duration,
+                category: 'Nature',
+                mainCategory: 'Personal Celebrations',
+                subcategory: '',
+                orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                            template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                price: '$0',
+                mrp: '$0',
+                discount: '0%',
+                trending: false,
+                resolution: 'HD',
+                videoUrl: template.video_variations.video_url || undefined,
+              };
 
               return (
-                <div key={template.id}>
+                <div key={template.id} className="relative group">
                   <VideoCard
                     video={video}
-                    onPlay={(v) => handlePlayVideo(v)}
-                    onClick={(v) => handlePlayVideo(v)}
-                    showTemplateActions
-                    templateId={template.id}
-                    onEditTemplate={() => navigate(`/template-editor/${template.variation_id}`)}
-                    onDeleteTemplate={() => handleDeleteTemplate(template.id)}
+                    onPlay={handlePlayVideo}
+                    onClick={handlePlayVideo}
+                    showShareButton={false}
                   />
+                  {/* Edit and Delete buttons positioned above Variations button */}
+                  <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                    <Button
+                      variant="default"
+                      size="icon"
+                      className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/template-editor/${template.variation_id}`);
+                      }}
+                    >
+                      <Edit className="h-3.5 w-3.5" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTemplate(template.id);
+                      }}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </Button>
+                  </div>
                 </div>
               );
             })}
@@ -352,11 +268,13 @@ export default function MyTemplates() {
         )}
       </div>
 
-      <VideoPlayerDrawer
-        video={selectedVideo}
-        open={drawerOpen}
-        onOpenChange={setDrawerOpen}
-      />
+      {selectedVideo && (
+        <VideoPlayerDrawer
+          open={drawerOpen}
+          onOpenChange={setDrawerOpen}
+          video={selectedVideo}
+        />
+      )}
     </div>
   );
 }

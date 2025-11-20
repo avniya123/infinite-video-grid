@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, Check, List, Pencil, Trash2 } from 'lucide-react';
+import { Play, Check, List } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -23,13 +23,9 @@ interface VideoCardProps {
   onSelect?: (video: VideoItem) => void;
   showShareButton?: boolean;
   showPrice?: boolean;
-  showTemplateActions?: boolean;
-  templateId?: string;
-  onEditTemplate?: () => void;
-  onDeleteTemplate?: () => void;
 }
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showPrice = true, showTemplateActions = false, onEditTemplate, onDeleteTemplate }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showPrice = true }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -251,7 +247,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                     </div>
                   </TooltipTrigger>
                   <TooltipContent 
-                    side="left"
+                    side="left" 
                     className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 shadow-lg"
                   >
                     <div className="space-y-1.5 min-w-[160px]">
@@ -274,34 +270,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                   </TooltipContent>
                 </Tooltip>
               </TooltipProvider>
-            )}
-            
-            {/* Template Actions - Show on hover below price */}
-            {showTemplateActions && (
-              <div className="flex flex-col gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                <Button
-                  size="sm"
-                  variant="secondary"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditTemplate?.();
-                  }}
-                  className="h-8 w-8 p-0 bg-white/95 dark:bg-gray-800/95 hover:bg-white dark:hover:bg-gray-800 shadow-sm"
-                >
-                  <Pencil className="h-4 w-4" />
-                </Button>
-                <Button
-                  size="sm"
-                  variant="destructive"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onDeleteTemplate?.();
-                  }}
-                  className="h-8 w-8 p-0 shadow-sm"
-                >
-                  <Trash2 className="h-4 w-4" />
-                </Button>
-              </div>
             )}
             
             {/* Share Button - visible on hover */}
