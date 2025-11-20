@@ -61,6 +61,8 @@ export default function MyTemplates() {
           custom_title,
           notes,
           created_at,
+          published,
+          published_at,
           video_variations (
             id,
             title,
