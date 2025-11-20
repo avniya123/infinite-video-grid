@@ -26,6 +26,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
   const [videoLoaded, setVideoLoaded] = useState(false);
+  const [videoReady, setVideoReady] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isInView, setIsInView] = useState(false);
   const [hasAnimated, setHasAnimated] = useState(false);
@@ -134,6 +135,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const handleMouseLeave = () => {
     setIsHovering(false);
     setShowVideo(false);
+    setVideoReady(false);
     setIsBuffering(false);
     if (hoverTimerRef.current) {
       clearTimeout(hoverTimerRef.current);
@@ -178,7 +180,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           <ProgressiveImage
             src={video.image}
             alt={video.title}
-            className={`w-full h-full transition-opacity duration-500 ease-out ${showVideo ? 'opacity-0' : 'opacity-100'}`}
+            className={`w-full h-full transition-opacity duration-300 ease-out ${videoReady ? 'opacity-0' : 'opacity-100'}`}
             onLoad={() => setImageLoaded(true)}
             lazy={true}
           />
@@ -193,7 +195,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             <video
               ref={videoRef}
               src={video.videoUrl}
-              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ease-out ${showVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ease-out ${videoReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               style={{
                 objectFit: 'cover',
               }}
@@ -203,11 +205,15 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               preload="none"
               onLoadedData={() => {
                 setVideoLoaded(true);
+              }}
+              onCanPlayThrough={() => {
                 setIsBuffering(false);
               }}
+              onPlaying={() => {
+                setIsBuffering(false);
+                setVideoReady(true);
+              }}
               onWaiting={() => setIsBuffering(true)}
-              onCanPlay={() => setIsBuffering(false)}
-              onPlaying={() => setIsBuffering(false)}
               onError={(e) => {
                 console.log('Video load error:', e);
                 setIsBuffering(false);
@@ -216,9 +222,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           )}
 
           {/* Professional Buffering Indicator */}
-          {showVideo && isBuffering && (
-            <div className="absolute inset-0 bg-black/40 z-20 flex items-center justify-center">
-              <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+          {showVideo && !videoReady && (
+            <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
+              <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
             </div>
           )}
 
