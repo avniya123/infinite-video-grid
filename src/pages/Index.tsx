@@ -340,14 +340,6 @@ const Index = () => {
           />
         )}
 
-        {/* Results Count */}
-        <div className="flex items-center justify-between">
-          <p className="text-sm text-muted-foreground animate-fade-in">
-            Showing <span className="font-semibold text-foreground">{filteredVideos.length}</span> 
-            {total && ` of ${total}`} videos
-            {hasActiveFilters && ' with filters applied'}
-          </p>
-        </div>
       </div>
 
       {/* Main Content */}
