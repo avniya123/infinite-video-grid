@@ -67,6 +67,7 @@ export default function ShareCartCheckout() {
   const [editingUser, setEditingUser] = useState<SharedUser | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [autoLoadEnrolled, setAutoLoadEnrolled] = useState(false);
+  const [paymentConfirmDialogOpen, setPaymentConfirmDialogOpen] = useState(false);
 
   useEffect(() => {
     const initializePage = async () => {
@@ -250,11 +251,18 @@ export default function ShareCartCheckout() {
     return { mrp, subtotal, discount, tax, total };
   };
 
-  const handleProceedToPayment = async () => {
+  const handleProceedToPayment = () => {
     if (sharedUsers.length === 0) {
       toast.error('Please add at least one shared user');
       return;
     }
+    
+    // Show confirmation dialog first
+    setPaymentConfirmDialogOpen(true);
+  };
+
+  const confirmPayment = async () => {
+    setPaymentConfirmDialogOpen(false);
     
     if (isQuickMode) {
       toast.success('Payment successful! Loading enrolled users...', {
@@ -857,6 +865,214 @@ export default function ShareCartCheckout() {
         onLoadEnrolledUsers={loadEnrolledUsers}
         defaultTab={autoLoadEnrolled ? 'enrolled' : undefined}
       />
+
+      {/* Payment Confirmation Dialog */}
+      <AlertDialog open={paymentConfirmDialogOpen} onOpenChange={setPaymentConfirmDialogOpen}>
+        <AlertDialogContent className="max-w-2xl">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl flex items-center gap-2">
+              <CreditCard className="h-6 w-6 text-primary" />
+              Confirm Payment
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
+              Please review your order details before proceeding with the payment.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          
+          <div className="space-y-4 py-4">
+            {/* Template Details */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-muted-foreground">Template Details</h4>
+              <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
+                <img 
+                  src={template.thumbnailUrl || '/placeholder.svg'} 
+                  alt={template.title}
+                  className="w-20 h-20 rounded-md object-cover"
+                />
+                <div className="flex-1">
+                  <p className="font-semibold">{template.title}</p>
+                  <div className="flex items-center gap-2 mt-2">
+                    <Badge variant="secondary" className="text-xs">{template.duration}</Badge>
+                    <Badge variant="outline" className="text-xs">{template.orientation}</Badge>
+                    <Badge variant="outline" className="text-xs">{template.resolution}</Badge>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Render Process */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-muted-foreground">Render Process</h4>
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  {shareMethod === 'cart' ? (
+                    <>
+                      <Users className="h-5 w-5 text-primary" />
+                      <span className="font-medium">Shared User Access</span>
+                    </>
+                  ) : (
+                    <>
+                      <Edit className="h-5 w-5 text-primary" />
+                      <span className="font-medium">Self & Render</span>
+                    </>
+                  )}
+                </div>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {shareMethod === 'cart' 
+                    ? `Template will be shared with ${sharedUsers.length} user(s). Each user will receive individual access.`
+                    : 'You will have full editing and rendering rights for this template.'}
+                </p>
+              </div>
+            </div>
+
+            {/* Shared Users Summary */}
+            {shareMethod === 'cart' && sharedUsers.length > 0 && (
+              <div className="space-y-2">
+                <h4 className="font-semibold text-sm text-muted-foreground">
+                  Shared Users ({sharedUsers.length})
+                </h4>
+                <div className="p-4 bg-muted/30 rounded-lg max-h-40 overflow-y-auto">
+                  <div className="space-y-2">
+                    {sharedUsers.slice(0, 5).map((user) => (
+                      <div key={user.id} className="flex items-center gap-2 text-sm">
+                        <div className="w-6 h-6 rounded-full bg-primary/10 flex items-center justify-center text-xs font-semibold text-primary">
+                          {user.name.charAt(0).toUpperCase()}
+                        </div>
+                        <span className="font-medium">{user.name}</span>
+                        <span className="text-muted-foreground">•</span>
+                        <span className="text-muted-foreground text-xs">{user.email}</span>
+                      </div>
+                    ))}
+                    {sharedUsers.length > 5 && (
+                      <p className="text-xs text-muted-foreground mt-2">
+                        + {sharedUsers.length - 5} more user(s)
+                      </p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
+            {/* Payment Summary */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-muted-foreground">Payment Summary</h4>
+              <div className="p-4 bg-gradient-to-br from-primary/5 to-primary/10 rounded-lg border border-primary/20 space-y-3">
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Base Price</span>
+                  <span className="font-medium">₹ {pricing.mrp.toFixed(2)}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Quantity (Users)</span>
+                  <span className="font-medium">× {sharedUsers.length || 1}</span>
+                </div>
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Subtotal</span>
+                  <span className="font-medium">₹ {pricing.subtotal.toFixed(2)}</span>
+                </div>
+                {discountApplied && (
+                  <div className="flex justify-between text-sm text-green-600">
+                    <span>Discount ({discountPercent}%)</span>
+                    <span>- ₹ {pricing.discount.toFixed(2)}</span>
+                  </div>
+                )}
+                <div className="flex justify-between text-sm">
+                  <span className="text-muted-foreground">Tax (18%)</span>
+                  <span className="font-medium">₹ {pricing.tax.toFixed(2)}</span>
+                </div>
+                <div className="pt-3 border-t border-primary/20">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-lg">Total Amount</span>
+                    <span className="text-2xl font-bold text-primary">₹ {pricing.total.toFixed(2)}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Payment Method */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-muted-foreground">Payment Method</h4>
+              <div className="p-4 bg-muted/30 rounded-lg">
+                <div className="flex items-center gap-2">
+                  {paymentMethod === 'paytm' ? (
+                    <>
+                      <Wallet className="h-5 w-5 text-primary" />
+                      <span className="font-medium">PAYTM - UPI Payment</span>
+                    </>
+                  ) : (
+                    <>
+                      <CreditCard className="h-5 w-5 text-primary" />
+                      <span className="font-medium">Credit Zone - Trusted Partners</span>
+                    </>
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* What Happens Next */}
+            <div className="space-y-2">
+              <h4 className="font-semibold text-sm text-muted-foreground">What Happens Next?</h4>
+              <div className="p-4 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                <div className="space-y-2">
+                  <div className="flex items-start gap-2">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">1</div>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      Payment will be processed securely through {paymentMethod === 'paytm' ? 'PAYTM' : 'Credit Zone'}
+                    </p>
+                  </div>
+                  {isQuickMode ? (
+                    <>
+                      <div className="flex items-start gap-2">
+                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          You will be able to manage and add enrolled users to share this template
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          All selected users will receive access to the template immediately
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="flex items-start gap-2">
+                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Template access will be granted to all {sharedUsers.length} shared user(s)
+                        </p>
+                      </div>
+                      <div className="flex items-start gap-2">
+                        <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
+                        <p className="text-sm text-blue-700 dark:text-blue-300">
+                          Each user will receive a notification email with access details
+                        </p>
+                      </div>
+                    </>
+                  )}
+                  <div className="flex items-start gap-2">
+                    <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">{isQuickMode ? '4' : '4'}</div>
+                    <p className="text-sm text-blue-700 dark:text-blue-300">
+                      You will receive a confirmation email with the order receipt
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmPayment}
+              className="bg-primary hover:bg-primary/90 gap-2"
+            >
+              <CreditCard className="h-4 w-4" />
+              Confirm & Pay ₹ {pricing.total.toFixed(2)}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
