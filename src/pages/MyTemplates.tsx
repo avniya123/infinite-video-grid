@@ -6,7 +6,7 @@ import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2, Edit } from 'lucide-react';
+import { Loader2, ArrowLeft, Trash2, Edit, FileVideo } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 
@@ -182,7 +182,10 @@ export default function MyTemplates() {
 
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
+              <div className="flex items-center gap-3">
+                <FileVideo className="h-8 w-8 text-primary" />
+                <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
+              </div>
               <p className="text-muted-foreground mt-2">
                 Manage your saved video templates
               </p>

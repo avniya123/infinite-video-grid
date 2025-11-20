@@ -10,7 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { toast } from 'sonner';
-import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useSharedUsers, type SharedUser } from '@/hooks/useSharedUsers';
 
@@ -251,9 +251,12 @@ export default function ShareCartCheckout() {
 
         {/* Header */}
         <div className="mb-10">
-          <h1 className="text-4xl font-bold tracking-tight mb-3">
-            Share Cart Checkout
-          </h1>
+          <div className="flex items-center gap-3 mb-3">
+            <ShoppingBag className="h-8 w-8 text-primary" />
+            <h1 className="text-4xl font-bold tracking-tight">
+              Share Cart Checkout
+            </h1>
+          </div>
           <p className="text-muted-foreground text-lg">
             Manage shared users and complete your order
           </p>

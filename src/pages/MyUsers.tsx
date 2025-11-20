@@ -198,7 +198,10 @@ export default function MyUsers() {
         {/* Header */}
         <div className="mb-8 flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold mb-2">My Users</h1>
+            <div className="flex items-center gap-3 mb-2">
+              <Users className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold">My Users</h1>
+            </div>
             <p className="text-muted-foreground">
               Manage your saved enrolled users ({savedUsers.length} total)
             </p>
