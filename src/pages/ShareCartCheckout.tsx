@@ -64,6 +64,7 @@ export default function ShareCartCheckout() {
   const [selfRenderConfirmDialogOpen, setSelfRenderConfirmDialogOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SharedUser | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
+  const [autoLoadEnrolled, setAutoLoadEnrolled] = useState(false);
 
   useEffect(() => {
     const initializePage = async () => {
@@ -247,21 +248,28 @@ export default function ShareCartCheckout() {
     return { mrp, subtotal, discount, tax, total };
   };
 
-  const handleProceedToPayment = () => {
+  const handleProceedToPayment = async () => {
     if (sharedUsers.length === 0) {
       toast.error('Please add at least one shared user');
       return;
     }
     
     if (isQuickMode) {
-      toast.success('Payment successful! Opening user management...', {
-        duration: 3000
+      toast.success('Payment successful! Loading enrolled users...', {
+        duration: 2000
       });
-      // After payment, show user management drawer
+      
+      // Load enrolled users automatically
+      setAutoLoadEnrolled(true);
+      await loadEnrolledUsers();
+      
+      // Open drawer with enrolled users tab pre-selected
       setTimeout(() => {
         setAddUserSheetOpen(true);
-        toast.info('Add users to share this template');
-      }, 1000);
+        toast.info('Select enrolled users to share this template', {
+          duration: 4000
+        });
+      }, 1500);
     } else {
       toast.success('Processing payment...');
     }
@@ -728,7 +736,12 @@ export default function ShareCartCheckout() {
       {/* Users Management Drawer */}
       <UsersManagementDrawer
         open={addUserSheetOpen}
-        onOpenChange={setAddUserSheetOpen}
+        onOpenChange={(open) => {
+          setAddUserSheetOpen(open);
+          if (!open) {
+            setAutoLoadEnrolled(false);
+          }
+        }}
         editingUser={editingUser}
         onAddUser={handleAddSharedUser}
         onUpdateUser={handleUpdateSharedUser}
@@ -737,6 +750,7 @@ export default function ShareCartCheckout() {
         enrolledUsers={enrolledUsers}
         loadingEnrolledUsers={loadingEnrolledUsers}
         onLoadEnrolledUsers={loadEnrolledUsers}
+        defaultTab={autoLoadEnrolled ? 'enrolled' : undefined}
       />
 
       {/* Delete Confirmation Dialog */}
