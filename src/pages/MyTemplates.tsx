@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
@@ -6,10 +6,10 @@ import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2, Edit, FileVideo } from 'lucide-react';
+import { Loader2, ArrowLeft, Trash2, Edit, FileVideo, X } from 'lucide-react';
 import { VideoControls } from '@/features/videos/VideoControls';
-import { VideoGrid } from '@/features/videos/VideoGrid';
-import { VideoListView } from '@/features/videos/VideoListView';
+import { FilterDrawer } from '@/components/FilterDrawer';
+import { FilterChips } from '@/components/FilterChips';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 
@@ -39,6 +39,21 @@ const sortOptions = [
   { value: 'title', label: 'Title A-Z' },
 ];
 
+const aspectRatioFilters = [
+  { value: '16:9', label: '16:9 (Landscape)', category: 'landscape' },
+  { value: '9:16', label: '9:16 (Portrait)', category: 'portrait' },
+  { value: '1:1', label: '1:1 (Square)', category: 'square' },
+  { value: '4:3', label: '4:3', category: 'landscape' },
+  { value: '21:9', label: '21:9 (Ultrawide)', category: 'landscape' },
+];
+
+const durationFilters = [
+  { value: '0-30', label: 'Under 30 seconds' },
+  { value: '30-60', label: '30-60 seconds' },
+  { value: '60-120', label: '1-2 minutes' },
+  { value: '120+', label: 'Over 2 minutes' },
+];
+
 export default function MyTemplates() {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -52,6 +67,12 @@ export default function MyTemplates() {
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [columnCount, setColumnCount] = useState(3);
   const [sortBy, setSortBy] = useState('newest');
+  
+  // Filter states
+  const [selectedAspectRatios, setSelectedAspectRatios] = useState<string[]>([]);
+  const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
+  const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
+  const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
 
   useEffect(() => {
     checkUser();
@@ -159,6 +180,53 @@ export default function MyTemplates() {
     }
   };
 
+  // Parse duration from "MM:SS" format to seconds
+  const parseDuration = (duration: string): number => {
+    const [minutes, seconds] = duration.split(':').map(Number);
+    return (minutes * 60) + seconds;
+  };
+
+  // Filter handlers
+  const handleAspectRatioToggle = useCallback((ratio: string) => {
+    setSelectedAspectRatios(prev =>
+      prev.includes(ratio) ? prev.filter(r => r !== ratio) : [...prev, ratio]
+    );
+  }, []);
+
+  const handleDurationToggle = useCallback((duration: string) => {
+    setSelectedDurations(prev =>
+      prev.includes(duration) ? prev.filter(d => d !== duration) : [...prev, duration]
+    );
+  }, []);
+
+  const handleSelectAllAspectRatios = useCallback(() => {
+    setSelectedAspectRatios(aspectRatioFilters.map(f => f.value));
+  }, []);
+
+  const handleClearAspectRatios = useCallback(() => {
+    setSelectedAspectRatios([]);
+  }, []);
+
+  const handleSelectAllDurations = useCallback(() => {
+    setSelectedDurations(durationFilters.map(f => f.value));
+  }, []);
+
+  const handleClearDurations = useCallback(() => {
+    setSelectedDurations([]);
+  }, []);
+
+  const handleResetFilters = useCallback(() => {
+    setSearchQuery('');
+    setSelectedAspectRatios([]);
+    setSelectedDurations([]);
+    setSelectedMainCategory(null);
+    setSelectedSubcategory(null);
+    toast.success('Filters reset');
+  }, []);
+
+  const hasActiveFilters = Boolean(searchQuery || selectedAspectRatios.length > 0 || 
+    selectedDurations.length > 0 || selectedMainCategory || selectedSubcategory);
+
   // Filter and sort templates
   const filteredAndSortedTemplates = useMemo(() => {
     let filtered = templates;
@@ -170,6 +238,27 @@ export default function MyTemplates() {
         const title = (template.custom_title || template.video_variations.title).toLowerCase();
         const idPrefix = template.video_variations.video_id.toString();
         return title.includes(query) || idPrefix.startsWith(query);
+      });
+    }
+
+    // Filter by aspect ratio
+    if (selectedAspectRatios.length > 0) {
+      filtered = filtered.filter(template =>
+        selectedAspectRatios.includes(template.video_variations.aspect_ratio)
+      );
+    }
+
+    // Filter by duration
+    if (selectedDurations.length > 0) {
+      filtered = filtered.filter(template => {
+        const seconds = parseDuration(template.video_variations.duration);
+        return selectedDurations.some(range => {
+          if (range === '0-30') return seconds < 30;
+          if (range === '30-60') return seconds >= 30 && seconds < 60;
+          if (range === '60-120') return seconds >= 60 && seconds < 120;
+          if (range === '120+') return seconds >= 120;
+          return false;
+        });
       });
     }
 
@@ -248,7 +337,7 @@ export default function MyTemplates() {
 
         {/* Search and Controls */}
         {templates.length > 0 && (
-          <div className="mb-6">
+          <div className="mb-6 space-y-4">
             <VideoControls
               searchQuery={searchQuery}
               onSearchChange={setSearchQuery}
@@ -260,6 +349,62 @@ export default function MyTemplates() {
               onSortChange={setSortBy}
               sortOptions={sortOptions}
             />
+
+            {/* Filters */}
+            <div className="flex gap-3 items-center flex-wrap">
+              {/* Reset Filters Button */}
+              {hasActiveFilters && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleResetFilters}
+                  className="h-10 whitespace-nowrap transition-all duration-200 hover:scale-105"
+                >
+                  <X className="w-4 h-4 mr-2" />
+                  Reset Filters
+                </Button>
+              )}
+
+              {/* Filter Drawer */}
+              <FilterDrawer
+                selectedMainCategory={selectedMainCategory}
+                selectedSubcategory={selectedSubcategory}
+                selectedDurations={selectedDurations}
+                selectedAspectRatios={selectedAspectRatios}
+                selectedPriceRanges={[]}
+                onMainCategorySelect={setSelectedMainCategory}
+                onSubcategorySelect={setSelectedSubcategory}
+                onDurationToggle={handleDurationToggle}
+                onAspectRatioToggle={handleAspectRatioToggle}
+                onPriceRangeToggle={() => {}}
+                onSelectAllDurations={handleSelectAllDurations}
+                onClearDurations={handleClearDurations}
+                onSelectAllAspectRatios={handleSelectAllAspectRatios}
+                onClearAspectRatios={handleClearAspectRatios}
+                onSelectAllPriceRanges={() => {}}
+                onClearPriceRanges={() => {}}
+                onResetFilters={handleResetFilters}
+                hasActiveFilters={hasActiveFilters}
+              />
+            </div>
+
+            {/* Active Filters Chips */}
+            {hasActiveFilters && (
+              <FilterChips
+                selectedMainCategory={selectedMainCategory}
+                selectedSubcategory={selectedSubcategory}
+                selectedDurations={selectedDurations}
+                selectedAspectRatios={selectedAspectRatios}
+                selectedPriceRanges={[]}
+                searchQuery={searchQuery}
+                onMainCategorySelect={setSelectedMainCategory}
+                onSubcategorySelect={setSelectedSubcategory}
+                onDurationToggle={handleDurationToggle}
+                onAspectRatioToggle={handleAspectRatioToggle}
+                onPriceRangeToggle={() => {}}
+                onClearSearch={() => setSearchQuery('')}
+              />
+            )}
           </div>
         )}
 
