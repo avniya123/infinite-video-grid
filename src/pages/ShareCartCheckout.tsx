@@ -165,13 +165,12 @@ export default function ShareCartCheckout() {
       />
 
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-muted-foreground mb-6">
+        {/* Back Button */}
+        <div className="mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate('/publish-cart')}>
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back
           </Button>
-          <span>Home → Templates → Proceed to Payment</span>
         </div>
 
         {/* Header */}
