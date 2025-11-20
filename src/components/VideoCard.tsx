@@ -87,12 +87,15 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     };
   }, []);
 
-  // Preload video when in view
+  // Remove preload - videos load on demand for better performance
   useEffect(() => {
-    if (isInView && videoRef.current && video.videoUrl) {
-      videoRef.current.load();
-    }
-  }, [isInView, video.videoUrl]);
+    // Cleanup function only
+    return () => {
+      if (hoverTimerRef.current) {
+        clearTimeout(hoverTimerRef.current);
+      }
+    };
+  }, []);
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -113,14 +116,19 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     if (!isInView) return;
     
     setIsHovering(true);
-    // Start playing video immediately on hover
+    // Delayed video start for better performance
     hoverTimerRef.current = setTimeout(() => {
       if (videoRef.current) {
         setShowVideo(true);
         setIsBuffering(true);
-        videoRef.current.play().catch(err => console.log('Play failed:', err));
+        // Load and play video on demand
+        videoRef.current.load();
+        videoRef.current.play().catch(err => {
+          console.log('Play failed:', err);
+          setIsBuffering(false);
+        });
       }
-    }, 150);
+    }, 300); // 300ms delay for smoother experience
   };
 
   const handleMouseLeave = () => {
@@ -185,32 +193,37 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             <video
               ref={videoRef}
               src={video.videoUrl}
-              className={`w-full h-full object-cover absolute inset-0 transition-all duration-500 ease-out ${showVideo ? 'opacity-100 scale-100' : 'opacity-0 scale-95 pointer-events-none'}`}
+              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ease-out ${showVideo ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               style={{
                 objectFit: 'cover',
-                WebkitMaskImage: '-webkit-radial-gradient(white, black)',
               }}
               loop
               muted
               playsInline
-              preload="metadata"
-              onLoadedData={() => setVideoLoaded(true)}
+              preload="none"
+              onLoadedData={() => {
+                setVideoLoaded(true);
+                setIsBuffering(false);
+              }}
               onWaiting={() => setIsBuffering(true)}
               onCanPlay={() => setIsBuffering(false)}
               onPlaying={() => setIsBuffering(false)}
-              onError={(e) => console.log('Video load error:', e)}
+              onError={(e) => {
+                console.log('Video load error:', e);
+                setIsBuffering(false);
+              }}
             />
           )}
 
-          {/* Buffering Shimmer Overlay */}
+          {/* Professional Buffering Indicator */}
           {showVideo && isBuffering && (
-            <div className="absolute inset-0 bg-black/30 backdrop-blur-sm z-20 transition-opacity duration-300">
-              <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/20 to-transparent" />
+            <div className="absolute inset-0 bg-black/40 z-20 flex items-center justify-center">
+              <div className="w-10 h-10 border-3 border-white/30 border-t-white rounded-full animate-spin" />
             </div>
           )}
 
           {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
             01/{String(variationsCount + 1).padStart(2, '0')}
           </Badge>
 
@@ -220,7 +233,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-800 dark:text-white px-2.5 py-1.5 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 cursor-help">
+                  <div className="bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white px-2.5 py-1.5 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 cursor-help">
                     <div className="text-xs font-semibold">₹ {video.price}</div>
                   </div>
                 </TooltipTrigger>
