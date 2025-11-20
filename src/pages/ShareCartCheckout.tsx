@@ -75,6 +75,7 @@ export default function ShareCartCheckout() {
   const [enrolledUsers, setEnrolledUsers] = useState<SharedUser[]>([]);
   const [loadingEnrolledUsers, setLoadingEnrolledUsers] = useState(false);
   const [selectedEnrolledIds, setSelectedEnrolledIds] = useState<string[]>([]);
+  const [enrolledSearchQuery, setEnrolledSearchQuery] = useState('');
   
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -1411,47 +1412,111 @@ export default function ShareCartCheckout() {
                   </div>
                 ) : (
                   <>
-                    <div className="border rounded-lg max-h-96 overflow-y-auto">
-                      <Table>
-                        <TableHeader>
-                          <TableRow>
-                            <TableHead className="w-12"></TableHead>
-                            <TableHead>Name</TableHead>
-                            <TableHead>Email</TableHead>
-                            <TableHead>Phone</TableHead>
-                          </TableRow>
-                        </TableHeader>
-                        <TableBody>
-                          {enrolledUsers.map((user) => (
-                            <TableRow key={user.id}>
-                              <TableCell>
-                                <Checkbox
-                                  checked={selectedEnrolledIds.includes(user.id)}
-                                  onCheckedChange={(checked) => {
-                                    if (checked) {
-                                      setSelectedEnrolledIds([...selectedEnrolledIds, user.id]);
-                                    } else {
-                                      setSelectedEnrolledIds(selectedEnrolledIds.filter(id => id !== user.id));
-                                    }
-                                  }}
-                                />
-                              </TableCell>
-                              <TableCell className="font-medium">{user.name}</TableCell>
-                              <TableCell className="text-sm">{user.email}</TableCell>
-                              <TableCell className="text-sm">{user.phone || 'N/A'}</TableCell>
-                            </TableRow>
-                          ))}
-                        </TableBody>
-                      </Table>
+                    {/* Search Input */}
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search by name or email..."
+                        value={enrolledSearchQuery}
+                        onChange={(e) => setEnrolledSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
                     </div>
 
-                    <Button
-                      onClick={handleAddEnrolledUsers}
-                      className="w-full"
-                      disabled={selectedEnrolledIds.length === 0}
-                    >
-                      Add Selected Users ({selectedEnrolledIds.length})
-                    </Button>
+                    {(() => {
+                      const filteredEnrolledUsers = enrolledUsers.filter(user =>
+                        user.name.toLowerCase().includes(enrolledSearchQuery.toLowerCase()) ||
+                        user.email.toLowerCase().includes(enrolledSearchQuery.toLowerCase())
+                      );
+
+                      return (
+                        <>
+                          {enrolledSearchQuery && (
+                            <p className="text-xs text-muted-foreground">
+                              Found {filteredEnrolledUsers.length} of {enrolledUsers.length} user(s)
+                            </p>
+                          )}
+
+                          {filteredEnrolledUsers.length === 0 ? (
+                            <div className="py-12 text-center text-muted-foreground">
+                              <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                              <p className="font-medium">No users found</p>
+                              <p className="text-sm mt-1">Try adjusting your search query</p>
+                              <Button variant="link" onClick={() => setEnrolledSearchQuery('')} className="mt-2">
+                                Clear search
+                              </Button>
+                            </div>
+                          ) : (
+                            <>
+                              <div className="border rounded-lg max-h-96 overflow-y-auto">
+                                <Table>
+                                  <TableHeader>
+                                    <TableRow>
+                                      <TableHead className="w-12">
+                                        <Checkbox
+                                          checked={
+                                            filteredEnrolledUsers.length > 0 &&
+                                            filteredEnrolledUsers.every(user => selectedEnrolledIds.includes(user.id))
+                                          }
+                                          onCheckedChange={(checked) => {
+                                            if (checked) {
+                                              setSelectedEnrolledIds([
+                                                ...selectedEnrolledIds,
+                                                ...filteredEnrolledUsers
+                                                  .filter(user => !selectedEnrolledIds.includes(user.id))
+                                                  .map(user => user.id)
+                                              ]);
+                                            } else {
+                                              setSelectedEnrolledIds(
+                                                selectedEnrolledIds.filter(
+                                                  id => !filteredEnrolledUsers.some(user => user.id === id)
+                                                )
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      </TableHead>
+                                      <TableHead>Name</TableHead>
+                                      <TableHead>Email</TableHead>
+                                      <TableHead>Phone</TableHead>
+                                    </TableRow>
+                                  </TableHeader>
+                                  <TableBody>
+                                    {filteredEnrolledUsers.map((user) => (
+                                      <TableRow key={user.id}>
+                                        <TableCell>
+                                          <Checkbox
+                                            checked={selectedEnrolledIds.includes(user.id)}
+                                            onCheckedChange={(checked) => {
+                                              if (checked) {
+                                                setSelectedEnrolledIds([...selectedEnrolledIds, user.id]);
+                                              } else {
+                                                setSelectedEnrolledIds(selectedEnrolledIds.filter(id => id !== user.id));
+                                              }
+                                            }}
+                                          />
+                                        </TableCell>
+                                        <TableCell className="font-medium">{user.name}</TableCell>
+                                        <TableCell className="text-sm">{user.email}</TableCell>
+                                        <TableCell className="text-sm">{user.phone || 'N/A'}</TableCell>
+                                      </TableRow>
+                                    ))}
+                                  </TableBody>
+                                </Table>
+                              </div>
+
+                              <Button
+                                onClick={handleAddEnrolledUsers}
+                                className="w-full"
+                                disabled={selectedEnrolledIds.length === 0}
+                              >
+                                Add Selected Users ({selectedEnrolledIds.length})
+                              </Button>
+                            </>
+                          )}
+                        </>
+                      );
+                    })()}
                   </>
                 )}
               </div>
