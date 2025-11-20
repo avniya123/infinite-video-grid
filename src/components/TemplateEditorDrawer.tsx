@@ -50,7 +50,11 @@ export function TemplateEditorDrawer({ open, onOpenChange, variationId }: Templa
               <Loader2 className="w-8 h-8 animate-spin text-primary" />
             </div>
           ) : variationData ? (
-            <TemplateEditorLayout variationId={variationId} variationData={variationData} />
+            <TemplateEditorLayout 
+              variationId={variationId} 
+              variationData={variationData}
+              onClose={() => onOpenChange(false)}
+            />
           ) : (
             <div className="flex items-center justify-center h-full text-muted-foreground">
               Failed to load template data
