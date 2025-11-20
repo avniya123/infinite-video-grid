@@ -216,6 +216,7 @@ export default function PublishCart() {
                       onPlay={handlePlayVideo}
                       onClick={handlePlayVideo}
                       showShareButton={false}
+                      showSaveButton={false}
                       publishMode={false}
                     />
                     {/* Remove from cart button */}
