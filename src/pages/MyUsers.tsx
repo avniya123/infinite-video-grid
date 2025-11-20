@@ -7,8 +7,10 @@ import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { ArrowLeft, Search, Mail, Phone, Calendar, Trash2 } from 'lucide-react';
+import { ArrowLeft, Search, Mail, Phone, Calendar, Trash2, Users } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
+import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
+import { useSharedUsers } from '@/hooks/useSharedUsers';
 
 interface SavedUser {
   id: string;
@@ -26,6 +28,18 @@ export default function MyUsers() {
   const [savedUsers, setSavedUsers] = useState<SavedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [usersDrawerOpen, setUsersDrawerOpen] = useState(false);
+  
+  const {
+    sharedUsers,
+    addUser,
+    updateUser,
+    removeUser,
+    importUsersFromCsv,
+    loadEnrolledUsers,
+    addEnrolledUsers,
+    enrolledUsers
+  } = useSharedUsers();
 
   useEffect(() => {
     checkUser();
@@ -127,11 +141,17 @@ export default function MyUsers() {
         </div>
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">My Users</h1>
-          <p className="text-muted-foreground">
-            Manage your saved enrolled users ({savedUsers.length} total)
-          </p>
+        <div className="mb-8 flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold mb-2">My Users</h1>
+            <p className="text-muted-foreground">
+              Manage your saved enrolled users ({savedUsers.length} total)
+            </p>
+          </div>
+          <Button onClick={() => setUsersDrawerOpen(true)}>
+            <Users className="w-4 h-4 mr-2" />
+            Manage Users
+          </Button>
         </div>
 
         {/* Search Bar */}
@@ -235,6 +255,43 @@ export default function MyUsers() {
           </div>
         )}
       </div>
+
+      <UsersManagementDrawer
+        open={usersDrawerOpen}
+        onOpenChange={setUsersDrawerOpen}
+        editingUser={null}
+        onAddUser={(userData) => {
+          const success = addUser(userData);
+          if (success) {
+            toast.success('User added successfully');
+            fetchSavedUsers();
+          }
+        }}
+        onUpdateUser={(userData) => {
+          const success = updateUser(userData);
+          if (success) {
+            toast.success('User updated successfully');
+            fetchSavedUsers();
+          }
+        }}
+        onImportCsv={(users) => {
+          const success = importUsersFromCsv(users);
+          if (success) {
+            toast.success('Users imported successfully');
+            fetchSavedUsers();
+          }
+        }}
+        onAddEnrolledUsers={(users) => {
+          const success = addEnrolledUsers(users);
+          if (success) {
+            toast.success('Enrolled users added successfully');
+            fetchSavedUsers();
+          }
+        }}
+        enrolledUsers={enrolledUsers}
+        loadingEnrolledUsers={loading}
+        onLoadEnrolledUsers={loadEnrolledUsers}
+      />
     </div>
   );
 }
