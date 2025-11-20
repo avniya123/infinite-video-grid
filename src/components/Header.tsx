@@ -442,7 +442,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         key={profileData?.avatar_url} 
                       />
                       <AvatarFallback className="bg-gradient-to-br from-gray-800 to-gray-600 text-white text-sm">
-                        <User className="w-4 h-4" />
+                        {(profileData?.full_name || user.user_metadata?.full_name || user.email || 'U').charAt(0).toUpperCase()}
                       </AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>

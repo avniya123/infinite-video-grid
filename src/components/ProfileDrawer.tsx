@@ -449,8 +449,8 @@ export default function ProfileDrawer({ open, onOpenChange, onProfileUpdate }: P
                 <CardContent className="flex flex-col items-center gap-4">
                   <Avatar className="h-24 w-24">
                     <AvatarImage src={avatarUrl || undefined} alt="Profile" />
-                    <AvatarFallback>
-                      <User className="h-12 w-12" />
+                    <AvatarFallback className="bg-gradient-to-br from-gray-800 to-gray-600 text-white text-3xl">
+                      {(formData.fullName || user?.email || 'U').charAt(0).toUpperCase()}
                     </AvatarFallback>
                   </Avatar>
                   <div className="flex gap-2">
