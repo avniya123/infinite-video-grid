@@ -10,7 +10,6 @@ import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
-import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -41,8 +40,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
 
   // Calculate aspect ratio based on orientation
   const getAspectRatio = () => {
@@ -229,11 +226,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               <div className="w-7 h-7 border-3 border-white/20 border-t-white rounded-full animate-spin" />
             </div>
           )}
-
-          {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-            01/{String(variationsCount + 1).padStart(2, '0')}
-          </Badge>
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
