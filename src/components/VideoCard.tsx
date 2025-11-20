@@ -23,10 +23,9 @@ interface VideoCardProps {
   onSelect?: (video: VideoItem) => void;
   showShareButton?: boolean;
   showPrice?: boolean;
-  disableVariations?: boolean;
 }
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showPrice = true, disableVariations = false }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showPrice = true }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -231,12 +230,10 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Variations Count Badge - hidden when variations disabled */}
-          {!disableVariations && (
-            <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-              01/{String(variationsCount + 1).padStart(2, '0')}
-            </Badge>
-          )}
+          {/* Variations Count Badge */}
+          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+            01/{String(variationsCount + 1).padStart(2, '0')}
+          </Badge>
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
@@ -323,31 +320,27 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </p>
           </div>
 
-          {/* Variations Button - hidden when variations disabled */}
-          {!disableVariations && (
-            <Button
-              size="sm"
-              className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
-              onClick={(e) => {
-                e.stopPropagation();
-                setVariationsOpen(true);
-              }}
-            >
-              <List className="h-3.5 w-3.5" />
-              Variations
-            </Button>
-          )}
+          {/* Variations Button */}
+          <Button
+            size="sm"
+            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
+            onClick={(e) => {
+              e.stopPropagation();
+              setVariationsOpen(true);
+            }}
+          >
+            <List className="h-3.5 w-3.5" />
+            Variations
+          </Button>
         </div>
       </AspectRatio>
 
-      {!disableVariations && (
-        <VariationsDrawer
-          video={video}
-          open={variationsOpen}
-          onOpenChange={setVariationsOpen}
-          onRequestAuth={() => setAuthDrawerOpen(true)}
-        />
-      )}
+      <VariationsDrawer
+        video={video}
+        open={variationsOpen}
+        onOpenChange={setVariationsOpen}
+        onRequestAuth={() => setAuthDrawerOpen(true)}
+      />
 
       <VideoPlayerDrawer
         video={video}
