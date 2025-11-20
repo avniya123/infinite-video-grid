@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -52,6 +53,8 @@ export default function ShareCartCheckout() {
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
   const [selectedUserType, setSelectedUserType] = useState('');
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [userToDelete, setUserToDelete] = useState<SharedUser | null>(null);
 
   useEffect(() => {
     checkUser();
@@ -101,9 +104,18 @@ export default function ShareCartCheckout() {
     setDrawerOpen(false);
   };
 
-  const handleRemoveUser = (userId: string) => {
-    setSharedUsers(sharedUsers.filter(u => u.id !== userId));
-    toast.success('User removed');
+  const handleRemoveUser = (user: SharedUser) => {
+    setUserToDelete(user);
+    setDeleteDialogOpen(true);
+  };
+
+  const confirmRemoveUser = () => {
+    if (userToDelete) {
+      setSharedUsers(sharedUsers.filter(u => u.id !== userToDelete.id));
+      toast.success('User removed from shared list');
+      setDeleteDialogOpen(false);
+      setUserToDelete(null);
+    }
   };
 
   const handleToggleAccess = (userId: string) => {
@@ -269,7 +281,7 @@ export default function ShareCartCheckout() {
                           variant="ghost" 
                           size="icon" 
                           className="h-8 w-8 text-destructive hover:text-destructive"
-                          onClick={() => handleRemoveUser(sharedUser.id)}
+                          onClick={() => handleRemoveUser(sharedUser)}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
@@ -537,6 +549,28 @@ export default function ShareCartCheckout() {
           </div>
         </DrawerContent>
       </Drawer>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Shared User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <span className="font-semibold text-foreground">{userToDelete?.name}</span> from the shared user list? 
+              They will no longer have access to this template.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmRemoveUser}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
