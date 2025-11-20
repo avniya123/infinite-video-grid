@@ -4,6 +4,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetDescription,
+  SheetClose,
 } from '@/components/ui/sheet';
 import { DRAWER_PRESETS } from '@/config/drawer';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
@@ -127,6 +128,16 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
           <h2>{video.title}</h2>
           <SheetDescription>Video player with playback controls and filters</SheetDescription>
         </SheetHeader>
+        
+        {/* Close Button */}
+        <div className="absolute top-4 right-4 z-50">
+          <SheetClose asChild>
+            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-background/80 hover:bg-background backdrop-blur-sm">
+              <X className="h-4 w-4" />
+            </Button>
+          </SheetClose>
+        </div>
+        
         {/* Video Player Section */}
         <div className="relative bg-black">
           <AspectRatio ratio={16 / 9} className="bg-black">
@@ -143,16 +154,6 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
               Your browser does not support the video tag.
             </video>
           </AspectRatio>
-          
-          {/* Close Button Overlay */}
-          <Button
-            variant="ghost"
-            size="sm"
-            className="absolute top-4 right-4 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
-            onClick={() => onOpenChange(false)}
-          >
-            <X className="h-5 w-5" />
-          </Button>
         </div>
 
         {/* Download Progress Indicator */}
