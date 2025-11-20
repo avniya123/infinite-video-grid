@@ -376,9 +376,8 @@ export function UsersManagementDrawer({
           ) : (
             /* Tabs for Different User Management Options */
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as typeof activeTab)} className="w-full">
-              <TabsList className="grid w-full grid-cols-3 mb-6">
+              <TabsList className="grid w-full grid-cols-2 mb-6">
                 <TabsTrigger value="single" className="text-xs sm:text-sm">Single User</TabsTrigger>
-                <TabsTrigger value="enrolled" className="text-xs sm:text-sm">Enrolled Users</TabsTrigger>
                 <TabsTrigger value="import" className="text-xs sm:text-sm">Import CSV</TabsTrigger>
               </TabsList>
 
@@ -480,113 +479,6 @@ export function UsersManagementDrawer({
                 >
                   Add Shared User
                 </Button>
-              </TabsContent>
-
-              {/* Enrolled Users Tab */}
-              <TabsContent value="enrolled" className="space-y-4 mt-0">
-                <div>
-                  <label className="text-sm font-medium">
-                    Assign User Type <span className="text-destructive">*</span>
-                  </label>
-                  <Select value={enrolledUserType} onValueChange={setEnrolledUserType}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select user type..." />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="family">Family</SelectItem>
-                      <SelectItem value="friend">Friend</SelectItem>
-                      <SelectItem value="colleague">Colleague</SelectItem>
-                      <SelectItem value="client">Client</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    All selected users will be added with this user type
-                  </p>
-                </div>
-
-                {loadingEnrolledUsers ? (
-                  <div className="py-12 text-center">
-                    <p className="text-muted-foreground">Loading users...</p>
-                  </div>
-                ) : enrolledUsers.length === 0 ? (
-                  <div className="py-12 text-center text-muted-foreground">
-                    <UsersIcon className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                    <p className="font-medium">No registered users found</p>
-                    <p className="text-sm mt-1">There are no users registered in the system yet</p>
-                  </div>
-                ) : (
-                  <>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search by name or email..."
-                        value={enrolledSearchQuery}
-                        onChange={(e) => setEnrolledSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
-                    </div>
-
-                    {enrolledSearchQuery && (
-                      <p className="text-xs text-muted-foreground">
-                        Found {filteredEnrolledUsers.length} of {enrolledUsers.length} user(s)
-                      </p>
-                    )}
-
-                    {filteredEnrolledUsers.length === 0 ? (
-                      <div className="py-12 text-center text-muted-foreground">
-                        <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                        <p className="font-medium">No users found</p>
-                        <p className="text-sm mt-1">Try adjusting your search query</p>
-                        <Button variant="link" onClick={() => setEnrolledSearchQuery('')} className="mt-2">
-                          Clear search
-                        </Button>
-                      </div>
-                    ) : (
-                      <>
-                        <div className="border rounded-lg max-h-96 overflow-y-auto">
-                          <Table>
-                            <TableHeader>
-                              <TableRow>
-                                <TableHead className="w-12">
-                                  <Checkbox
-                                    checked={selectedEnrolledIds.length === filteredEnrolledUsers.length && filteredEnrolledUsers.length > 0}
-                                    onCheckedChange={handleToggleAllEnrolled}
-                                  />
-                                </TableHead>
-                                <TableHead>Name</TableHead>
-                                <TableHead>Email</TableHead>
-                                <TableHead>Phone</TableHead>
-                              </TableRow>
-                            </TableHeader>
-                            <TableBody>
-                              {filteredEnrolledUsers.map((user) => (
-                                <TableRow key={user.id}>
-                                  <TableCell>
-                                    <Checkbox
-                                      checked={selectedEnrolledIds.includes(user.id)}
-                                      onCheckedChange={() => handleToggleEnrolledSelection(user.id)}
-                                    />
-                                  </TableCell>
-                                  <TableCell className="font-medium">{user.name}</TableCell>
-                                  <TableCell className="text-sm">{user.email}</TableCell>
-                                  <TableCell className="text-sm">{user.phone || 'N/A'}</TableCell>
-                                </TableRow>
-                              ))}
-                            </TableBody>
-                          </Table>
-                        </div>
-
-                        <Button
-                          onClick={handleAddEnrolledUsers}
-                          className="w-full"
-                          disabled={selectedEnrolledIds.length === 0}
-                        >
-                          Add Selected Users ({selectedEnrolledIds.length})
-                        </Button>
-                      </>
-                    )}
-                  </>
-                )}
               </TabsContent>
 
               {/* Import CSV Tab */}
