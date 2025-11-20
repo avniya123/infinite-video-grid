@@ -634,98 +634,119 @@ export default function ShareCartCheckout() {
         onSubcategorySelect={() => {}}
       />
 
-      <div className="container mx-auto px-4 py-6 max-w-7xl">
+      <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Back Button */}
         <div className="mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/publish-cart')}>
+          <Button variant="ghost" size="sm" onClick={() => navigate('/publish-cart')} className="hover:bg-muted/50">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
+            <span className="font-medium">Back to Cart</span>
           </Button>
         </div>
 
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
-          <h1 className="text-3xl font-bold">Share Cart Place Order</h1>
-          <div className="flex gap-3">
-            <Button 
-              variant="outline" 
-              onClick={() => {
-                setDrawerMode('csv');
-                setAddUserSheetOpen(true);
-              }}
-              className="gap-2"
-            >
-              <Upload className="w-5 h-5" />
-              Import CSV
-            </Button>
-            <Button 
-              onClick={() => {
-                setDrawerMode('add');
-                setEditingUser(null);
-                setAddUserSheetOpen(true);
-              }} 
-              className="gap-2"
-            >
-              <UserPlus className="w-5 h-5" />
-              Add Share Users
-            </Button>
-            <Button 
-              onClick={() => {
-                setDrawerMode('enrol');
-                setAddUserSheetOpen(true);
-              }}
-              variant="outline"
-              className="gap-2"
-            >
-              <UserCheck className="w-5 h-5" />
-              Enrol Users
-            </Button>
-          </div>
+        <div className="mb-10">
+          <h1 className="text-4xl font-bold tracking-tight mb-3 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+            Share Cart Checkout
+          </h1>
+          <p className="text-muted-foreground text-lg">
+            Manage shared users and complete your order
+          </p>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-6">
+        {/* Action Buttons */}
+        <div className="flex flex-wrap gap-3 mb-8">
+          <Button 
+            variant="outline" 
+            onClick={() => {
+              setDrawerMode('csv');
+              setAddUserSheetOpen(true);
+            }}
+            className="gap-2 font-medium hover:bg-accent hover:text-accent-foreground transition-all"
+          >
+            <Upload className="w-4 h-4" />
+            Import CSV
+          </Button>
+          <Button 
+            onClick={() => {
+              setDrawerMode('add');
+              setEditingUser(null);
+              setAddUserSheetOpen(true);
+            }} 
+            className="gap-2 font-medium shadow-sm hover:shadow-md transition-all"
+          >
+            <UserPlus className="w-4 h-4" />
+            Add Users
+          </Button>
+          <Button 
+            onClick={() => {
+              setDrawerMode('enrol');
+              setAddUserSheetOpen(true);
+            }}
+            variant="outline"
+            className="gap-2 font-medium hover:bg-accent hover:text-accent-foreground transition-all"
+          >
+            <UserCheck className="w-4 h-4" />
+            Enrolled Users
+          </Button>
+        </div>
+
+        <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Template & Users */}
-          <div className="lg:col-span-2 space-y-6">
+          <div className="lg:col-span-2 space-y-8">
             {/* Template Info */}
-            <Card className="p-6">
-              <div className="flex gap-4">
-                <img 
-                  src={template.thumbnailUrl || '/placeholder.svg'} 
-                  alt={template.title}
-                  className="w-24 h-24 rounded-lg object-cover"
-                />
+            <Card className="p-6 shadow-sm border-border/50 hover:shadow-md transition-shadow">
+              <h2 className="text-lg font-semibold mb-4 text-foreground">Template Details</h2>
+              <div className="flex gap-5">
+                <div className="relative rounded-xl overflow-hidden shadow-md">
+                  <img 
+                    src={template.thumbnailUrl || '/placeholder.svg'} 
+                    alt={template.title}
+                    className="w-28 h-28 object-cover"
+                  />
+                </div>
                 <div className="flex-1">
-                  <h3 className="font-semibold text-lg">{template.title}</h3>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <span>{template.duration}</span>
-                    <span>{template.orientation}</span>
-                    <span>{template.resolution}</span>
+                  <h3 className="font-semibold text-xl mb-2 text-foreground">{template.title}</h3>
+                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
+                      {template.duration}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
+                      {template.orientation}
+                    </span>
+                    <span className="inline-flex items-center gap-1">
+                      <span className="w-1.5 h-1.5 rounded-full bg-muted-foreground/40" />
+                      {template.resolution}
+                    </span>
                   </div>
-                  <div className="flex items-center gap-2 mt-3">
-                    <span className="text-2xl font-bold text-green-600">₹ {template.price.toFixed(2)}</span>
-                    <span className="text-sm text-muted-foreground line-through">MRP: ₹ {template.mrp.toFixed(2)}</span>
-                    <span className="text-sm text-green-600">{template.discount}</span>
+                  <div className="flex items-center gap-3">
+                    <span className="text-2xl font-bold text-green-600">₹{template.price.toFixed(2)}</span>
+                    <span className="text-sm text-muted-foreground line-through">₹{template.mrp.toFixed(2)}</span>
+                    <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400">
+                      {template.discount}
+                    </span>
                   </div>
                 </div>
               </div>
             </Card>
 
             {/* User List */}
-            <Card className="p-6">
-              <div className="mb-4 flex items-center justify-between">
+            <Card className="p-6 shadow-sm border-border/50 hover:shadow-md transition-shadow">
+              <div className="mb-6 flex items-center justify-between">
                 <div>
-                  <h3 className="font-semibold text-lg">Confirm User list</h3>
-                  <p className="text-sm text-muted-foreground">Editable for shared users.</p>
+                  <h2 className="text-lg font-semibold text-foreground">Shared Users</h2>
+                  <p className="text-sm text-muted-foreground mt-1">Manage users who have access to this template</p>
                 </div>
                 {sharedUsers.length > 0 && selectedUserIds.length > 0 && (
                   <Button
                     variant="destructive"
                     size="sm"
                     onClick={handleBulkDelete}
-                    className="gap-2"
+                    className="gap-2 shadow-sm hover:shadow-md transition-all"
                   >
                     <Trash2 className="w-4 h-4" />
-                    Delete Selected ({selectedUserIds.length})
+                    Remove ({selectedUserIds.length})
                   </Button>
                 )}
               </div>
@@ -866,63 +887,80 @@ export default function ShareCartCheckout() {
               )}
 
               {sharedUsers.length > 0 && (
-                <div className="mt-6 p-4 bg-muted/30 rounded-lg">
-                  <p className="text-sm font-medium">Media Templates for Shared user ( {sharedUsers.length} )</p>
-                  <p className="text-xs text-muted-foreground mt-1">Notifications Sent Mail & Mobile to Selected users</p>
+                <div className="mt-6 p-5 bg-gradient-to-br from-primary/5 to-primary/10 dark:from-primary/10 dark:to-primary/20 rounded-xl border border-primary/20">
+                  <div className="flex items-start gap-3">
+                    <div className="p-2 rounded-lg bg-background/50">
+                      <Users className="w-5 h-5 text-primary" />
+                    </div>
+                    <div>
+                      <p className="text-sm font-semibold text-foreground">
+                        {sharedUsers.length} {sharedUsers.length === 1 ? 'User' : 'Users'} Selected
+                      </p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        Email & mobile notifications will be sent to all users with access enabled
+                      </p>
+                    </div>
+                  </div>
                 </div>
               )}
             </Card>
 
             {/* Reseller Discount */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Reseller Discount</h3>
+            <Card className="p-6 shadow-sm border-border/50 hover:shadow-md transition-shadow">
+              <h2 className="text-lg font-semibold mb-4 text-foreground">Reseller Discount</h2>
               <div className="flex gap-3">
                 <Input
-                  placeholder="Discount 10"
+                  placeholder="Enter discount code"
                   value={discountCode}
                   onChange={(e) => setDiscountCode(e.target.value)}
                   disabled={discountApplied}
+                  className="font-medium"
                 />
                 <Button 
                   onClick={handleApplyDiscount}
                   disabled={discountApplied}
+                  className="px-6 font-medium shadow-sm hover:shadow-md transition-all"
                 >
                   Apply
                 </Button>
               </div>
               {discountApplied && (
-                <p className="text-sm text-green-600 mt-2">Success! Reseller coupon added</p>
+                <div className="mt-3 p-3 bg-green-50 dark:bg-green-900/20 rounded-lg border border-green-200 dark:border-green-800">
+                  <p className="text-sm font-medium text-green-700 dark:text-green-400">
+                    ✓ Discount code applied successfully
+                  </p>
+                </div>
               )}
             </Card>
           </div>
 
           {/* Right Column - Summary & Payment */}
-          <div className="space-y-6">
+          <div className="space-y-8">
             {/* Share Method */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Template Share Status Method</h3>
+            <Card className="p-6 shadow-sm border-border/50 hover:shadow-md transition-shadow">
+              <h2 className="text-lg font-semibold mb-5 text-foreground">Share Method</h2>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setShareMethod('cart')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`p-5 rounded-xl border-2 transition-all duration-200 ${
                     shareMethod === 'cart' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-primary bg-primary/10 shadow-sm' 
+                      : 'border-border hover:border-primary/40 hover:bg-accent/5'
                   }`}
                 >
-                  <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <p className="text-sm font-medium">Share Cart</p>
+                  <Users className={`w-7 h-7 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className="text-sm font-semibold">Share Cart</p>
                 </button>
                 <button
                   onClick={() => setShareMethod('edited')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`p-5 rounded-xl border-2 transition-all duration-200 ${
                     shareMethod === 'edited' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-primary bg-primary/10 shadow-sm' 
+                      : 'border-border hover:border-primary/40 hover:bg-accent/5'
                   }`}
                 >
-                  <Edit className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <p className="text-sm font-medium">Edited Templeted</p>
+                  <Edit className={`w-7 h-7 mx-auto mb-2 ${shareMethod === 'edited' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className="text-sm font-semibold">Edited Template</p>
                 </button>
               </div>
             </Card>
@@ -993,7 +1031,7 @@ export default function ShareCartCheckout() {
             {/* Proceed Button */}
             <Button 
               onClick={handleProceedToPayment}
-              className="w-full h-12 text-base font-semibold"
+              className="w-full h-14 text-base font-semibold shadow-lg hover:shadow-xl transition-all duration-200"
               size="lg"
               disabled={sharedUsers.length === 0}
             >
@@ -1001,9 +1039,11 @@ export default function ShareCartCheckout() {
               Proceed to Payment
             </Button>
             {sharedUsers.length === 0 && (
-              <p className="text-sm text-center text-muted-foreground mt-2">
-                Please add at least one shared user to proceed
-              </p>
+              <div className="text-center p-4 bg-muted/30 rounded-lg">
+                <p className="text-sm text-muted-foreground">
+                  Add at least one user to proceed with checkout
+                </p>
+              </div>
             )}
           </div>
         </div>
