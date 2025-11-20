@@ -70,6 +70,18 @@ export default function ShareCartCheckout() {
   // CSV import states
   const [csvImportDrawerOpen, setCsvImportDrawerOpen] = useState(false);
 
+  // Validation functions
+  const validateEmail = (email: string): boolean => {
+    const emailRegex = /^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string): boolean => {
+    // Accepts formats: +91 9876543210, +919876543210, 9876543210, or 10-digit numbers
+    const phoneRegex = /^(\+91[\s]?)?[6-9]\d{9}$/;
+    return phoneRegex.test(phone.replace(/\s+/g, ''));
+  };
+
   useEffect(() => {
     checkUser();
     // Get template data from navigation state
@@ -95,6 +107,22 @@ export default function ShareCartCheckout() {
   const handleAddSharedUser = () => {
     if (!newUserName || !newUserPhone || !newUserEmail || !selectedUserType) {
       toast.error('Please fill all required fields');
+      return;
+    }
+
+    // Validate email format
+    if (!validateEmail(newUserEmail)) {
+      toast.error('Invalid email format', {
+        description: 'Please enter a valid email address (e.g., example@domain.com)',
+      });
+      return;
+    }
+
+    // Validate phone format
+    if (!validatePhone(newUserPhone)) {
+      toast.error('Invalid phone number format', {
+        description: 'Please enter a valid 10-digit Indian phone number (e.g., +91 9876543210)',
+      });
       return;
     }
 
@@ -201,6 +229,22 @@ export default function ShareCartCheckout() {
       return;
     }
 
+    // Validate email format
+    if (!validateEmail(editUserEmail)) {
+      toast.error('Invalid email format', {
+        description: 'Please enter a valid email address (e.g., example@domain.com)',
+      });
+      return;
+    }
+
+    // Validate phone format
+    if (!validatePhone(editUserPhone)) {
+      toast.error('Invalid phone number format', {
+        description: 'Please enter a valid 10-digit Indian phone number (e.g., +91 9876543210)',
+      });
+      return;
+    }
+
     // Check for duplicate email (excluding current user)
     const duplicateEmail = sharedUsers.find(
       user => user.id !== editingUser.id && user.email.toLowerCase() === editUserEmail.toLowerCase()
@@ -258,7 +302,7 @@ export default function ShareCartCheckout() {
       
       const newUsers: SharedUser[] = [];
       const duplicates: string[] = [];
-      const skipped: string[] = [];
+      const invalidFormats: string[] = [];
       
       for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',').map(v => v.trim());
@@ -266,6 +310,18 @@ export default function ShareCartCheckout() {
           const email = values[2];
           const phone = values[1];
           const name = values[0];
+          
+          // Validate email format
+          if (!validateEmail(email)) {
+            invalidFormats.push(`${name} (invalid email)`);
+            continue;
+          }
+          
+          // Validate phone format
+          if (!validatePhone(phone)) {
+            invalidFormats.push(`${name} (invalid phone)`);
+            continue;
+          }
           
           // Check for duplicates in existing shared users
           const duplicateEmail = sharedUsers.find(
@@ -296,8 +352,6 @@ export default function ShareCartCheckout() {
             userType: values[3],
             hasAccess: true,
           });
-        } else {
-          skipped.push(`Row ${i + 1}`);
         }
       }
       
@@ -306,7 +360,10 @@ export default function ShareCartCheckout() {
         
         let message = `${newUsers.length} user(s) imported successfully`;
         if (duplicates.length > 0) {
-          message += `. ${duplicates.length} duplicate(s) skipped: ${duplicates.slice(0, 3).join(', ')}${duplicates.length > 3 ? '...' : ''}`;
+          message += `. ${duplicates.length} duplicate(s) skipped`;
+        }
+        if (invalidFormats.length > 0) {
+          message += `. ${invalidFormats.length} invalid format(s) skipped`;
         }
         
         toast.success('CSV Import Complete', {
@@ -314,13 +371,21 @@ export default function ShareCartCheckout() {
         });
         setCsvImportDrawerOpen(false);
       } else {
+        let errorMessage = 'No valid users found in CSV file';
+        let description = '';
+        
         if (duplicates.length > 0) {
-          toast.error('All users in CSV already exist', {
-            description: `${duplicates.length} duplicate user(s) were skipped.`,
-          });
-        } else {
-          toast.error('No valid users found in CSV file');
+          errorMessage = 'All users in CSV already exist or have invalid formats';
+          description = `${duplicates.length} duplicate(s)`;
         }
+        if (invalidFormats.length > 0) {
+          if (description) description += ', ';
+          description += `${invalidFormats.length} invalid format(s): ${invalidFormats.slice(0, 2).join(', ')}${invalidFormats.length > 2 ? '...' : ''}`;
+        }
+        
+        toast.error(errorMessage, {
+          description: description || undefined,
+        });
       }
     };
     reader.readAsText(file);
