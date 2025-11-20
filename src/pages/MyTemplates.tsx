@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2, Edit, FileVideo, X, Search, Columns3, List } from 'lucide-react';
+import { Loader2, ArrowLeft, Trash2, Edit, FileVideo, X, Search, Columns3, List, ShoppingCart } from 'lucide-react';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { FilterChips } from '@/components/FilterChips';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -21,6 +21,7 @@ interface UserTemplate {
   custom_title: string | null;
   notes: string | null;
   created_at: string;
+  published: boolean | null;
   video_variations: {
     id: string;
     title: string;
@@ -160,6 +161,40 @@ export default function MyTemplates() {
   const handlePlayVideo = (video: VideoItem) => {
     setSelectedVideo(video);
     setDrawerOpen(true);
+  };
+
+  const handleAddToPublishCart = async (templateId: string) => {
+    // Optimistic update
+    const templateToPublish = templates.find(t => t.id === templateId);
+    const previousTemplates = [...templates];
+    
+    // Update UI immediately
+    setTemplates(templates.map(t => 
+      t.id === templateId ? { ...t, published: true } : t
+    ));
+    
+    // Show optimistic feedback
+    toast.success('Adding to publish cart...', { duration: 1000 });
+    
+    try {
+      const { error } = await supabase
+        .from('user_templates')
+        .update({ 
+          published: true,
+          published_at: new Date().toISOString()
+        })
+        .eq('id', templateId);
+
+      if (error) throw error;
+
+      // Confirm success
+      toast.success('Template added to publish cart');
+    } catch (error: any) {
+      // Revert on failure
+      setTemplates(previousTemplates);
+      toast.error('Failed to add to publish cart');
+      console.error('Error publishing template:', error);
+    }
   };
 
   const handlePublishConfirm = async (video: VideoItem) => {
@@ -570,8 +605,22 @@ export default function MyTemplates() {
                         onClick={handlePlayVideo}
                         showShareButton={false}
                       />
-                      {/* Edit and Delete buttons */}
+                      {/* Action buttons */}
                       <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        {!template.published && (
+                          <Button
+                            variant="secondary"
+                            size="icon"
+                            className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleAddToPublishCart(template.id);
+                            }}
+                            title="Add to Publish Cart"
+                          >
+                            <ShoppingCart className="h-3.5 w-3.5" />
+                          </Button>
+                        )}
                         <Button
                           variant="default"
                           size="icon"
@@ -646,6 +695,20 @@ export default function MyTemplates() {
                           </p>
                         </div>
                         <div className="flex gap-2">
+                          {!template.published && (
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="h-8 w-8 transition-transform hover:scale-110"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToPublishCart(template.id);
+                              }}
+                              title="Add to Publish Cart"
+                            >
+                              <ShoppingCart className="h-4 w-4" />
+                            </Button>
+                          )}
                           <Button
                             variant="default"
                             size="icon"
