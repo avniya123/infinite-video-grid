@@ -108,6 +108,38 @@ export default function MyTemplates() {
     setDrawerOpen(true);
   };
 
+  const handlePublishConfirm = async (video: VideoItem) => {
+    try {
+      // Find the template in the templates array
+      const template = templates.find(t => t.video_variations.video_id === video.id);
+      if (!template) {
+        toast.error('Template not found');
+        return;
+      }
+
+      // Update the template to mark it as published
+      const { error } = await supabase
+        .from('user_templates')
+        .update({ 
+          published: true, 
+          published_at: new Date().toISOString() 
+        })
+        .eq('id', template.id);
+
+      if (error) throw error;
+
+      toast.success('Template published successfully!');
+      
+      // Redirect to publish cart page
+      setTimeout(() => {
+        navigate('/publish-cart');
+      }, 1000);
+    } catch (error: any) {
+      toast.error('Failed to publish template');
+      console.error('Error publishing template:', error);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -202,6 +234,7 @@ export default function MyTemplates() {
                     onClick={handlePlayVideo}
                     showShareButton={false}
                     publishMode={true}
+                    onPublish={handlePublishConfirm}
                   />
                   {/* Edit and Delete buttons positioned above Variations button */}
                   <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">

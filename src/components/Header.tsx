@@ -356,13 +356,14 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => navigate('/publish-cart')}
                         className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
                         <ShoppingCart className="w-5 h-5" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Cart</p>
+                      <p>Publish Cart</p>
                     </TooltipContent>
                   </Tooltip>
 

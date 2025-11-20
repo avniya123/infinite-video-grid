@@ -24,9 +24,10 @@ interface VideoCardProps {
   onSelect?: (video: VideoItem) => void;
   showShareButton?: boolean;
   publishMode?: boolean;
+  onPublish?: (video: VideoItem) => Promise<void>;
 }
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, publishMode = false }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, publishMode = false, onPublish }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -200,8 +201,12 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   const handlePublishConfirm = async () => {
     setPublishDialogOpen(false);
-    // TODO: Implement actual publish logic here
-    toast.success('Template published successfully!');
+    
+    if (onPublish) {
+      await onPublish(video);
+    } else {
+      toast.success('Template published successfully!');
+    }
   };
 
   const handlePlayClick = (e: React.MouseEvent) => {

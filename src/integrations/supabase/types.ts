@@ -71,6 +71,8 @@ export type Database = {
           custom_title: string | null
           id: string
           notes: string | null
+          published: boolean | null
+          published_at: string | null
           updated_at: string | null
           user_id: string
           variation_id: string
@@ -80,6 +82,8 @@ export type Database = {
           custom_title?: string | null
           id?: string
           notes?: string | null
+          published?: boolean | null
+          published_at?: string | null
           updated_at?: string | null
           user_id: string
           variation_id: string
@@ -89,6 +93,8 @@ export type Database = {
           custom_title?: string | null
           id?: string
           notes?: string | null
+          published?: boolean | null
+          published_at?: string | null
           updated_at?: string | null
           user_id?: string
           variation_id?: string
