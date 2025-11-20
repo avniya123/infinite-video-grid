@@ -81,27 +81,24 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
   };
 
   const selectCategory = (category: string) => {
-    // Navigate to videos page with category parameter
-    if (location.pathname !== '/videos') {
-      navigate(`/videos?category=${encodeURIComponent(category)}`);
+    // Toggle category selection
+    if (selectedCategory === category) {
+      setSelectedCategory(null);
+      if (onSubcategorySelect) {
+        onSubcategorySelect(null);
+      }
+      if (onMainCategorySelect) {
+        onMainCategorySelect(null);
+      }
     } else {
-      // If already on videos page, update the filter
-      if (selectedCategory === category) {
-        setSelectedCategory(null);
-        if (onSubcategorySelect) {
-          onSubcategorySelect(null);
-        }
-        if (onMainCategorySelect) {
-          onMainCategorySelect(null);
-        }
-      } else {
-        setSelectedCategory(category);
-        if (onSubcategorySelect) {
-          onSubcategorySelect(null);
-        }
-        if (onMainCategorySelect) {
-          onMainCategorySelect(category);
-        }
+      setSelectedCategory(category);
+      // Clear subcategory selection when changing main category
+      if (onSubcategorySelect) {
+        onSubcategorySelect(null);
+      }
+      // Set main category for filtering
+      if (onMainCategorySelect) {
+        onMainCategorySelect(category);
       }
     }
   };
