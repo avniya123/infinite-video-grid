@@ -393,6 +393,7 @@ export default function MyUsers() {
           }
         }}
         editingUser={editingUser}
+        showEnrolledTab={false}
         onAddUser={async (userData) => {
           const success = addUser(userData);
           if (success) {
