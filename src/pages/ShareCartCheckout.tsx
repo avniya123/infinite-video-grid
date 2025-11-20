@@ -32,7 +32,7 @@ export default function ShareCartCheckout() {
   const navigate = useNavigate();
   const location = useLocation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
-  const [template, setTemplate] = useState<TemplateData | null>(null);
+  const [templates, setTemplates] = useState<TemplateData[]>([]);
   const [isQuickMode, setIsQuickMode] = useState(false);
   const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   
@@ -99,7 +99,7 @@ export default function ShareCartCheckout() {
             const price = 999;
             const discountPercent = Math.round(((mrp - price) / mrp) * 100);
             
-            setTemplate({
+            setTemplates([{
               id: variation.id,
               title: variation.title,
               price: price,
@@ -110,7 +110,7 @@ export default function ShareCartCheckout() {
                           variation.aspect_ratio.includes('9:16') ? 'Portrait' : 'Square',
               resolution: variation.quality || '1920x1080',
               thumbnailUrl: variation.thumbnail_url || '/placeholder.svg'
-            });
+            }]);
           }
         } catch (error) {
           console.error('Error loading variation:', error);
@@ -120,11 +120,11 @@ export default function ShareCartCheckout() {
           setIsLoadingTemplate(false);
         }
       } else {
-        const templateData = location.state?.template;
-        if (templateData) {
-          setTemplate(templateData);
+        const templatesData = location.state?.templates;
+        if (templatesData && Array.isArray(templatesData)) {
+          setTemplates(templatesData);
         } else {
-          toast.error('No template selected');
+          toast.error('No templates selected');
           navigate('/publish-cart');
         }
       }
@@ -239,16 +239,18 @@ export default function ShareCartCheckout() {
   };
 
   const calculatePricing = () => {
-    if (!template) return { mrp: 0, subtotal: 0, discount: 0, tax: 0, total: 0 };
+    if (templates.length === 0) return { mrp: 0, subtotal: 0, discount: 0, tax: 0, total: 0 };
     
     const numUsers = sharedUsers.length || 1;
-    const mrp = template.price;
-    const subtotal = mrp * numUsers;
+    
+    // Calculate total for all templates
+    const totalPrice = templates.reduce((sum, template) => sum + template.price, 0);
+    const subtotal = totalPrice * numUsers;
     const discount = discountApplied ? (subtotal * discountPercent) / 100 : 0;
     const tax = (subtotal - discount) * 0.18;
     const total = subtotal - discount + tax;
 
-    return { mrp, subtotal, discount, tax, total };
+    return { mrp: totalPrice, subtotal, discount, tax, total };
   };
 
   const handleProceedToPayment = () => {
@@ -313,7 +315,7 @@ export default function ShareCartCheckout() {
   const pricing = calculatePricing();
 
   // Show loading state while fetching template data
-  if (isLoadingTemplate || !template) {
+  if (isLoadingTemplate || templates.length === 0) {
     return (
       <div className="min-h-screen bg-background">
         <Header 
@@ -361,7 +363,7 @@ export default function ShareCartCheckout() {
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {isQuickMode ? 'Quick Publish Cart (1)' : 'Publish Cart Checkout (1)'}
+                  {isQuickMode ? `Quick Publish Cart (${templates.length})` : `Publish Cart Checkout (${templates.length})`}
                 </h1>
                 {isQuickMode && (
                   <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 gap-1.5 px-3 py-1">
@@ -382,30 +384,34 @@ export default function ShareCartCheckout() {
           <div className="lg:col-span-2 space-y-8">
             {/* Template Info */}
             <Card className="p-6 shadow-sm border-border/50">
-              <h2 className="text-lg font-semibold mb-4">Template Details</h2>
-              <div className="flex gap-5">
-                <div className="relative rounded-xl overflow-hidden shadow-md">
-                  <img 
-                    src={template.thumbnailUrl || '/placeholder.svg'} 
-                    alt={template.title}
-                    className="w-28 h-28 object-cover"
-                  />
-                </div>
-                <div className="flex-1">
-                  <h3 className="font-semibold text-xl mb-2">{template.title}</h3>
-                  <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
-                    <span>{template.duration}</span>
-                    <span>{template.orientation}</span>
-                    <span>{template.resolution}</span>
+              <h2 className="text-lg font-semibold mb-4">Template Details ({templates.length})</h2>
+              <div className="space-y-5">
+                {templates.map((template, index) => (
+                  <div key={template.id} className="flex gap-5 pb-5 border-b last:border-0 last:pb-0">
+                    <div className="relative rounded-xl overflow-hidden shadow-md">
+                      <img 
+                        src={template.thumbnailUrl || '/placeholder.svg'} 
+                        alt={template.title}
+                        className="w-28 h-28 object-cover"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <h3 className="font-semibold text-xl mb-2">{template.title}</h3>
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground mb-3">
+                        <span>{template.duration}</span>
+                        <span>{template.orientation}</span>
+                        <span>{template.resolution}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-2xl font-bold text-green-600">₹{template.price.toFixed(2)}</span>
+                        <span className="text-sm text-muted-foreground line-through">₹{template.mrp.toFixed(2)}</span>
+                        <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                          {template.discount} off
+                        </span>
+                      </div>
+                    </div>
                   </div>
-                  <div className="flex items-center gap-3">
-                    <span className="text-2xl font-bold text-green-600">₹{template.price.toFixed(2)}</span>
-                    <span className="text-sm text-muted-foreground line-through">₹{template.mrp.toFixed(2)}</span>
-                    <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
-                      {template.discount} off
-                    </span>
-                  </div>
-                </div>
+                ))}
               </div>
             </Card>
 
@@ -778,18 +784,18 @@ export default function ShareCartCheckout() {
                   {/* Template Info */}
                   <div className="flex items-start gap-3 p-3 bg-background/80 rounded-lg">
                     <img 
-                      src={template.thumbnailUrl || '/placeholder.svg'} 
-                      alt={template.title}
+                      src={templates[0].thumbnailUrl || '/placeholder.svg'} 
+                      alt={templates[0].title}
                       className="w-16 h-16 rounded-md object-cover"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{template.title}</p>
+                      <p className="font-medium text-sm truncate">{templates[0].title}</p>
                       <div className="flex items-center gap-2 mt-1">
                         <Badge variant="secondary" className="text-xs">
-                          {template.duration}
+                          {templates[0].duration}
                         </Badge>
                         <Badge variant="outline" className="text-xs">
-                          {template.resolution}
+                          {templates[0].resolution}
                         </Badge>
                       </div>
                     </div>
@@ -882,21 +888,25 @@ export default function ShareCartCheckout() {
           <div className="space-y-4 py-4">
             {/* Template Details */}
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm text-muted-foreground">Template Details</h4>
-              <div className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
-                <img 
-                  src={template.thumbnailUrl || '/placeholder.svg'} 
-                  alt={template.title}
-                  className="w-20 h-20 rounded-md object-cover"
-                />
-                <div className="flex-1">
-                  <p className="font-semibold">{template.title}</p>
-                  <div className="flex items-center gap-2 mt-2">
-                    <Badge variant="secondary" className="text-xs">{template.duration}</Badge>
-                    <Badge variant="outline" className="text-xs">{template.orientation}</Badge>
-                    <Badge variant="outline" className="text-xs">{template.resolution}</Badge>
+              <h4 className="font-semibold text-sm text-muted-foreground">Template Details ({templates.length})</h4>
+              <div className="space-y-3 max-h-60 overflow-y-auto">
+                {templates.map((template) => (
+                  <div key={template.id} className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
+                    <img 
+                      src={template.thumbnailUrl || '/placeholder.svg'} 
+                      alt={template.title}
+                      className="w-20 h-20 rounded-md object-cover"
+                    />
+                    <div className="flex-1">
+                      <p className="font-semibold">{template.title}</p>
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="secondary" className="text-xs">{template.duration}</Badge>
+                        <Badge variant="outline" className="text-xs">{template.orientation}</Badge>
+                        <Badge variant="outline" className="text-xs">{template.resolution}</Badge>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
             </div>
 

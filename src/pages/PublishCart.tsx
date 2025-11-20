@@ -739,22 +739,24 @@ export default function PublishCart() {
               className="px-16 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105"
               onClick={() => {
                 if (filteredAndSortedTemplates.length > 0) {
-                  const template = filteredAndSortedTemplates[0];
-                  const pricing = calculateTemplatePrice(template, 1);
+                  // Send all published templates to checkout
+                  const templates = filteredAndSortedTemplates.map(template => {
+                    const pricing = calculateTemplatePrice(template, 1);
+                    return {
+                      id: template.id,
+                      title: template.video_variations.title,
+                      price: pricing.price,
+                      mrp: pricing.mrp,
+                      discount: pricing.discount,
+                      duration: template.video_variations.duration,
+                      orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
+                      resolution: 'HD',
+                      thumbnailUrl: template.video_variations.thumbnail_url,
+                    };
+                  });
+                  
                   navigate('/share-cart-checkout', {
-                    state: {
-                      template: {
-                        id: template.id,
-                        title: template.video_variations.title,
-                        price: pricing.price,
-                        mrp: pricing.mrp,
-                        discount: pricing.discount,
-                        duration: template.video_variations.duration,
-                        orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
-                        resolution: 'HD',
-                        thumbnailUrl: template.video_variations.thumbnail_url,
-                      }
-                    }
+                    state: { templates }
                   });
                 }
               }}
