@@ -13,6 +13,7 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import { VariationCard } from "@/components/VariationCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
@@ -24,6 +25,7 @@ interface VariationsDrawerProps {
 }
 
 export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false }: VariationsDrawerProps) => {
+  const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
@@ -130,8 +132,17 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
       onRequestAuth?.();
       return;
     }
-    // Navigate to Quick Cart payment page with video data
-    window.location.href = `/share-cart-checkout?mode=quick&videoId=${video.id}`;
+    
+    // Get the first variation or selected variation
+    const variationId = selectedVariation?.id || (variations && variations.length > 0 ? variations[0].id : null);
+    
+    if (!variationId) {
+      toast.error('No variation available');
+      return;
+    }
+    
+    // Navigate to Quick Cart payment page with variation data
+    navigate(`/share-cart-checkout?mode=quick&variationId=${variationId}`);
   };
 
   const handleEdit = async (variationId?: string) => {

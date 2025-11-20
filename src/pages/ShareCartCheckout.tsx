@@ -32,6 +32,7 @@ export default function ShareCartCheckout() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [template, setTemplate] = useState<TemplateData | null>(null);
   const [isQuickMode, setIsQuickMode] = useState(false);
+  const [isLoadingTemplate, setIsLoadingTemplate] = useState(false);
   
   // User management hook
   const {
@@ -65,38 +66,67 @@ export default function ShareCartCheckout() {
   const [searchQuery, setSearchQuery] = useState('');
 
   useEffect(() => {
-    checkUser();
-    
-    // Check if this is quick mode from URL params
-    const searchParams = new URLSearchParams(location.search);
-    const mode = searchParams.get('mode');
-    const videoId = searchParams.get('videoId');
-    
-    if (mode === 'quick' && videoId) {
-      setIsQuickMode(true);
-      setShareMethod('cart'); // Pre-select Share User Cart
-      // You can load video data here if needed
-      // For now, we'll use a placeholder template
-      setTemplate({
-        id: videoId,
-        title: 'Quick Cart Template',
-        price: 999,
-        mrp: 1499,
-        discount: '33%',
-        duration: '30s',
-        orientation: 'Landscape',
-        resolution: '1920x1080',
-        thumbnailUrl: '/placeholder.svg'
-      });
-    } else {
-      const templateData = location.state?.template;
-      if (templateData) {
-        setTemplate(templateData);
+    const initializePage = async () => {
+      await checkUser();
+      
+      // Check if this is quick mode from URL params
+      const searchParams = new URLSearchParams(location.search);
+      const mode = searchParams.get('mode');
+      const variationId = searchParams.get('variationId');
+      
+      if (mode === 'quick' && variationId) {
+        setIsQuickMode(true);
+        setShareMethod('cart'); // Pre-select Share User Cart
+        
+        // Fetch actual variation data from database
+        setIsLoadingTemplate(true);
+        try {
+          const { data: variation, error } = await supabase
+            .from('video_variations')
+            .select('*')
+            .eq('id', variationId)
+            .single();
+          
+          if (error) throw error;
+          
+          if (variation) {
+            // Calculate price and discount (placeholder values)
+            const mrp = 1499;
+            const price = 999;
+            const discountPercent = Math.round(((mrp - price) / mrp) * 100);
+            
+            setTemplate({
+              id: variation.id,
+              title: variation.title,
+              price: price,
+              mrp: mrp,
+              discount: `${discountPercent}%`,
+              duration: variation.duration,
+              orientation: variation.aspect_ratio.includes('16:9') ? 'Landscape' : 
+                          variation.aspect_ratio.includes('9:16') ? 'Portrait' : 'Square',
+              resolution: variation.quality || '1920x1080',
+              thumbnailUrl: variation.thumbnail_url || '/placeholder.svg'
+            });
+          }
+        } catch (error) {
+          console.error('Error loading variation:', error);
+          toast.error('Failed to load template details');
+          navigate('/videos');
+        } finally {
+          setIsLoadingTemplate(false);
+        }
       } else {
-        toast.error('No template selected');
-        navigate('/publish-cart');
+        const templateData = location.state?.template;
+        if (templateData) {
+          setTemplate(templateData);
+        } else {
+          toast.error('No template selected');
+          navigate('/publish-cart');
+        }
       }
-    }
+    };
+    
+    initializePage();
   }, []);
 
   const checkUser = async () => {
@@ -264,8 +294,26 @@ export default function ShareCartCheckout() {
 
   const pricing = calculatePricing();
 
-  if (!template) {
-    return null;
+  // Show loading state while fetching template data
+  if (isLoadingTemplate || !template) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Header 
+          selectedMainCategory={null}
+          selectedSubcategory={null}
+          onMainCategorySelect={() => {}}
+          onSubcategorySelect={() => {}}
+        />
+        <div className="container mx-auto px-4 py-8 max-w-7xl">
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+              <p className="text-muted-foreground">Loading template details...</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
   }
 
   return (
