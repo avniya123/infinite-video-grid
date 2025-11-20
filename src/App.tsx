@@ -8,6 +8,7 @@ import Landing from "./pages/Landing";
 import NotFound from "./pages/NotFound";
 import TemplateEditor from "./pages/TemplateEditor";
 import MyTemplates from "./pages/MyTemplates";
+import MyUsers from "./pages/MyUsers";
 import PublishCart from "./pages/PublishCart";
 import ShareCartCheckout from "./pages/ShareCartCheckout";
 
@@ -23,6 +24,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/videos" element={<Index />} />
           <Route path="/my-templates" element={<MyTemplates />} />
+          <Route path="/my-users" element={<MyUsers />} />
           <Route path="/publish-cart" element={<PublishCart />} />
           <Route path="/share-cart-checkout" element={<ShareCartCheckout />} />
           <Route path="/template-editor/:variationId" element={<TemplateEditor />} />

@@ -183,6 +183,17 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         <LayoutTemplate className="mr-2 h-4 w-4" />
                         My Templates
                       </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={() => {
+                          navigate('/my-users');
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        My Users
+                      </Button>
                       <Button variant="ghost" className="w-full justify-start">
                         <ShoppingCart className="mr-2 h-4 w-4" />
                         Cart
@@ -348,6 +359,22 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>My Templates</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate('/my-users')}
+                        className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      >
+                        <User className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>My Users</p>
                     </TooltipContent>
                   </Tooltip>
 

@@ -65,6 +65,39 @@ export type Database = {
         }
         Relationships: []
       }
+      saved_enrolled_users: {
+        Row: {
+          created_at: string
+          enrolled_user_email: string
+          enrolled_user_name: string
+          enrolled_user_phone: string | null
+          id: string
+          is_enabled: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          enrolled_user_email: string
+          enrolled_user_name: string
+          enrolled_user_phone?: string | null
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          enrolled_user_email?: string
+          enrolled_user_name?: string
+          enrolled_user_phone?: string | null
+          id?: string
+          is_enabled?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_templates: {
         Row: {
           created_at: string | null
