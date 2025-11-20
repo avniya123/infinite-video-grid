@@ -1,14 +1,14 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { X, Chrome, AlertCircle, Facebook, Twitter, Github, Eye, EyeOff, Loader2 } from 'lucide-react';
+import { Chrome, AlertCircle, Facebook, Twitter, Github, Eye, EyeOff, Loader2 } from 'lucide-react';
 import {
   Sheet,
   SheetContent,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from '@/components/ui/sheet';
 import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
+import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import {
   Select,
   SelectContent,
@@ -399,11 +399,7 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
                 {view === 'phone-login' && 'Login with Phone'}
                 {view === 'phone-otp' && 'Verify Phone'}
               </SheetTitle>
-              <SheetClose asChild>
-                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                  <X className="w-4 h-4" />
-                </Button>
-              </SheetClose>
+              <DrawerCloseButton />
             </div>
           </SheetHeader>
 

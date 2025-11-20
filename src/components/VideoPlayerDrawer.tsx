@@ -4,9 +4,9 @@ import {
   SheetContent,
   SheetHeader,
   SheetDescription,
-  SheetClose,
 } from '@/components/ui/sheet';
 import { DRAWER_PRESETS } from '@/config/drawer';
+import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -131,11 +131,7 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
         
         {/* Close Button */}
         <div className="absolute top-4 right-4 z-50">
-          <SheetClose asChild>
-            <Button variant="ghost" size="sm" className="h-8 w-8 p-0 bg-background/80 hover:bg-background backdrop-blur-sm">
-              <X className="h-4 w-4" />
-            </Button>
-          </SheetClose>
+          <DrawerCloseButton variant="withBackground" />
         </div>
         
         {/* Video Player Section */}
