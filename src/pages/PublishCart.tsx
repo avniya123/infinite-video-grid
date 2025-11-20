@@ -1,14 +1,29 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { FilterChips } from '@/components/FilterChips';
+import { FilterDrawer } from '@/components/FilterDrawer';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, ShoppingCart, Trash2 } from 'lucide-react';
+import { Loader2, ArrowLeft, ShoppingCart, Trash2, ArrowUpDown, ChevronDown, List, Columns3, Search, X } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
+import { useVideoFilters } from '@/hooks/useVideoFilters';
+
+type ViewMode = 'masonry' | 'list';
+
+const sortOptions: { value: string; label: string }[] = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'popular', label: 'Most Popular' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'price-high', label: 'Price: High to Low' },
+];
 
 interface PublishedTemplate {
   id: string;
@@ -35,6 +50,62 @@ export default function PublishCart() {
   const [publishedTemplates, setPublishedTemplates] = useState<PublishedTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('masonry');
+  const [columnCount, setColumnCount] = useState(3);
+
+  // Transform published templates to VideoItem format for filtering
+  const videoItems = useMemo(() => {
+    return publishedTemplates.map((template): VideoItem => ({
+      id: template.video_variations.video_id,
+      title: template.custom_title || template.video_variations.title,
+      image: template.video_variations.thumbnail_url || '/placeholder.svg',
+      duration: template.video_variations.duration,
+      category: 'Nature',
+      mainCategory: 'Personal Celebrations',
+      subcategory: '',
+      orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                  template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+      price: '$0',
+      mrp: '$0',
+      discount: '0%',
+      trending: false,
+      resolution: 'HD',
+      videoUrl: template.video_variations.video_url || undefined,
+      templateId: template.id,
+      variationId: template.variation_id,
+    }));
+  }, [publishedTemplates]);
+
+  // Use filter hook
+  const {
+    selectedCategories,
+    selectedDurations,
+    selectedAspectRatios,
+    selectedPriceRanges,
+    selectedSubcategory,
+    selectedMainCategory,
+    searchQuery,
+    sortBy,
+    filteredVideos,
+    hasActiveFilters,
+    setSearchQuery,
+    setSortBy,
+    handleCategoryToggle,
+    handleDurationToggle,
+    handleAspectRatioToggle,
+    handlePriceRangeToggle,
+    handleSubcategorySelect,
+    handleMainCategorySelect,
+    handleSelectAllCategories,
+    handleClearCategories,
+    handleSelectAllDurations,
+    handleClearDurations,
+    handleSelectAllAspectRatios,
+    handleClearAspectRatios,
+    handleSelectAllPriceRanges,
+    handleClearPriceRanges,
+    handleResetFilters,
+  } = useVideoFilters(videoItems);
 
   useEffect(() => {
     checkUser();
@@ -87,7 +158,10 @@ export default function PublishCart() {
     }
   };
 
-  const handleRemoveFromCart = async (templateId: string) => {
+  const handleRemoveFromCart = async (video: VideoItem) => {
+    const templateId = video.templateId;
+    if (!templateId) return;
+    
     try {
       const { error } = await supabase
         .from('user_templates')
@@ -230,7 +304,7 @@ export default function PublishCart() {
       />
       
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+        <div className="mb-6">
           <Button
             variant="ghost"
             onClick={() => navigate('/my-templates')}
@@ -240,7 +314,7 @@ export default function PublishCart() {
             Back to My Templates
           </Button>
 
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between mb-6">
             <div>
               <div className="flex items-center gap-3">
                 <ShoppingCart className="h-8 w-8 text-primary" />
@@ -261,73 +335,282 @@ export default function PublishCart() {
           </div>
         </div>
 
-        {publishedTemplates.length === 0 ? (
+        {/* Search and Controls */}
+        {publishedTemplates.length > 0 && (
+          <div className="space-y-4 mb-6">
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* Search Bar */}
+              <div className="relative flex-1 sm:w-96">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search templates..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  className="pl-10 pr-4 h-10 w-full"
+                />
+              </div>
+              
+              {/* Controls */}
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                {/* Reset Filters Button */}
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetFilters}
+                    className="h-10 whitespace-nowrap"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Reset
+                  </Button>
+                )}
+                
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+                  <Button
+                    variant={viewMode === 'masonry' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('masonry')}
+                    className="h-8 px-3"
+                    title="Masonry View"
+                  >
+                    <Columns3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="h-8 px-3"
+                    title="List View"
+                  >
+                    <List className="w-4 h-4" />
+                  </Button>
+                </div>
+
+                {/* Column Count Slider */}
+                {viewMode === 'masonry' && (
+                  <div className="flex items-center gap-3 bg-muted px-4 py-2 rounded-lg min-w-[180px]">
+                    <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Columns: {columnCount}</span>
+                    <Slider
+                      value={[columnCount]}
+                      onValueChange={(value) => setColumnCount(value[0])}
+                      min={2}
+                      max={6}
+                      step={1}
+                      className="w-24"
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Sort and Filters */}
+            <div className="flex gap-3 items-center flex-wrap">
+              {/* Sort Dropdown */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" className="h-10 border-2">
+                    <ArrowUpDown className="w-4 h-4 mr-2" />
+                    {sortOptions.find(opt => opt.value === sortBy)?.label || 'Sort'}
+                    <ChevronDown className="w-4 h-4 ml-2" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="start" className="w-56">
+                  <DropdownMenuLabel>Sort By</DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  {sortOptions.map((option) => (
+                    <DropdownMenuItem
+                      key={option.value}
+                      onClick={() => setSortBy(option.value as any)}
+                      className={`cursor-pointer ${sortBy === option.value ? 'bg-accent' : ''}`}
+                    >
+                      <span>{option.label}</span>
+                      {sortBy === option.value && <span className="ml-auto">✓</span>}
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+
+              {/* Filter Drawer */}
+              <FilterDrawer
+                selectedMainCategory={selectedMainCategory}
+                selectedSubcategory={selectedSubcategory}
+                selectedDurations={selectedDurations}
+                selectedAspectRatios={selectedAspectRatios}
+                selectedPriceRanges={selectedPriceRanges}
+                onMainCategorySelect={handleMainCategorySelect}
+                onSubcategorySelect={handleSubcategorySelect}
+                onDurationToggle={handleDurationToggle}
+                onAspectRatioToggle={handleAspectRatioToggle}
+                onPriceRangeToggle={handlePriceRangeToggle}
+                onSelectAllDurations={handleSelectAllDurations}
+                onClearDurations={handleClearDurations}
+                onSelectAllAspectRatios={handleSelectAllAspectRatios}
+                onClearAspectRatios={handleClearAspectRatios}
+                onSelectAllPriceRanges={handleSelectAllPriceRanges}
+                onClearPriceRanges={handleClearPriceRanges}
+                onResetFilters={handleResetFilters}
+                hasActiveFilters={hasActiveFilters}
+              />
+            </div>
+
+            {/* Active Filters Chips */}
+            {hasActiveFilters && (
+              <FilterChips
+                selectedMainCategory={selectedMainCategory}
+                selectedSubcategory={selectedSubcategory}
+                selectedDurations={selectedDurations}
+                selectedAspectRatios={selectedAspectRatios}
+                selectedPriceRanges={selectedPriceRanges}
+                searchQuery={searchQuery}
+                onMainCategorySelect={handleMainCategorySelect}
+                onSubcategorySelect={handleSubcategorySelect}
+                onDurationToggle={handleDurationToggle}
+                onAspectRatioToggle={handleAspectRatioToggle}
+                onPriceRangeToggle={handlePriceRangeToggle}
+                onClearSearch={() => setSearchQuery('')}
+              />
+            )}
+
+            {/* Results Count */}
+            <div className="flex items-center justify-between">
+              <p className="text-sm text-muted-foreground">
+                Showing <span className="font-semibold text-foreground">{filteredVideos.length}</span> 
+                {' '}of {publishedTemplates.length} templates
+                {hasActiveFilters && ' with filters applied'}
+              </p>
+            </div>
+          </div>
+        )}
+
+        {filteredVideos.length === 0 ? (
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <ShoppingCart className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
               <h3 className="text-lg font-semibold text-foreground mb-2">
-                Your publish cart is empty
+                {publishedTemplates.length === 0 ? 'Your publish cart is empty' : 'No templates match your filters'}
               </h3>
               <p className="text-muted-foreground mb-6">
-                Go to My Templates and publish your templates to add them to your cart.
+                {publishedTemplates.length === 0 
+                  ? 'Go to My Templates and publish your templates to add them to your cart.'
+                  : 'Try adjusting your filters to see more results.'}
               </p>
-              <Button onClick={() => navigate('/my-templates')}>
-                Go to My Templates
-              </Button>
+              {publishedTemplates.length === 0 ? (
+                <Button onClick={() => navigate('/my-templates')}>
+                  Go to My Templates
+                </Button>
+              ) : (
+                <Button onClick={handleResetFilters}>
+                  Clear Filters
+                </Button>
+              )}
             </div>
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-              {publishedTemplates.map((template) => {
-                // Get variation count - default to 1 if not available
-                const variationCount = 1; // This would ideally come from a query
-                const pricing = calculateTemplatePrice(template, variationCount);
-                const video: VideoItem = {
-                  id: template.video_variations.video_id,
-                  title: template.custom_title || template.video_variations.title,
-                  image: template.video_variations.thumbnail_url || '/placeholder.svg',
-                  duration: template.video_variations.duration,
-                  category: 'Nature',
-                  mainCategory: 'Personal Celebrations',
-                  subcategory: '',
-                  orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
-                              template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                  price: `₹${pricing.price}`,
-                  mrp: `₹${pricing.mrp}`,
-                  discount: pricing.discount,
-                  trending: false,
-                  resolution: 'HD',
-                  videoUrl: template.video_variations.video_url || undefined,
-                };
+            {/* Masonry Layout */}
+            {viewMode === 'masonry' && (
+              <div 
+                className="gap-5 [column-fill:balance] mb-8"
+                style={{ columnCount }}
+              >
+                {filteredVideos.map((video, index) => {
+                  const template = publishedTemplates.find(t => t.id === video.templateId);
+                  if (!template) return null;
+                  
+                  const variationCount = 1;
+                  const pricing = calculateTemplatePrice(template, variationCount);
+                  const videoWithPricing: VideoItem = {
+                    ...video,
+                    price: `₹${pricing.price}`,
+                    mrp: `₹${pricing.mrp}`,
+                    discount: pricing.discount,
+                  };
 
-                return (
-                  <div key={template.id} className="relative group">
-                    <VideoCard
-                      video={video}
-                      onPlay={handlePlayVideo}
-                      onClick={handlePlayVideo}
-                      showShareButton={false}
-                      showPrice={true}
-                    />
-                    {/* Remove from cart button */}
-                    <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-8 w-8 shadow-lg"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveFromCart(template.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  return (
+                    <div 
+                      key={video.templateId}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <div className="relative group">
+                        <VideoCard
+                          video={videoWithPricing}
+                          onPlay={handlePlayVideo}
+                          onClick={handlePlayVideo}
+                          showShareButton={false}
+                          showPrice={true}
+                        />
+                        <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8 shadow-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFromCart(video);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
+            
+            {/* List Layout */}
+            {viewMode === 'list' && (
+              <div className="flex flex-col gap-4 mb-8">
+                {filteredVideos.map((video, index) => {
+                  const template = publishedTemplates.find(t => t.id === video.templateId);
+                  if (!template) return null;
+                  
+                  const variationCount = 1;
+                  const pricing = calculateTemplatePrice(template, variationCount);
+                  const videoWithPricing: VideoItem = {
+                    ...video,
+                    price: `₹${pricing.price}`,
+                    mrp: `₹${pricing.mrp}`,
+                    discount: pricing.discount,
+                  };
+
+                  return (
+                    <div 
+                      key={video.templateId}
+                      className="animate-fade-in"
+                      style={{ animationDelay: `${index * 0.05}s` }}
+                    >
+                      <div className="relative group">
+                        <VideoCard
+                          video={videoWithPricing}
+                          onPlay={handlePlayVideo}
+                          onClick={handlePlayVideo}
+                          showShareButton={false}
+                          showPrice={true}
+                        />
+                        <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8 shadow-lg"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFromCart(video);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Proceed to Checkout Button */}
             <div className="mt-16 mb-12 flex justify-center">
