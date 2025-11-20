@@ -359,9 +359,9 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         variant="ghost"
                         size="icon"
                         onClick={() => navigate('/my-templates')}
-                        className="flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                        className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
-                        <LayoutTemplate className="w-5 h-5" />
+                        <LayoutTemplate className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -375,9 +375,9 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         variant="ghost"
                         size="icon"
                         onClick={() => navigate('/my-users')}
-                        className="flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                        className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
-                        <User className="w-5 h-5" />
+                        <User className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -391,9 +391,9 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         variant="ghost"
                         size="icon"
                         onClick={() => navigate('/publish-cart')}
-                        className="flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                        className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
-                        <ShoppingCart className="w-5 h-5" />
+                        <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -407,9 +407,9 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         variant="ghost"
                         size="icon"
                         onClick={() => navigate('/share-cart-checkout')}
-                        className="flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                        className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
-                        <Share className="w-5 h-5" />
+                        <Share className="w-4 h-4 sm:w-5 sm:h-5" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
