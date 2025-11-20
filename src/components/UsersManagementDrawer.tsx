@@ -99,6 +99,7 @@ export function UsersManagementDrawer({
   const [selectedEnrolledIds, setSelectedEnrolledIds] = useState<string[]>([]);
   const [enrolledSearchQuery, setEnrolledSearchQuery] = useState('');
   const [enrolledUserType, setEnrolledUserType] = useState('');
+  const [enrolledFilterType, setEnrolledFilterType] = useState<string>('all');
 
   // Initialize enrolled user type with first available type
   useEffect(() => {
@@ -308,10 +309,18 @@ export function UsersManagementDrawer({
     toast.success(`Added ${usersToAdd.length} user(s) as ${enrolledUserType}`);
   };
 
-  const filteredEnrolledUsers = enrolledUsers.filter(user =>
-    user.name.toLowerCase().includes(enrolledSearchQuery.toLowerCase()) ||
-    user.email.toLowerCase().includes(enrolledSearchQuery.toLowerCase())
-  );
+  const filteredEnrolledUsers = enrolledUsers.filter(user => {
+    const matchesSearch = user.name.toLowerCase().includes(enrolledSearchQuery.toLowerCase()) ||
+      user.email.toLowerCase().includes(enrolledSearchQuery.toLowerCase()) ||
+      (user.phone && user.phone.includes(enrolledSearchQuery));
+    
+    const matchesType = enrolledFilterType === 'all' || user.userType === enrolledFilterType;
+    
+    return matchesSearch && matchesType;
+  });
+
+  // Get unique user types from enrolled users
+  const enrolledUserTypes = ['all', ...new Set(enrolledUsers.map(u => u.userType).filter(Boolean))];
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
@@ -640,29 +649,68 @@ export function UsersManagementDrawer({
                   </div>
                 ) : (
                   <>
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                      <Input
-                        placeholder="Search by name or email..."
-                        value={enrolledSearchQuery}
-                        onChange={(e) => setEnrolledSearchQuery(e.target.value)}
-                        className="pl-10"
-                      />
+                    <div className="flex flex-col sm:flex-row gap-3">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                        <Input
+                          placeholder="Search by name, email, or phone..."
+                          value={enrolledSearchQuery}
+                          onChange={(e) => setEnrolledSearchQuery(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                      
+                      <Select value={enrolledFilterType} onValueChange={setEnrolledFilterType}>
+                        <SelectTrigger className="w-full sm:w-48">
+                          <SelectValue placeholder="Filter by type" />
+                        </SelectTrigger>
+                        <SelectContent className="bg-background z-50">
+                          <SelectItem value="all">All Types</SelectItem>
+                          {enrolledUserTypes.filter(type => type !== 'all').map(type => (
+                            <SelectItem key={type} value={type!} className="capitalize">
+                              {type}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
 
-                    {enrolledSearchQuery && (
-                      <p className="text-xs text-muted-foreground">
-                        Found {filteredEnrolledUsers.length} of {enrolledUsers.length} user(s)
-                      </p>
+                    {(enrolledSearchQuery || enrolledFilterType !== 'all') && (
+                      <div className="flex items-center gap-2">
+                        <p className="text-xs text-muted-foreground">
+                          Found {filteredEnrolledUsers.length} of {enrolledUsers.length} user(s)
+                        </p>
+                        {(enrolledSearchQuery || enrolledFilterType !== 'all') && (
+                          <Button 
+                            variant="ghost" 
+                            size="sm"
+                            onClick={() => {
+                              setEnrolledSearchQuery('');
+                              setEnrolledFilterType('all');
+                            }}
+                            className="h-6 px-2 text-xs"
+                          >
+                            <X className="w-3 h-3 mr-1" />
+                            Clear
+                          </Button>
+                        )}
+                      </div>
                     )}
 
                     {filteredEnrolledUsers.length === 0 ? (
                       <div className="py-12 text-center text-muted-foreground">
                         <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
                         <p className="font-medium">No users found</p>
-                        <p className="text-sm mt-1">Try adjusting your search query</p>
-                        <Button variant="link" onClick={() => setEnrolledSearchQuery('')} className="mt-2">
-                          Clear search
+                        <p className="text-sm mt-1">Try adjusting your search or filter</p>
+                        <Button 
+                          variant="link" 
+                          onClick={() => {
+                            setEnrolledSearchQuery('');
+                            setEnrolledFilterType('all');
+                          }} 
+                          className="mt-2"
+                        >
+                          Clear filters
                         </Button>
                       </div>
                     ) : (
