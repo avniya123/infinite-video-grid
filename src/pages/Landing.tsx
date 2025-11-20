@@ -1,12 +1,30 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowRight, Sparkles, Gift, Calendar, FileText, PartyPopper, Zap, TrendingUp } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Header } from '@/components/Header';
+import { supabase } from '@/integrations/supabase/client';
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const Landing = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+
+  useEffect(() => {
+    // Check current session
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+    });
+
+    // Listen for auth changes
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
 
   const flashDeals = [
     { discount: '25%', title: 'Birthday Videos', color: 'from-pink-500 to-rose-500' },
@@ -30,29 +48,13 @@ const Landing = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
-                <span className="text-primary-foreground font-bold text-lg">V</span>
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                VideoMart
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link to="/videos">
-                <Button variant="ghost">Browse Videos</Button>
-              </Link>
-              <Link to="/videos">
-                <Button>Get Started</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
+      {/* Header with Authentication */}
+      <Header 
+        selectedMainCategory={null}
+        selectedSubcategory={null}
+        onMainCategorySelect={() => {}}
+        onSubcategorySelect={() => {}}
+      />
 
       {/* Hero Section */}
       <section className="relative overflow-hidden py-20 px-4">
@@ -77,7 +79,7 @@ const Landing = () => {
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
               <Link to="/videos">
                 <Button size="lg" className="gap-2 group">
-                  Explore Templates
+                  {user ? 'Browse Templates' : 'Get Started'}
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
