@@ -131,7 +131,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
     toast.success('Added to cart');
   };
 
-  const handleEdit = (variationId?: string) => {
+  const handleEdit = async (variationId?: string) => {
     if (!user) {
       toast.error('Please sign in to edit videos');
       onRequestAuth?.();
@@ -146,7 +146,44 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
       return;
     }
     
-    window.location.href = `/template-editor/${targetVariationId}`;
+    // Show loading toast
+    const loadingToast = toast.loading('Saving to My Templates...');
+    
+    try {
+      // Check if template already exists
+      const { data: existingTemplate } = await supabase
+        .from('user_templates')
+        .select('id')
+        .eq('user_id', user.id)
+        .eq('variation_id', targetVariationId)
+        .single();
+      
+      // Only create if it doesn't exist
+      if (!existingTemplate) {
+        const { error } = await supabase
+          .from('user_templates')
+          .insert({
+            user_id: user.id,
+            variation_id: targetVariationId,
+            published: false
+          });
+        
+        if (error) throw error;
+      }
+      
+      // Dismiss loading toast
+      toast.dismiss(loadingToast);
+      toast.success('Template saved! Opening editor...');
+      
+      // Navigate to template editor
+      setTimeout(() => {
+        window.location.href = `/template-editor/${targetVariationId}`;
+      }, 500);
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to save template');
+      console.error('Error saving template:', error);
+    }
   };
 
   return (
