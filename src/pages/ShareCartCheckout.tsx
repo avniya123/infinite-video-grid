@@ -345,12 +345,7 @@ export default function ShareCartCheckout() {
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Back Button */}
-        <div className="mb-6 flex items-center justify-between">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/publish-cart')} className="hover:bg-muted/50">
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            <span className="font-medium">Back to Publish Cart</span>
-          </Button>
-          
+        <div className="mb-6 flex items-center justify-end">
           <Button variant="outline" size="sm" onClick={() => navigate('/publish-cart')} className="hover:bg-muted/50">
             <span className="font-medium">Back to Publish Cart</span>
             <ArrowLeft className="w-4 h-4 ml-2 rotate-180" />
