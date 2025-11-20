@@ -33,6 +33,7 @@ interface UsersManagementDrawerProps {
   loadingEnrolledUsers: boolean;
   onLoadEnrolledUsers: () => void;
   showEnrolledTab?: boolean;
+  defaultTab?: string;
 }
 
 export function UsersManagementDrawer({
@@ -47,6 +48,7 @@ export function UsersManagementDrawer({
   loadingEnrolledUsers,
   onLoadEnrolledUsers,
   showEnrolledTab = true,
+  defaultTab,
 }: UsersManagementDrawerProps) {
   const [activeTab, setActiveTab] = useState<'single' | 'enrolled' | 'import'>('single');
   const [customUserTypes, setCustomUserTypes] = useState<string[]>([]);
@@ -72,6 +74,15 @@ export function UsersManagementDrawer({
   const [editUserType, setEditUserType] = useState('');
   const [isEditEmailValid, setIsEditEmailValid] = useState<boolean | null>(null);
   const [isEditPhoneValid, setIsEditPhoneValid] = useState<boolean | null>(null);
+
+  // Set default tab when drawer opens
+  useEffect(() => {
+    if (open && defaultTab) {
+      setActiveTab(defaultTab as 'single' | 'enrolled' | 'import');
+    } else if (open && !defaultTab) {
+      setActiveTab('single');
+    }
+  }, [open, defaultTab]);
 
   // Update edit form when editingUser changes
   useEffect(() => {
