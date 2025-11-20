@@ -339,7 +339,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>My Videos</p>
+                      <p>My Templates</p>
                     </TooltipContent>
                   </Tooltip>
 
