@@ -231,9 +231,11 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           )}
 
           {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-            01/{String(variationsCount + 1).padStart(2, '0')}
-          </Badge>
+          {variationsCount > 0 && (
+            <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+              +{variationsCount} more
+            </Badge>
+          )}
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
@@ -255,7 +257,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                         Pricing Breakdown
                       </div>
                       <div className="flex justify-between items-center text-xs">
-                        <span className="text-gray-600 dark:text-gray-400">MRP:</span>
                         <span className="text-gray-900 dark:text-white line-through">₹ {video.mrp}</span>
                       </div>
                       <div className="flex justify-between items-center text-xs">
