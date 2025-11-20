@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { DRAWER_PRESETS, getDrawerHeaderClassName, getDrawerContentClassName } from '@/config/drawer';
 import { DrawerCloseButton } from '@/components/DrawerCloseButton';
@@ -64,12 +64,32 @@ export function UsersManagementDrawer({
   const [isNewPhoneValid, setIsNewPhoneValid] = useState<boolean | null>(null);
   
   // Edit user form
-  const [editUserName, setEditUserName] = useState(editingUser?.name || '');
-  const [editUserPhone, setEditUserPhone] = useState(editingUser?.phone || '');
-  const [editUserEmail, setEditUserEmail] = useState(editingUser?.email || '');
-  const [editUserType, setEditUserType] = useState(editingUser?.userType || '');
+  const [editUserName, setEditUserName] = useState('');
+  const [editUserPhone, setEditUserPhone] = useState('');
+  const [editUserEmail, setEditUserEmail] = useState('');
+  const [editUserType, setEditUserType] = useState('');
   const [isEditEmailValid, setIsEditEmailValid] = useState<boolean | null>(null);
   const [isEditPhoneValid, setIsEditPhoneValid] = useState<boolean | null>(null);
+
+  // Update edit form when editingUser changes
+  useEffect(() => {
+    if (editingUser) {
+      setEditUserName(editingUser.name);
+      setEditUserPhone(editingUser.phone);
+      setEditUserEmail(editingUser.email);
+      setEditUserType(editingUser.userType);
+      setIsEditEmailValid(editingUser.email ? validateEmail(editingUser.email) : null);
+      setIsEditPhoneValid(editingUser.phone ? validatePhone(editingUser.phone) : null);
+    } else {
+      // Reset when closing
+      setEditUserName('');
+      setEditUserPhone('');
+      setEditUserEmail('');
+      setEditUserType('');
+      setIsEditEmailValid(null);
+      setIsEditPhoneValid(null);
+    }
+  }, [editingUser]);
   
   // CSV import
   const [csvPreviewData, setCsvPreviewData] = useState<SharedUser[]>([]);
