@@ -300,7 +300,7 @@ export default function MyTemplates() {
   if (!user) return null;
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-background transition-colors duration-300">
       <Header 
         selectedMainCategory={null}
         selectedSubcategory={null}
@@ -308,49 +308,65 @@ export default function MyTemplates() {
         onSubcategorySelect={() => {}}
       />
       
-      <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/videos')}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to Videos
-          </Button>
-
-          <div className="flex items-center justify-between">
+      {/* Main Content */}
+      <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-2">
+          <div className="flex items-center gap-3">
+            <FileVideo className="h-8 w-8 text-primary" />
             <div>
-              <div className="flex items-center gap-3">
-                <FileVideo className="h-8 w-8 text-primary" />
-                <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
-              </div>
-              <p className="text-muted-foreground mt-2">
+              <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
+              <p className="text-muted-foreground text-sm mt-1">
                 Manage your saved video templates
               </p>
             </div>
-            <div className="text-sm text-muted-foreground">
-              {filteredAndSortedTemplates.length} of {templates.length} {templates.length === 1 ? 'template' : 'templates'}
-            </div>
           </div>
+          <Button
+            variant="ghost"
+            onClick={() => navigate('/videos')}
+            className="gap-2"
+          >
+            <ArrowLeft className="h-4 w-4" />
+            Back to Videos
+          </Button>
         </div>
 
-        {/* Search and Controls */}
-        {templates.length > 0 && (
-          <div className="mb-6 space-y-4">
-            <VideoControls
-              searchQuery={searchQuery}
-              onSearchChange={setSearchQuery}
-              viewMode={viewMode}
-              onViewModeChange={setViewMode}
-              columnCount={columnCount}
-              onColumnCountChange={setColumnCount}
-              sortBy={sortBy}
-              onSortChange={setSortBy}
-              sortOptions={sortOptions}
-            />
+        {templates.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <FileVideo className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No templates yet
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Start exploring video templates and save the ones you like to your collection.
+              </p>
+              <Button onClick={() => navigate('/videos')}>
+                Browse Templates
+              </Button>
+            </div>
+          </div>
+        ) : (
+          <>
+            {/* Search and Controls - matching /videos page */}
+            <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
+              {/* Search integrated in VideoControls but we'll add the count here */}
+              <div className="flex-1 w-full">
+                <VideoControls
+                  searchQuery={searchQuery}
+                  onSearchChange={setSearchQuery}
+                  viewMode={viewMode}
+                  onViewModeChange={setViewMode}
+                  columnCount={columnCount}
+                  onColumnCountChange={setColumnCount}
+                  sortBy={sortBy}
+                  onSortChange={setSortBy}
+                  sortOptions={sortOptions}
+                />
+              </div>
+            </div>
 
-            {/* Filters */}
+            {/* Sort and Filters - matching /videos page */}
             <div className="flex gap-3 items-center flex-wrap">
               {/* Reset Filters Button */}
               {hasActiveFilters && (
@@ -361,7 +377,7 @@ export default function MyTemplates() {
                   className="h-10 whitespace-nowrap transition-all duration-200 hover:scale-105"
                 >
                   <X className="w-4 h-4 mr-2" />
-                  Reset Filters
+                  Reset
                 </Button>
               )}
 
@@ -386,9 +402,14 @@ export default function MyTemplates() {
                 onResetFilters={handleResetFilters}
                 hasActiveFilters={hasActiveFilters}
               />
+
+              {/* Results count */}
+              <div className="ml-auto text-sm text-muted-foreground">
+                {filteredAndSortedTemplates.length} of {templates.length} templates
+              </div>
             </div>
 
-            {/* Active Filters Chips */}
+            {/* Active Filters Chips - matching /videos page */}
             {hasActiveFilters && (
               <FilterChips
                 selectedMainCategory={selectedMainCategory}
@@ -405,73 +426,68 @@ export default function MyTemplates() {
                 onClearSearch={() => setSearchQuery('')}
               />
             )}
-          </div>
+          </>
         )}
+      </div>
 
-        {templates.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                No templates yet
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Start exploring video templates and save the ones you like to your collection.
-              </p>
-              <Button onClick={() => navigate('/videos')}>
-                Browse Templates
-              </Button>
-            </div>
-          </div>
-        ) : filteredAndSortedTemplates.length === 0 ? (
+      {/* Main Content Area */}
+      {templates.length > 0 && filteredAndSortedTemplates.length === 0 ? (
+        <div className="max-w-7xl mx-auto px-4">
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <h3 className="text-lg font-semibold text-foreground mb-2">
                 No templates found
               </h3>
               <p className="text-muted-foreground mb-6">
-                Try adjusting your search query.
+                Try adjusting your search query or filters.
               </p>
-              <Button onClick={() => setSearchQuery('')} variant="outline">
-                Clear Search
+              <Button onClick={handleResetFilters} variant="outline">
+                Clear Filters
               </Button>
             </div>
           </div>
-        ) : (
-          <>
-            {/* Masonry View */}
-            {viewMode === 'masonry' && (
-              <div 
-                className="gap-5 [column-fill:balance]"
-                style={{ columnCount }}
-              >
-                {filteredAndSortedTemplates.map((template) => {
-                  const video: VideoItem = {
-                    id: template.video_variations.video_id,
-                    title: template.custom_title || template.video_variations.title,
-                    image: template.video_variations.thumbnail_url || '/placeholder.svg',
-                    duration: template.video_variations.duration,
-                    category: 'Nature',
-                    mainCategory: 'Personal Celebrations',
-                    subcategory: '',
-                    orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
-                                template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                    price: '$0',
-                    mrp: '$0',
-                    discount: '0%',
-                    trending: false,
-                    resolution: 'HD',
-                    videoUrl: template.video_variations.video_url || undefined,
-                  };
+        </div>
+      ) : templates.length > 0 && (
+        <main className="max-w-7xl mx-auto px-4 pb-8">
+          {/* Masonry View */}
+          {viewMode === 'masonry' && (
+            <div 
+              className="gap-5 [column-fill:balance]"
+              style={{ columnCount }}
+            >
+              {filteredAndSortedTemplates.map((template, index) => {
+                const video: VideoItem = {
+                  id: template.video_variations.video_id,
+                  title: template.custom_title || template.video_variations.title,
+                  image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                  duration: template.video_variations.duration,
+                  category: 'Nature',
+                  mainCategory: 'Personal Celebrations',
+                  subcategory: '',
+                  orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                              template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                  price: '$0',
+                  mrp: '$0',
+                  discount: '0%',
+                  trending: false,
+                  resolution: 'HD',
+                  videoUrl: template.video_variations.video_url || undefined,
+                };
 
-                  return (
-                    <div key={template.id} className="relative group mb-5">
+                return (
+                  <div 
+                    key={template.id} 
+                    className="animate-fade-in"
+                    style={{ animationDelay: `${index * 0.05}s` }}
+                  >
+                    <div className="relative group mb-5">
                       <VideoCard
                         video={video}
                         onPlay={handlePlayVideo}
                         onClick={handlePlayVideo}
                         showShareButton={false}
                       />
-                      {/* Edit and Delete buttons positioned above Variations button */}
+                      {/* Edit and Delete buttons */}
                       <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
                         <Button
                           variant="default"
@@ -497,88 +513,88 @@ export default function MyTemplates() {
                         </Button>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
+                  </div>
+                );
+              })}
+            </div>
+          )}
 
-            {/* List View */}
-            {viewMode === 'list' && (
-              <div className="flex flex-col gap-4">
-                {filteredAndSortedTemplates.map((template) => {
-                  const video: VideoItem = {
-                    id: template.video_variations.video_id,
-                    title: template.custom_title || template.video_variations.title,
-                    image: template.video_variations.thumbnail_url || '/placeholder.svg',
-                    duration: template.video_variations.duration,
-                    category: 'Nature',
-                    mainCategory: 'Personal Celebrations',
-                    subcategory: '',
-                    orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
-                                template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                    price: '$0',
-                    mrp: '$0',
-                    discount: '0%',
-                    trending: false,
-                    resolution: 'HD',
-                    videoUrl: template.video_variations.video_url || undefined,
-                  };
+          {/* List View */}
+          {viewMode === 'list' && (
+            <div className="flex flex-col gap-4">
+              {filteredAndSortedTemplates.map((template, index) => {
+                const video: VideoItem = {
+                  id: template.video_variations.video_id,
+                  title: template.custom_title || template.video_variations.title,
+                  image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                  duration: template.video_variations.duration,
+                  category: 'Nature',
+                  mainCategory: 'Personal Celebrations',
+                  subcategory: '',
+                  orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                              template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                  price: '$0',
+                  mrp: '$0',
+                  discount: '0%',
+                  trending: false,
+                  resolution: 'HD',
+                  videoUrl: template.video_variations.video_url || undefined,
+                };
 
-                  return (
-                    <div 
-                      key={template.id} 
-                      className="group flex gap-4 bg-card p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
-                      onClick={() => handlePlayVideo(video)}
-                    >
-                      <div className="relative w-64 flex-shrink-0">
-                        <img
-                          src={video.image}
-                          alt={video.title}
-                          className="w-full h-40 object-cover rounded-lg"
-                        />
-                      </div>
-                      <div className="flex-1 flex flex-col">
-                        <div className="flex items-start justify-between mb-2">
-                          <div className="flex-1">
-                            <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
-                            <p className="text-sm text-muted-foreground mb-2">
-                              {video.duration} • {video.orientation} • {video.resolution}
-                            </p>
-                          </div>
-                          <div className="flex gap-2">
-                            <Button
-                              variant="default"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                navigate(`/template-editor/${template.variation_id}`);
-                              }}
-                            >
-                              <Edit className="h-4 w-4" />
-                            </Button>
-                            <Button
-                              variant="destructive"
-                              size="icon"
-                              className="h-8 w-8"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteTemplate(template.id);
-                              }}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
+                return (
+                  <div 
+                    key={template.id} 
+                    className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
+                    onClick={() => handlePlayVideo(video)}
+                  >
+                    <div className="relative w-64 flex-shrink-0">
+                      <img
+                        src={video.image}
+                        alt={video.title}
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+                    </div>
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {video.duration} • {video.orientation} • {video.resolution}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button
+                            variant="default"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              navigate(`/template-editor/${template.variation_id}`);
+                            }}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteTemplate(template.id);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
                         </div>
                       </div>
                     </div>
-                  );
-                })}
-              </div>
-            )}
-          </>
-        )}
-      </div>
+                  </div>
+                );
+              })}
+            </div>
+          )}
+        </main>
+      )}
 
       {selectedVideo && (
         <VideoPlayerDrawer
