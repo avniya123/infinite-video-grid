@@ -172,7 +172,14 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                   {/* User Actions */}
                   {user && (
                     <div className="border-t pt-4 space-y-2">
-                      <Button variant="ghost" className="w-full justify-start">
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={() => {
+                          navigate('/my-templates');
+                          setMobileMenuOpen(false);
+                        }}
+                      >
                         <LayoutTemplate className="mr-2 h-4 w-4" />
                         My Templates
                       </Button>
@@ -333,6 +340,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                       <Button
                         variant="ghost"
                         size="icon"
+                        onClick={() => navigate('/my-templates')}
                         className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
                         <LayoutTemplate className="w-5 h-5" />

@@ -65,6 +65,44 @@ export type Database = {
         }
         Relationships: []
       }
+      user_templates: {
+        Row: {
+          created_at: string | null
+          custom_title: string | null
+          id: string
+          notes: string | null
+          updated_at: string | null
+          user_id: string
+          variation_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          custom_title?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+          user_id: string
+          variation_id: string
+        }
+        Update: {
+          created_at?: string | null
+          custom_title?: string | null
+          id?: string
+          notes?: string | null
+          updated_at?: string | null
+          user_id?: string
+          variation_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "user_templates_variation_id_fkey"
+            columns: ["variation_id"]
+            isOneToOne: false
+            referencedRelation: "video_variations"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       video_variations: {
         Row: {
           aspect_ratio: string
