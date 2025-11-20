@@ -26,6 +26,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
+  const [isCreatingDefault, setIsCreatingDefault] = useState(false);
   
   const {
     videoRef,
@@ -65,6 +66,42 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
       setSelectedVariation(null); // Reset to main video when opening
     }
   }, [open, video, setCurrentVideo]);
+
+  // Auto-create default variation if none exist
+  useEffect(() => {
+    const createDefaultVariation = async () => {
+      if (!isLoading && variations && variations.length === 0 && !isCreatingDefault && open) {
+        setIsCreatingDefault(true);
+        try {
+          const { error } = await supabase.functions.invoke('create-default-variation', {
+            body: {
+              videoData: {
+                id: video.id,
+                title: video.title,
+                duration: video.duration,
+                resolution: video.resolution,
+                videoUrl: video.videoUrl,
+                image: video.image,
+              }
+            }
+          });
+
+          if (error) {
+            console.error('Error creating default variation:', error);
+          } else {
+            // Refetch variations to show the newly created one
+            await refetch();
+          }
+        } catch (error) {
+          console.error('Failed to create default variation:', error);
+        } finally {
+          setIsCreatingDefault(false);
+        }
+      }
+    };
+
+    createDefaultVariation();
+  }, [isLoading, variations, open, video, isCreatingDefault, refetch]);
 
   const handleThumbnailGenerated = (variationId: string, thumbnailUrl: string) => {
     setGeneratingIds(prev => {
@@ -206,7 +243,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
 
           {/* Variations List */}
           <div className="space-y-4">
-            {isLoading ? (
+            {isLoading || isCreatingDefault ? (
               <>
                 <div className="flex items-center justify-between px-1 mb-4">
                   <div>
