@@ -58,6 +58,7 @@ export default function ShareCartCheckout() {
   const [userToDelete, setUserToDelete] = useState<SharedUser | null>(null);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
+  const [selfRenderConfirmDialogOpen, setSelfRenderConfirmDialogOpen] = useState(false);
   
   // Edit user states
   const [editingUser, setEditingUser] = useState<SharedUser | null>(null);
@@ -920,7 +921,7 @@ export default function ShareCartCheckout() {
                   <p className="text-sm font-medium">Share Cart</p>
                 </button>
                 <button
-                  onClick={() => setShareMethod('edited')}
+                  onClick={() => setSelfRenderConfirmDialogOpen(true)}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     shareMethod === 'edited' 
                       ? 'border-primary bg-primary/5' 
@@ -1070,6 +1071,47 @@ export default function ShareCartCheckout() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Remove {selectedUserIds.length} User(s)
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Self & Render Confirmation Dialog */}
+      <AlertDialog open={selfRenderConfirmDialogOpen} onOpenChange={setSelfRenderConfirmDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Confirm Self & Render</AlertDialogTitle>
+            <AlertDialogDescription className="space-y-3">
+              <p className="text-foreground">
+                You are about to select <span className="font-semibold">Self & Render</span> mode.
+              </p>
+              <div className="bg-muted/50 p-4 rounded-lg space-y-2">
+                <p className="font-medium text-foreground">What this means:</p>
+                <ul className="list-disc list-inside space-y-1 text-sm">
+                  <li>The template will be rendered using your logged-in user data</li>
+                  <li>Your profile information (name, email, phone) will be used</li>
+                  <li>Any customizations will be applied automatically</li>
+                  <li>The rendered output will be personalized for you</li>
+                </ul>
+              </div>
+              <p className="text-sm text-muted-foreground">
+                This is ideal when you want to render the template for yourself without sharing it with other users.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={() => {
+                setShareMethod('edited');
+                setSelfRenderConfirmDialogOpen(false);
+                toast.success('Self & Render Mode Selected', {
+                  description: 'Template will be rendered using your profile data',
+                });
+              }}
+              className="bg-primary text-primary-foreground hover:bg-primary/90"
+            >
+              Confirm Self & Render
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
