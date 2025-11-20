@@ -147,8 +147,8 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
           {/* Close Button Overlay */}
           <Button
             variant="ghost"
-            size="icon"
-            className="absolute top-4 right-4 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
+            size="sm"
+            className="absolute top-4 right-4 h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm"
             onClick={() => onOpenChange(false)}
           >
             <X className="h-5 w-5" />

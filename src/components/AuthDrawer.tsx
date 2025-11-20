@@ -6,6 +6,7 @@ import {
   SheetContent,
   SheetHeader,
   SheetTitle,
+  SheetClose,
 } from '@/components/ui/sheet';
 import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
 import {
@@ -389,14 +390,21 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
         <div className="h-full bg-card flex flex-col">
           {/* Header */}
           <SheetHeader className={getDrawerHeaderClassName('sticky')}>
-            <SheetTitle className="text-xl font-semibold">
-              {view === 'login' && 'Welcome Back'}
-              {view === 'signup' && 'Create Account'}
-              {view === 'forgot' && 'Forgot Password'}
-              {view === 'otp' && 'Verify Email'}
-              {view === 'phone-login' && 'Login with Phone'}
-              {view === 'phone-otp' && 'Verify Phone'}
-            </SheetTitle>
+            <div className="flex items-center justify-between">
+              <SheetTitle className="text-xl font-semibold">
+                {view === 'login' && 'Welcome Back'}
+                {view === 'signup' && 'Create Account'}
+                {view === 'forgot' && 'Forgot Password'}
+                {view === 'otp' && 'Verify Email'}
+                {view === 'phone-login' && 'Login with Phone'}
+                {view === 'phone-otp' && 'Verify Phone'}
+              </SheetTitle>
+              <SheetClose asChild>
+                <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                  <X className="w-4 h-4" />
+                </Button>
+              </SheetClose>
+            </div>
           </SheetHeader>
 
           {/* Content */}

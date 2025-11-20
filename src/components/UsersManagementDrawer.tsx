@@ -256,7 +256,7 @@ export function UsersManagementDrawer({
               {editingUser ? 'Edit Shared User' : 'Manage Users'}
             </SheetTitle>
             <SheetClose asChild>
-              <Button variant="ghost" size="icon">
+              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
                 <X className="w-4 h-4" />
               </Button>
             </SheetClose>
