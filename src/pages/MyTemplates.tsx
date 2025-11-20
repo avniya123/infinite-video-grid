@@ -487,22 +487,22 @@ export default function MyTemplates() {
                 {filteredVideos.map((video, index) => (
                   <div 
                     key={video.templateId || video.id}
-                    className="animate-fade-in"
+                    className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
                     style={{ animationDelay: `${index * 0.05}s` }}
+                    onClick={() => handlePlayVideo(video)}
                   >
-                    <div className="relative group">
-                      <VideoCard
-                        video={video}
-                        onPlay={handlePlayVideo}
-                        onClick={handlePlayVideo}
-                        showShareButton={false}
+                    <div className="relative w-64 flex-shrink-0">
+                      <img
+                        src={video.image}
+                        alt={video.title}
+                        className="w-full h-40 object-cover rounded-lg"
                       />
-                      {/* Edit and Delete buttons */}
-                      <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      {/* Action buttons */}
+                      <div className="absolute bottom-2 right-2 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
                         <Button
                           variant="default"
                           size="icon"
-                          className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+                          className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md"
                           onClick={(e) => {
                             e.stopPropagation();
                             navigate(`/template-editor/${video.variationId}`);
@@ -513,7 +513,7 @@ export default function MyTemplates() {
                         <Button
                           variant="destructive"
                           size="icon"
-                          className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                          className="h-7 w-7 shadow-md"
                           onClick={(e) => {
                             e.stopPropagation();
                             handleDeleteTemplate(video);
@@ -521,6 +521,26 @@ export default function MyTemplates() {
                         >
                           <Trash2 className="h-3.5 w-3.5" />
                         </Button>
+                      </div>
+                    </div>
+                    <div className="flex-1 flex flex-col">
+                      <div className="flex items-start justify-between mb-2">
+                        <div className="flex-1">
+                          <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
+                          <p className="text-sm text-muted-foreground mb-2">
+                            {video.duration} • {video.category} • {video.orientation} • {video.resolution}
+                          </p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mt-auto">
+                        <span className="text-xl font-bold text-primary">{video.price}</span>
+                        <span className="text-sm text-muted-foreground line-through">{video.mrp}</span>
+                        <span className="text-sm text-discount font-semibold">{video.discount}</span>
+                        {video.trending && (
+                          <span className="ml-2 px-2 py-0.5 bg-trending text-trending-foreground text-xs font-semibold rounded">
+                            TRENDING
+                          </span>
+                        )}
                       </div>
                     </div>
                   </div>

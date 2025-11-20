@@ -581,29 +581,49 @@ export default function PublishCart() {
                   return (
                     <div 
                       key={video.templateId}
-                      className="animate-fade-in"
+                      className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
                       style={{ animationDelay: `${index * 0.05}s` }}
+                      onClick={() => handlePlayVideo(videoWithPricing)}
                     >
-                      <div className="relative group">
-                        <VideoCard
-                          video={videoWithPricing}
-                          onPlay={handlePlayVideo}
-                          onClick={handlePlayVideo}
-                          showShareButton={false}
-                          showPrice={true}
+                      <div className="relative w-64 flex-shrink-0">
+                        <img
+                          src={videoWithPricing.image}
+                          alt={videoWithPricing.title}
+                          className="w-full h-40 object-cover rounded-lg"
                         />
-                        <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                        {/* Remove button */}
+                        <div className="absolute top-2 right-2 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="destructive"
                             size="icon"
-                            className="h-8 w-8 shadow-lg"
+                            className="h-7 w-7 shadow-lg"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleRemoveFromCart(video);
                             }}
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </Button>
+                        </div>
+                      </div>
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold mb-2">{videoWithPricing.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {videoWithPricing.duration} • {videoWithPricing.category} • {videoWithPricing.orientation} • {videoWithPricing.resolution}
+                            </p>
+                          </div>
+                        </div>
+                        <div className="flex items-center gap-2 mt-auto">
+                          <span className="text-xl font-bold text-primary">{videoWithPricing.price}</span>
+                          <span className="text-sm text-muted-foreground line-through">{videoWithPricing.mrp}</span>
+                          <span className="text-sm text-discount font-semibold">{videoWithPricing.discount}</span>
+                          {videoWithPricing.trending && (
+                            <span className="ml-2 px-2 py-0.5 bg-trending text-trending-foreground text-xs font-semibold rounded">
+                              TRENDING
+                            </span>
+                          )}
                         </div>
                       </div>
                     </div>
