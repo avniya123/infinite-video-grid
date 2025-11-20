@@ -639,6 +639,7 @@ export default function PublishCart() {
                         onClick={handlePlayVideo}
                         showShareButton={false}
                         showPrice={true}
+                        disableVariations={true}
                       />
                       {/* Remove from cart button */}
                       <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
