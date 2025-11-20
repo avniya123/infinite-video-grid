@@ -348,7 +348,7 @@ export default function ShareCartCheckout() {
         <div className="mb-6">
           <Button variant="ghost" size="sm" onClick={() => navigate('/publish-cart')} className="hover:bg-muted/50">
             <ArrowLeft className="w-4 h-4 mr-2" />
-            <span className="font-medium">Back to Cart</span>
+            <span className="font-medium">Back to Publish Cart</span>
           </Button>
         </div>
 
@@ -361,7 +361,7 @@ export default function ShareCartCheckout() {
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {isQuickMode ? 'Quick Cart Payment' : 'Share Cart Checkout'}
+                  {isQuickMode ? 'Quick Publish Cart' : 'Publish Cart Checkout'}
                 </h1>
                 {isQuickMode && (
                   <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 gap-1.5 px-3 py-1">
@@ -371,7 +371,7 @@ export default function ShareCartCheckout() {
                 )}
               </div>
               <p className="text-muted-foreground text-sm mt-0.5">
-                {isQuickMode ? 'Fast checkout with shared user access' : 'Manage shared users and complete your order'}
+                {isQuickMode ? 'Fast checkout with instant template publishing' : 'Complete your purchase and publish templates to users'}
               </p>
             </div>
           </div>
@@ -818,7 +818,7 @@ export default function ShareCartCheckout() {
                   <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
                     <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
                     <p className="text-xs text-blue-700 dark:text-blue-300">
-                      After payment, you'll be able to manage and add enrolled users to share this template.
+                      After payment, you can manage and add enrolled users to publish this template with instant access.
                     </p>
                   </div>
                 </div>
@@ -1024,13 +1024,13 @@ export default function ShareCartCheckout() {
                       <div className="flex items-start gap-2">
                         <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
                         <p className="text-sm text-blue-700 dark:text-blue-300">
-                          You will be able to manage and add enrolled users to share this template
+                          You can manage and add enrolled users to publish this template
                         </p>
                       </div>
                       <div className="flex items-start gap-2">
                         <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
                         <p className="text-sm text-blue-700 dark:text-blue-300">
-                          All selected users will receive access to the template immediately
+                          All selected users will receive instant access to the published template
                         </p>
                       </div>
                     </>
@@ -1039,13 +1039,13 @@ export default function ShareCartCheckout() {
                       <div className="flex items-start gap-2">
                         <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">2</div>
                         <p className="text-sm text-blue-700 dark:text-blue-300">
-                          Template access will be granted to all {sharedUsers.length} shared user(s)
+                          Template will be published and granted to all {sharedUsers.length} user(s)
                         </p>
                       </div>
                       <div className="flex items-start gap-2">
                         <div className="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shrink-0 mt-0.5">3</div>
                         <p className="text-sm text-blue-700 dark:text-blue-300">
-                          Each user will receive a notification email with access details
+                          Each user will receive a notification with their access credentials
                         </p>
                       </div>
                     </>
