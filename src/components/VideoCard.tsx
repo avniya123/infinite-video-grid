@@ -23,11 +23,12 @@ interface VideoCardProps {
   isSelected?: boolean;
   onSelect?: (video: VideoItem) => void;
   showShareButton?: boolean;
+  showSaveButton?: boolean;
   publishMode?: boolean;
   onPublish?: (video: VideoItem) => Promise<void>;
 }
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, publishMode = false, onPublish }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showSaveButton = true, publishMode = false, onPublish }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -390,30 +391,32 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             )}
 
             {/* Save to My Templates / Publish Button */}
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon"
-                    onClick={handleSaveTemplate}
-                    disabled={savingTemplate}
-                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 dark:bg-gray-800/95 border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800"
-                  >
-                    {publishMode ? (
-                      <ShoppingCart className="h-4 w-4" />
-                    ) : isSaved ? (
-                      <BookmarkCheck className="h-4 w-4 text-primary" />
-                    ) : (
-                      <Bookmark className="h-4 w-4" />
-                    )}
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="left">
-                  <p>{publishMode ? 'Publish' : isSaved ? 'Saved to My Templates' : 'Save to My Templates'}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
+            {showSaveButton && (
+              <TooltipProvider delayDuration={200}>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      onClick={handleSaveTemplate}
+                      disabled={savingTemplate}
+                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 dark:bg-gray-800/95 border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800"
+                    >
+                      {publishMode ? (
+                        <ShoppingCart className="h-4 w-4" />
+                      ) : isSaved ? (
+                        <BookmarkCheck className="h-4 w-4 text-primary" />
+                      ) : (
+                        <Bookmark className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="left">
+                    <p>{publishMode ? 'Publish' : isSaved ? 'Saved to My Templates' : 'Save to My Templates'}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            )}
           </div>
 
           {/* Play Button - hide when video is playing */}
