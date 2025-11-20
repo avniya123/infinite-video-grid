@@ -88,15 +88,13 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     };
   }, []);
 
-  // Remove preload - videos load on demand for better performance
+  // Preload video metadata when in view for instant playback
   useEffect(() => {
-    // Cleanup function only
-    return () => {
-      if (hoverTimerRef.current) {
-        clearTimeout(hoverTimerRef.current);
-      }
-    };
-  }, []);
+    if (isInView && videoRef.current && video.videoUrl) {
+      // Preload just the metadata for faster startup
+      videoRef.current.load();
+    }
+  }, [isInView, video.videoUrl]);
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -117,19 +115,18 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     if (!isInView) return;
     
     setIsHovering(true);
-    // Delayed video start for better performance
+    // Fast video start with minimal delay
     hoverTimerRef.current = setTimeout(() => {
       if (videoRef.current) {
         setShowVideo(true);
         setIsBuffering(true);
-        // Load and play video on demand
-        videoRef.current.load();
+        // Play immediately - video is already preloaded
         videoRef.current.play().catch(err => {
           console.log('Play failed:', err);
           setIsBuffering(false);
         });
       }
-    }, 300); // 300ms delay for smoother experience
+    }, 100); // Ultra-fast 100ms delay
   };
 
   const handleMouseLeave = () => {
@@ -195,18 +192,18 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             <video
               ref={videoRef}
               src={video.videoUrl}
-              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-300 ease-out ${videoReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
+              className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-200 ease-out ${videoReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               style={{
                 objectFit: 'cover',
               }}
               loop
               muted
               playsInline
-              preload="none"
-              onLoadedData={() => {
+              preload="metadata"
+              onLoadedMetadata={() => {
                 setVideoLoaded(true);
               }}
-              onCanPlayThrough={() => {
+              onCanPlay={() => {
                 setIsBuffering(false);
               }}
               onPlaying={() => {
@@ -217,14 +214,15 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               onError={(e) => {
                 console.log('Video load error:', e);
                 setIsBuffering(false);
+                setVideoReady(false);
               }}
             />
           )}
 
-          {/* Professional Buffering Indicator */}
+          {/* Professional Buffering Indicator - Minimal Design */}
           {showVideo && !videoReady && (
             <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
-              <div className="w-8 h-8 border-3 border-white/30 border-t-white rounded-full animate-spin" />
+              <div className="w-7 h-7 border-3 border-white/20 border-t-white rounded-full animate-spin" />
             </div>
           )}
 
