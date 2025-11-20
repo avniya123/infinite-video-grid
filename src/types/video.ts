@@ -18,6 +18,4 @@ export interface VideoItem {
   resolution: VideoResolution;
   mainCategory: MainCategory;
   subcategory: string;
-  templateId?: string;
-  variationId?: string;
 }

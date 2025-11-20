@@ -21,7 +21,6 @@ import { Slider } from '@/components/ui/slider';
 import { useVideoFilters } from '@/hooks/useVideoFilters';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
 import { useImagePreloader } from '@/hooks/useImagePreloader';
-import { ShoppingCart } from 'lucide-react';
 
 const PAGE_SIZE = 8;
 
@@ -48,7 +47,6 @@ const Index = () => {
   const [columnCount, setColumnCount] = useState(3);
   const [listVariationsOpen, setListVariationsOpen] = useState<string | null>(null);
   const [listAuthDrawerOpen, setListAuthDrawerOpen] = useState(false);
-  const [selectedVideos, setSelectedVideos] = useState<Set<number>>(new Set());
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Use custom filter hook
@@ -163,28 +161,6 @@ const Index = () => {
       description: `${video.duration} • ${video.category} • ${video.price}`,
     });
   }, []);
-
-  const handleVideoSelect = useCallback((video: VideoItem) => {
-    setSelectedVideos(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(video.id)) {
-        newSet.delete(video.id);
-      } else {
-        newSet.add(video.id);
-      }
-      return newSet;
-    });
-  }, []);
-
-  const calculateTotalPrice = useCallback(() => {
-    return Array.from(selectedVideos).reduce((total, videoId) => {
-      const video = videos.find(v => v.id === videoId);
-      if (video) {
-        return total + parseInt(video.price.replace(/[^0-9]/g, ''));
-      }
-      return total;
-    }, 0);
-  }, [selectedVideos, videos]);
 
   // Navigate between videos with arrow keys
   const navigateToVideo = useCallback((direction: 'prev' | 'next') => {
@@ -364,22 +340,13 @@ const Index = () => {
           />
         )}
 
-        {/* Results Count and Selection */}
+        {/* Results Count */}
         <div className="flex items-center justify-between">
           <p className="text-sm text-muted-foreground animate-fade-in">
             Showing <span className="font-semibold text-foreground">{filteredVideos.length}</span> 
             {total && ` of ${total}`} videos
             {hasActiveFilters && ' with filters applied'}
           </p>
-          {selectedVideos.size > 0 && (
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedVideos(new Set())}
-            >
-              Clear Selection ({selectedVideos.size})
-            </Button>
-          )}
         </div>
       </div>
 
@@ -401,8 +368,6 @@ const Index = () => {
                   video={video}
                   onPlay={handlePlayVideo}
                   onClick={handleVideoClick}
-                  isSelected={selectedVideos.has(video.id)}
-                  onSelect={handleVideoSelect}
                 />
               </div>
             ))}
@@ -491,34 +456,6 @@ const Index = () => {
           open={listAuthDrawerOpen} 
           onOpenChange={setListAuthDrawerOpen} 
         />
-
-        {/* Checkout Section */}
-        {selectedVideos.size > 0 && (
-          <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur-sm border-t border-border py-4 px-4 z-50 shadow-lg">
-            <div className="max-w-7xl mx-auto flex items-center justify-between">
-              <div className="flex items-center gap-4">
-                <div>
-                  <p className="text-sm text-muted-foreground">
-                    {selectedVideos.size} video{selectedVideos.size !== 1 ? 's' : ''} selected
-                  </p>
-                  <p className="text-2xl font-bold text-primary">
-                    ${calculateTotalPrice()}
-                  </p>
-                </div>
-              </div>
-              <Button 
-                size="lg"
-                className="px-8 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105"
-                onClick={() => {
-                  toast.success(`Proceeding to checkout with ${selectedVideos.size} video(s)`);
-                }}
-              >
-                <ShoppingCart className="mr-2 h-5 w-5" />
-                Proceed to Checkout
-              </Button>
-            </div>
-          </div>
-        )}
 
         {/* Loading Sentinel */}
         {!finished && (
