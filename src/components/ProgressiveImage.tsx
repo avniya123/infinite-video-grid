@@ -20,11 +20,11 @@ export const ProgressiveImage = ({
   lazy = true
 }: ProgressiveImageProps) => {
   const [isLoaded, setIsLoaded] = useState(false);
-  const [isLoading, setIsLoading] = useState(true);
   const [isInView, setIsInView] = useState(!lazy);
   const [currentSrc, setCurrentSrc] = useState(blurDataURL || '');
   const [imageError, setImageError] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
+  const hasLoadedRef = useRef(false);
 
   // Intersection Observer for lazy loading with aggressive preloading
   useEffect(() => {
@@ -57,9 +57,8 @@ export const ProgressiveImage = ({
 
   // Load image when in view with WebP optimization
   useEffect(() => {
-    if (!isInView || !src) return;
+    if (!isInView || !src || hasLoadedRef.current) return;
 
-    setIsLoading(true);
     setImageError(false);
     
     // Try loading WebP format first
@@ -71,7 +70,7 @@ export const ProgressiveImage = ({
       setTimeout(() => {
         setCurrentSrc(optimizedSrc);
         setIsLoaded(true);
-        setIsLoading(false);
+        hasLoadedRef.current = true;
         onLoad?.();
       }, 100);
     };
@@ -87,16 +86,16 @@ export const ProgressiveImage = ({
           setTimeout(() => {
             setCurrentSrc(getFallbackUrl(src));
             setIsLoaded(true);
-            setIsLoading(false);
+            hasLoadedRef.current = true;
             onLoad?.();
           }, 100);
         };
         
         fallbackImg.onerror = () => {
-          setIsLoading(false);
+          hasLoadedRef.current = true;
         };
       } else {
-        setIsLoading(false);
+        hasLoadedRef.current = true;
       }
     };
 
@@ -122,8 +121,8 @@ export const ProgressiveImage = ({
         />
       )}
       
-      {/* Loading Shimmer Overlay */}
-      {isLoading && (
+      {/* Loading Shimmer Overlay - only show before first load */}
+      {!hasLoadedRef.current && (
         <div className="absolute inset-0 bg-gradient-to-br from-muted/30 via-muted/20 to-muted/30">
           <div className="absolute inset-0 -translate-x-full animate-shimmer bg-gradient-to-r from-transparent via-white/30 dark:via-white/20 to-transparent" />
         </div>
