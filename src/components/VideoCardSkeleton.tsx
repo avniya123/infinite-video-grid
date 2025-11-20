@@ -3,11 +3,15 @@ import { AspectRatio } from '@/components/ui/aspect-ratio';
 
 interface VideoCardSkeletonProps {
   aspectRatio?: number;
+  index?: number;
 }
 
-export function VideoCardSkeleton({ aspectRatio = 16 / 9 }: VideoCardSkeletonProps) {
+export function VideoCardSkeleton({ aspectRatio = 16 / 9, index = 0 }: VideoCardSkeletonProps) {
   return (
-    <article className="relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-[var(--shadow-card)] break-inside-avoid mb-5 animate-fade-in">
+    <article 
+      className="relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-[var(--shadow-card)] break-inside-avoid mb-5 animate-fade-in"
+      style={{ animationDelay: `${index * 0.1}s` }}
+    >
       <AspectRatio ratio={aspectRatio}>
         <div className="relative w-full h-full">
           {/* Main Image Skeleton with enhanced shimmer */}
