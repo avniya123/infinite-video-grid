@@ -15,6 +15,7 @@ interface VariationCardProps {
   onPlay: (variation: VideoVariation) => void;
   onThumbnailGenerated: (variationId: string, url: string) => void;
   onEdit?: (variationId: string) => void;
+  hideShareButtons?: boolean;
 }
 
 export const VariationCard = ({
@@ -25,6 +26,7 @@ export const VariationCard = ({
   onPlay,
   onThumbnailGenerated,
   onEdit,
+  hideShareButtons = false,
 }: VariationCardProps) => {
   return (
     <div
@@ -161,13 +163,15 @@ export const VariationCard = ({
             Edit
           </Button>
         )}
-        <div onClick={(e) => e.stopPropagation()}>
-          <SocialShareButtons
-            title={`${videoTitle} - ${variation.title}`}
-            description={`Check out this video variation: ${variation.title}`}
-            url={window.location.href}
-          />
-        </div>
+        {!hideShareButtons && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <SocialShareButtons
+              title={`${videoTitle} - ${variation.title}`}
+              description={`Check out this video variation: ${variation.title}`}
+              url={window.location.href}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
