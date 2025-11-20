@@ -189,7 +189,7 @@ export default function PublishCart() {
           </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {publishedTemplates.map((template) => {
                 const video: VideoItem = {
                   id: template.video_variations.video_id,
@@ -240,10 +240,10 @@ export default function PublishCart() {
             </div>
 
             {/* Proceed to Checkout Button */}
-            <div className="mt-12 flex justify-center">
+            <div className="mt-16 mb-12 flex justify-center">
               <Button 
                 size="lg"
-                className="px-12 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all"
+                className="px-16 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105"
                 onClick={() => {
                   if (publishedTemplates.length > 0) {
                     const template = publishedTemplates[0];
