@@ -11,7 +11,7 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
-import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X, Upload, Download, Check, XCircle } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X, Upload, Download, Check, XCircle, Search } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 interface SharedUser {
@@ -69,6 +69,9 @@ export default function ShareCartCheckout() {
   
   // CSV import states
   const [csvImportDrawerOpen, setCsvImportDrawerOpen] = useState(false);
+  
+  // Search/filter state
+  const [searchQuery, setSearchQuery] = useState('');
   
   // Real-time validation states
   const [isNewEmailValid, setIsNewEmailValid] = useState<boolean | null>(null);
@@ -485,6 +488,17 @@ export default function ShareCartCheckout() {
     // Here you would integrate with actual payment gateway
   };
 
+  // Filter users based on search query
+  const filteredUsers = sharedUsers.filter((user) => {
+    const query = searchQuery.toLowerCase();
+    return (
+      user.name.toLowerCase().includes(query) ||
+      user.email.toLowerCase().includes(query) ||
+      user.phone.includes(query) ||
+      user.userType.toLowerCase().includes(query)
+    );
+  });
+
   const pricing = calculatePricing();
 
   if (!template) {
@@ -575,6 +589,36 @@ export default function ShareCartCheckout() {
                 )}
               </div>
 
+              {/* Search Bar */}
+              {sharedUsers.length > 0 && (
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by name, email, phone, or type..."
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      className="pl-10"
+                    />
+                    {searchQuery && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                        onClick={() => setSearchQuery('')}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                    )}
+                  </div>
+                  {searchQuery && (
+                    <p className="text-xs text-muted-foreground mt-2">
+                      Found {filteredUsers.length} of {sharedUsers.length} user(s)
+                    </p>
+                  )}
+                </div>
+              )}
+
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-4 pb-3 border-b text-sm font-medium text-muted-foreground">
                 <div className="col-span-1 flex items-center">
@@ -602,9 +646,18 @@ export default function ShareCartCheckout() {
                     Add your first user
                   </Button>
                 </div>
+              ) : filteredUsers.length === 0 ? (
+                <div className="py-12 text-center text-muted-foreground">
+                  <Search className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                  <p className="font-medium">No users found</p>
+                  <p className="text-sm mt-1">Try adjusting your search query</p>
+                  <Button variant="link" onClick={() => setSearchQuery('')} className="mt-2">
+                    Clear search
+                  </Button>
+                </div>
               ) : (
                 <div className="space-y-3 mt-4">
-                  {sharedUsers.map((sharedUser) => (
+                  {filteredUsers.map((sharedUser) => (
                     <div key={sharedUser.id} className="grid grid-cols-12 gap-4 items-center py-3 border-b last:border-b-0">
                       <div className="col-span-1 flex items-center">
                         <Checkbox
