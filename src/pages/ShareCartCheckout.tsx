@@ -50,7 +50,7 @@ export default function ShareCartCheckout() {
   const [discountPercent, setDiscountPercent] = useState(0);
 
   // Form states for adding user
-  const [userType, setUserType] = useState<'single' | 'group' | 'enrol'>('single');
+  const [drawerMode, setDrawerMode] = useState<'add' | 'csv' | 'enrol'>('add');
   const [newUserName, setNewUserName] = useState('');
   const [newUserPhone, setNewUserPhone] = useState('');
   const [newUserEmail, setNewUserEmail] = useState('');
@@ -61,7 +61,6 @@ export default function ShareCartCheckout() {
   const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
   
   // Edit user states
-  const [editDrawerOpen, setEditDrawerOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<SharedUser | null>(null);
   const [editUserName, setEditUserName] = useState('');
   const [editUserPhone, setEditUserPhone] = useState('');
@@ -69,9 +68,13 @@ export default function ShareCartCheckout() {
   const [editUserType, setEditUserType] = useState('');
   
   // CSV import states
-  const [csvImportDrawerOpen, setCsvImportDrawerOpen] = useState(false);
   const [csvPreviewData, setCsvPreviewData] = useState<SharedUser[]>([]);
   const [csvImportErrors, setCsvImportErrors] = useState<{ duplicates: string[], invalidFormats: string[] }>({ duplicates: [], invalidFormats: [] });
+  
+  // Enrolled users states
+  const [enrolledUsers, setEnrolledUsers] = useState<SharedUser[]>([]);
+  const [loadingEnrolledUsers, setLoadingEnrolledUsers] = useState(false);
+  const [selectedEnrolledIds, setSelectedEnrolledIds] = useState<string[]>([]);
   
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -273,7 +276,8 @@ export default function ShareCartCheckout() {
     setEditUserType(user.userType);
     setIsEditEmailValid(validateEmail(user.email));
     setIsEditPhoneValid(validatePhone(user.phone));
-    setEditDrawerOpen(true);
+    setDrawerMode('add');
+    setAddUserSheetOpen(true);
   };
 
   const handleUpdateUser = () => {
@@ -327,7 +331,7 @@ export default function ShareCartCheckout() {
     ));
     
     toast.success('User updated successfully');
-    setEditDrawerOpen(false);
+    setAddUserSheetOpen(false);
     setEditingUser(null);
     setIsEditEmailValid(null);
     setIsEditPhoneValid(null);
@@ -342,7 +346,10 @@ export default function ShareCartCheckout() {
     a.download = 'shared_users_template.csv';
     a.click();
     window.URL.revokeObjectURL(url);
+    
     toast.success('CSV template downloaded');
+    setDrawerMode('csv');
+    setAddUserSheetOpen(true);
   };
 
   const handleExportUsers = () => {
@@ -501,7 +508,7 @@ export default function ShareCartCheckout() {
     // Reset and close
     setCsvPreviewData([]);
     setCsvImportErrors({ duplicates: [], invalidFormats: [] });
-    setCsvImportDrawerOpen(false);
+    setAddUserSheetOpen(false);
   };
 
   const handleRemovePreviewUser = (userId: string) => {
@@ -517,6 +524,38 @@ export default function ShareCartCheckout() {
   const handleCancelCsvImport = () => {
     setCsvPreviewData([]);
     setCsvImportErrors({ duplicates: [], invalidFormats: [] });
+    setAddUserSheetOpen(false);
+  };
+
+  const handleAddEnrolledUsers = () => {
+    const usersToAdd = enrolledUsers.filter(u => selectedEnrolledIds.includes(u.id));
+    
+    // Filter out duplicates
+    const newUsers = usersToAdd.filter(enrolledUser => 
+      !sharedUsers.some(sharedUser => 
+        sharedUser.email.toLowerCase() === enrolledUser.email.toLowerCase() ||
+        sharedUser.phone === enrolledUser.phone
+      )
+    );
+    
+    if (newUsers.length === 0) {
+      toast.error('All selected users are already in the shared list');
+      return;
+    }
+    
+    setSharedUsers([...sharedUsers, ...newUsers]);
+    
+    const skipped = usersToAdd.length - newUsers.length;
+    const message = skipped > 0 
+      ? `${newUsers.length} user(s) added. ${skipped} duplicate(s) skipped.`
+      : `${newUsers.length} enrolled user(s) added`;
+    
+    toast.success('Enrolled Users Added', {
+      description: message,
+    });
+    
+    setSelectedEnrolledIds([]);
+    setAddUserSheetOpen(false);
   };
 
   const handleToggleAccess = (userId: string) => {
@@ -605,15 +644,36 @@ export default function ShareCartCheckout() {
           <div className="flex gap-3">
             <Button 
               variant="outline" 
-              onClick={() => setCsvImportDrawerOpen(true)} 
+              onClick={() => {
+                setDrawerMode('csv');
+                setAddUserSheetOpen(true);
+              }}
               className="gap-2"
             >
               <Upload className="w-5 h-5" />
               Import CSV
             </Button>
-            <Button onClick={() => setAddUserSheetOpen(true)} className="gap-2">
+            <Button 
+              onClick={() => {
+                setDrawerMode('add');
+                setEditingUser(null);
+                setAddUserSheetOpen(true);
+              }} 
+              className="gap-2"
+            >
               <UserPlus className="w-5 h-5" />
               Add Share Users
+            </Button>
+            <Button 
+              onClick={() => {
+                setDrawerMode('enrol');
+                setAddUserSheetOpen(true);
+              }}
+              variant="outline"
+              className="gap-2"
+            >
+              <UserCheck className="w-5 h-5" />
+              Enrol Users
             </Button>
           </div>
         </div>
@@ -949,7 +1009,12 @@ export default function ShareCartCheckout() {
         <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
           <SheetHeader className="border-b pb-4">
             <div className="flex items-center justify-between">
-              <SheetTitle>Adding Shared User For Template</SheetTitle>
+              <SheetTitle>
+                {drawerMode === 'add' && !editingUser && 'Add Shared User'}
+                {drawerMode === 'add' && editingUser && 'Edit Shared User'}
+                {drawerMode === 'csv' && 'Import Users from CSV'}
+                {drawerMode === 'enrol' && 'Select Enrolled Users'}
+              </SheetTitle>
               <SheetClose asChild>
                 <Button variant="ghost" size="icon">
                   <X className="w-4 h-4" />
@@ -959,338 +1024,253 @@ export default function ShareCartCheckout() {
           </SheetHeader>
 
           <div className="py-6 space-y-6">
-            {/* User Type Selection */}
-            <div className="grid grid-cols-3 gap-4">
-              <button
-                onClick={() => setUserType('single')}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  userType === 'single'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <UserPlus className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Single User</p>
-              </button>
-              <button
-                onClick={() => setUserType('group')}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  userType === 'group'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <Users className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">Group Users</p>
-              </button>
-              <button
-                onClick={() => setUserType('enrol')}
-                className={`p-4 rounded-lg border-2 transition-all ${
-                  userType === 'enrol'
-                    ? 'border-primary bg-primary/5'
-                    : 'border-border hover:border-primary/50'
-                }`}
-              >
-                <UserCheck className="w-8 h-8 mx-auto mb-2 text-primary" />
-                <p className="text-sm font-medium">enrol Users</p>
-              </button>
-            </div>
-
-            {/* Form */}
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium">
-                  Select Type Of User <span className="text-destructive">*</span>
-                </label>
-                <Select value={selectedUserType} onValueChange={setSelectedUserType}>
-                  <SelectTrigger className="mt-2">
-                    <SelectValue placeholder="Select a User..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="family">Family</SelectItem>
-                    <SelectItem value="friend">Friend</SelectItem>
-                    <SelectItem value="colleague">Colleague</SelectItem>
-                    <SelectItem value="client">Client</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div>
-                <label className="text-sm font-medium">
-                  User name <span className="text-destructive">*</span>
-                </label>
-                <Input
-                  placeholder="Enter the user name"
-                  value={newUserName}
-                  onChange={(e) => setNewUserName(e.target.value)}
-                  className="mt-2"
-                />
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="text-sm font-medium">
-                    User Phone Number <span className="text-destructive">*</span>
-                  </label>
-                  <div className="relative">
-                    <Input
-                      placeholder="+91 0000000000"
-                      value={newUserPhone}
-                      onChange={(e) => handleNewPhoneChange(e.target.value)}
-                      className={`mt-2 pr-10 ${
-                        isNewPhoneValid === true 
-                          ? 'border-green-500 focus-visible:ring-green-500' 
-                          : isNewPhoneValid === false 
-                          ? 'border-red-500 focus-visible:ring-red-500' 
-                          : ''
-                      }`}
-                    />
-                    {isNewPhoneValid !== null && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
-                        {isNewPhoneValid ? (
-                          <Check className="w-5 h-5 text-green-500" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-500" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {isNewPhoneValid === false && newUserPhone.length > 0 && (
-                    <p className="text-xs text-red-500 mt-1">Invalid phone format</p>
-                  )}
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium">
-                    User Email Id <span className="text-destructive">*</span>
-                  </label>
-                  <div className="relative">
-                    <Input
-                      type="email"
-                      placeholder="Example@gmail.com"
-                      value={newUserEmail}
-                      onChange={(e) => handleNewEmailChange(e.target.value)}
-                      className={`mt-2 pr-10 ${
-                        isNewEmailValid === true 
-                          ? 'border-green-500 focus-visible:ring-green-500' 
-                          : isNewEmailValid === false 
-                          ? 'border-red-500 focus-visible:ring-red-500' 
-                          : ''
-                      }`}
-                    />
-                    {isNewEmailValid !== null && (
-                      <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
-                        {isNewEmailValid ? (
-                          <Check className="w-5 h-5 text-green-500" />
-                        ) : (
-                          <XCircle className="w-5 h-5 text-red-500" />
-                        )}
-                      </div>
-                    )}
-                  </div>
-                  {isNewEmailValid === false && newUserEmail.length > 0 && (
-                    <p className="text-xs text-red-500 mt-1">Invalid email format</p>
-                  )}
-                </div>
-              </div>
-
-              <Button onClick={handleAddSharedUser} className="w-full">
-                Add User
-              </Button>
-            </div>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* Edit User Drawer */}
-      <Sheet open={editDrawerOpen} onOpenChange={setEditDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
-          <SheetHeader className="border-b pb-4 mb-6">
-            <SheetTitle>Edit Shared User</SheetTitle>
-          </SheetHeader>
-
-          <div className="space-y-4">
-            <div>
-              <label className="text-sm font-medium">
-                Select Type Of User <span className="text-destructive">*</span>
-              </label>
-              <Select value={editUserType} onValueChange={setEditUserType}>
-                <SelectTrigger className="mt-2">
-                  <SelectValue placeholder="Select a User..." />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="family">Family</SelectItem>
-                  <SelectItem value="friend">Friend</SelectItem>
-                  <SelectItem value="colleague">Colleague</SelectItem>
-                  <SelectItem value="client">Client</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div>
-              <label className="text-sm font-medium">
-                User name <span className="text-destructive">*</span>
-              </label>
-              <Input
-                placeholder="Enter the user name"
-                value={editUserName}
-                onChange={(e) => setEditUserName(e.target.value)}
-                className="mt-2"
-              />
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <label className="text-sm font-medium">
-                  User Phone Number <span className="text-destructive">*</span>
-                </label>
-                <div className="relative">
-                  <Input
-                    placeholder="+91 0000000000"
-                    value={editUserPhone}
-                    onChange={(e) => handleEditPhoneChange(e.target.value)}
-                    className={`mt-2 pr-10 ${
-                      isEditPhoneValid === true 
-                        ? 'border-green-500 focus-visible:ring-green-500' 
-                        : isEditPhoneValid === false 
-                        ? 'border-red-500 focus-visible:ring-red-500' 
-                        : ''
-                    }`}
-                  />
-                  {isEditPhoneValid !== null && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
-                      {isEditPhoneValid ? (
-                        <Check className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-red-500" />
-                      )}
-                    </div>
-                  )}
-                </div>
-                {isEditPhoneValid === false && editUserPhone.length > 0 && (
-                  <p className="text-xs text-red-500 mt-1">Invalid phone format</p>
-                )}
-              </div>
-              <div>
-                <label className="text-sm font-medium">
-                  Email Id <span className="text-destructive">*</span>
-                </label>
-                <div className="relative">
-                  <Input
-                    type="email"
-                    placeholder="yourmail@mail.com"
-                    value={editUserEmail}
-                    onChange={(e) => handleEditEmailChange(e.target.value)}
-                    className={`mt-2 pr-10 ${
-                      isEditEmailValid === true 
-                        ? 'border-green-500 focus-visible:ring-green-500' 
-                        : isEditEmailValid === false 
-                        ? 'border-red-500 focus-visible:ring-red-500' 
-                        : ''
-                    }`}
-                  />
-                  {isEditEmailValid !== null && (
-                    <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
-                      {isEditEmailValid ? (
-                        <Check className="w-5 h-5 text-green-500" />
-                      ) : (
-                        <XCircle className="w-5 h-5 text-red-500" />
-                      )}
-                    </div>
-                  )}
-                </div>
-                {isEditEmailValid === false && editUserEmail.length > 0 && (
-                  <p className="text-xs text-red-500 mt-1">Invalid email format</p>
-                )}
-              </div>
-            </div>
-
-            <Button 
-              onClick={handleUpdateUser}
-              className="w-full mt-6"
-            >
-              <Edit className="w-4 h-4 mr-2" />
-              Update User
-            </Button>
-          </div>
-        </SheetContent>
-      </Sheet>
-
-      {/* CSV Import Drawer */}
-      <Sheet open={csvImportDrawerOpen} onOpenChange={(open) => {
-        setCsvImportDrawerOpen(open);
-        if (!open) {
-          handleCancelCsvImport();
-        }
-      }}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
-          <SheetHeader className="border-b pb-4 mb-6">
-            <SheetTitle>Import Users from CSV</SheetTitle>
-          </SheetHeader>
-
-          <div className="space-y-6">
-            {csvPreviewData.length === 0 ? (
+            {/* Conditional Rendering based on Drawer Mode */}
+            {drawerMode === 'add' && !editingUser && (
               <>
-                {/* Instructions */}
-                <div className="bg-muted/50 p-4 rounded-lg">
-                  <h3 className="font-semibold mb-2">CSV Format Instructions</h3>
-                  <p className="text-sm text-muted-foreground mb-3">
-                    Your CSV file should have the following columns in order:
-                  </p>
-                  <div className="bg-background p-3 rounded font-mono text-xs mb-3">
-                    name,phone,email,userType
-                  </div>
-                  <p className="text-sm text-muted-foreground">
-                    <span className="font-medium">User Types:</span> Family, Friend, Colleague, or Client
-                  </p>
-                </div>
-
-                {/* Download Template */}
-                <div className="flex flex-col gap-3">
-                  <Button
-                    variant="outline"
-                    onClick={handleDownloadTemplate}
-                    className="gap-2"
-                  >
-                    <Download className="w-4 h-4" />
-                    Download CSV Template
-                  </Button>
-
-                  {/* File Upload */}
-                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-                    <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-sm font-medium mb-2">Upload CSV File</p>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      Click to select a CSV file from your computer
-                    </p>
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept=".csv"
-                        onChange={handleCsvImport}
-                        className="hidden"
-                      />
-                      <Button variant="default" asChild>
-                        <span>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Choose File
-                        </span>
-                      </Button>
+                {/* Form for Adding User */}
+                <div className="space-y-4">
+                  <div>
+                    <label className="text-sm font-medium">
+                      Select Type Of User <span className="text-destructive">*</span>
                     </label>
+                    <Select value={selectedUserType} onValueChange={setSelectedUserType}>
+                      <SelectTrigger className="mt-2">
+                        <SelectValue placeholder="Select a User..." />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="family">Family</SelectItem>
+                        <SelectItem value="friend">Friend</SelectItem>
+                        <SelectItem value="colleague">Colleague</SelectItem>
+                        <SelectItem value="client">Client</SelectItem>
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <div>
+                    <label className="text-sm font-medium">
+                      User name <span className="text-destructive">*</span>
+                    </label>
+                    <Input
+                      placeholder="Enter the user name"
+                      value={newUserName}
+                      onChange={(e) => setNewUserName(e.target.value)}
+                      className="mt-2"
+                    />
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div>
+                      <label className="text-sm font-medium">
+                        User Phone Number <span className="text-destructive">*</span>
+                      </label>
+                      <div className="relative">
+                        <Input
+                          placeholder="+91 0000000000"
+                          value={newUserPhone}
+                          onChange={(e) => handleNewPhoneChange(e.target.value)}
+                          className={`mt-2 pr-10 ${
+                            isNewPhoneValid === true 
+                              ? 'border-green-500 focus-visible:ring-green-500' 
+                              : isNewPhoneValid === false 
+                              ? 'border-red-500 focus-visible:ring-red-500' 
+                              : ''
+                          }`}
+                        />
+                        {isNewPhoneValid !== null && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                            {isNewPhoneValid ? (
+                              <Check className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <XCircle className="w-5 h-5 text-red-500" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {isNewPhoneValid === false && newUserPhone.length > 0 && (
+                        <p className="text-xs text-red-500 mt-1">Invalid phone format</p>
+                      )}
+                    </div>
+                    <div>
+                      <label className="text-sm font-medium">
+                        Email Id <span className="text-destructive">*</span>
+                      </label>
+                      <div className="relative">
+                        <Input
+                          type="email"
+                          placeholder="yourmail@mail.com"
+                          value={newUserEmail}
+                          onChange={(e) => handleNewEmailChange(e.target.value)}
+                          className={`mt-2 pr-10 ${
+                            isNewEmailValid === true 
+                              ? 'border-green-500 focus-visible:ring-green-500' 
+                              : isNewEmailValid === false 
+                              ? 'border-red-500 focus-visible:ring-red-500' 
+                              : ''
+                          }`}
+                        />
+                        {isNewEmailValid !== null && (
+                          <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                            {isNewEmailValid ? (
+                              <Check className="w-5 h-5 text-green-500" />
+                            ) : (
+                              <XCircle className="w-5 h-5 text-red-500" />
+                            )}
+                          </div>
+                        )}
+                      </div>
+                      {isNewEmailValid === false && newUserEmail.length > 0 && (
+                        <p className="text-xs text-red-500 mt-1">Invalid email format</p>
+                      )}
+                    </div>
+                  </div>
+
+                  <Button onClick={handleAddSharedUser} className="w-full">
+                    Add User
+                  </Button>
+                </div>
+              </>
+            )}
+
+            {/* Edit User Mode */}
+            {drawerMode === 'add' && editingUser && (
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium">
+                    Select Type Of User <span className="text-destructive">*</span>
+                  </label>
+                  <Select value={editUserType} onValueChange={setEditUserType}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Select a User..." />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="family">Family</SelectItem>
+                      <SelectItem value="friend">Friend</SelectItem>
+                      <SelectItem value="colleague">Colleague</SelectItem>
+                      <SelectItem value="client">Client</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium">
+                    User name <span className="text-destructive">*</span>
+                  </label>
+                  <Input
+                    placeholder="Enter the user name"
+                    value={editUserName}
+                    onChange={(e) => setEditUserName(e.target.value)}
+                    className="mt-2"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <label className="text-sm font-medium">
+                      User Phone Number <span className="text-destructive">*</span>
+                    </label>
+                    <div className="relative">
+                      <Input
+                        placeholder="+91 0000000000"
+                        value={editUserPhone}
+                        onChange={(e) => handleEditPhoneChange(e.target.value)}
+                        className={`mt-2 pr-10 ${
+                          isEditPhoneValid === true 
+                            ? 'border-green-500 focus-visible:ring-green-500' 
+                            : isEditPhoneValid === false 
+                            ? 'border-red-500 focus-visible:ring-red-500' 
+                            : ''
+                        }`}
+                      />
+                      {isEditPhoneValid !== null && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                          {isEditPhoneValid ? (
+                            <Check className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-500" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {isEditPhoneValid === false && editUserPhone.length > 0 && (
+                      <p className="text-xs text-red-500 mt-1">Invalid phone format</p>
+                    )}
+                  </div>
+                  <div>
+                    <label className="text-sm font-medium">
+                      Email Id <span className="text-destructive">*</span>
+                    </label>
+                    <div className="relative">
+                      <Input
+                        type="email"
+                        placeholder="yourmail@mail.com"
+                        value={editUserEmail}
+                        onChange={(e) => handleEditEmailChange(e.target.value)}
+                        className={`mt-2 pr-10 ${
+                          isEditEmailValid === true 
+                            ? 'border-green-500 focus-visible:ring-green-500' 
+                            : isEditEmailValid === false 
+                            ? 'border-red-500 focus-visible:ring-red-500' 
+                            : ''
+                        }`}
+                      />
+                      {isEditEmailValid !== null && (
+                        <div className="absolute right-3 top-1/2 -translate-y-1/2 mt-1">
+                          {isEditEmailValid ? (
+                            <Check className="w-5 h-5 text-green-500" />
+                          ) : (
+                            <XCircle className="w-5 h-5 text-red-500" />
+                          )}
+                        </div>
+                      )}
+                    </div>
+                    {isEditEmailValid === false && editUserEmail.length > 0 && (
+                      <p className="text-xs text-red-500 mt-1">Invalid email format</p>
+                    )}
                   </div>
                 </div>
 
-                {/* Example */}
-                <div className="bg-muted/30 p-4 rounded-lg">
-                  <h4 className="text-sm font-semibold mb-3">Example CSV Content:</h4>
-                  <div className="bg-background rounded-lg border overflow-hidden">
+                <Button onClick={handleUpdateUser} className="w-full">
+                  Update User
+                </Button>
+              </div>
+            )}
+
+            {/* CSV Import Mode */}
+            {drawerMode === 'csv' && csvPreviewData.length === 0 && (
+              <div className="space-y-6">
+                <div className="p-6 border-2 border-dashed border-border rounded-lg">
+                  <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <h3 className="text-center font-medium mb-2">Upload CSV File</h3>
+                  <p className="text-sm text-muted-foreground text-center mb-4">
+                    Import multiple users at once using a CSV file
+                  </p>
+                  <Input
+                    type="file"
+                    accept=".csv"
+                    onChange={handleCsvImport}
+                    className="cursor-pointer"
+                  />
+                </div>
+
+                <div>
+                  <div className="flex items-center justify-between mb-3">
+                    <h4 className="font-medium">CSV Format Instructions</h4>
+                    <Button variant="outline" size="sm" onClick={handleDownloadTemplate}>
+                      <Download className="w-4 h-4 mr-2" />
+                      Download Template
+                    </Button>
+                  </div>
+                  <div className="p-4 bg-muted/30 rounded-lg">
+                    <p className="text-sm text-muted-foreground mb-3">
+                      Your CSV file should include the following columns in order:
+                    </p>
                     <Table>
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="font-semibold">name</TableHead>
-                          <TableHead className="font-semibold">phone</TableHead>
-                          <TableHead className="font-semibold">email</TableHead>
-                          <TableHead className="font-semibold">userType</TableHead>
+                          <TableHead>name</TableHead>
+                          <TableHead>phone</TableHead>
+                          <TableHead>email</TableHead>
+                          <TableHead>userType</TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
@@ -1316,118 +1296,165 @@ export default function ShareCartCheckout() {
                     </Table>
                   </div>
                 </div>
-              </>
-            ) : (
-              <>
-                {/* Preview Header */}
-                <div className="flex items-center justify-between pb-3 border-b">
-                  <div>
-                    <h3 className="font-semibold text-lg">Preview Imported Users</h3>
-                    <p className="text-sm text-muted-foreground">
-                      Review and modify before confirming import
-                    </p>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={handleCancelCsvImport}
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Cancel
-                  </Button>
+              </div>
+            )}
+
+            {/* CSV Preview Mode */}
+            {drawerMode === 'csv' && csvPreviewData.length > 0 && (
+              <div className="space-y-4">
+                <div className="flex items-center justify-between">
+                  <h4 className="font-medium">Preview CSV Import ({csvPreviewData.length} users)</h4>
                 </div>
 
                 {/* Error Summary */}
                 {(csvImportErrors.duplicates.length > 0 || csvImportErrors.invalidFormats.length > 0) && (
-                  <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 rounded-lg p-4">
-                    <h4 className="font-medium text-sm mb-2 text-yellow-900 dark:text-yellow-100">Import Warnings</h4>
+                  <div className="p-4 bg-muted/30 rounded-lg space-y-2">
                     {csvImportErrors.duplicates.length > 0 && (
-                      <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                        • {csvImportErrors.duplicates.length} duplicate(s) skipped
-                      </p>
+                      <div className="flex items-start gap-2">
+                        <XCircle className="w-5 h-5 text-orange-500 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium">Duplicates Skipped ({csvImportErrors.duplicates.length})</p>
+                          <p className="text-xs text-muted-foreground">
+                            {csvImportErrors.duplicates.slice(0, 3).join(', ')}
+                            {csvImportErrors.duplicates.length > 3 && ` and ${csvImportErrors.duplicates.length - 3} more`}
+                          </p>
+                        </div>
+                      </div>
                     )}
                     {csvImportErrors.invalidFormats.length > 0 && (
-                      <p className="text-xs text-yellow-800 dark:text-yellow-200">
-                        • {csvImportErrors.invalidFormats.length} invalid format(s) skipped
-                      </p>
+                      <div className="flex items-start gap-2">
+                        <XCircle className="w-5 h-5 text-red-500 mt-0.5" />
+                        <div>
+                          <p className="text-sm font-medium">Invalid Formats Skipped ({csvImportErrors.invalidFormats.length})</p>
+                          <p className="text-xs text-muted-foreground">
+                            {csvImportErrors.invalidFormats.slice(0, 3).join(', ')}
+                            {csvImportErrors.invalidFormats.length > 3 && ` and ${csvImportErrors.invalidFormats.length - 3} more`}
+                          </p>
+                        </div>
+                      </div>
                     )}
                   </div>
                 )}
 
-                {/* Stats */}
-                <div className="bg-primary/5 p-4 rounded-lg">
-                  <p className="text-sm font-medium">
-                    <span className="text-primary">{csvPreviewData.length}</span> user(s) ready to import
-                  </p>
-                </div>
-
-                {/* Data Table */}
+                {/* Preview Table */}
                 <div className="border rounded-lg overflow-hidden">
-                  <div className="overflow-x-auto">
-                    <table className="w-full">
-                      <thead className="bg-muted/50">
-                        <tr>
-                          <th className="text-left text-xs font-medium p-3">Name</th>
-                          <th className="text-left text-xs font-medium p-3">Phone</th>
-                          <th className="text-left text-xs font-medium p-3">Email</th>
-                          <th className="text-left text-xs font-medium p-3">Type</th>
-                          <th className="text-center text-xs font-medium p-3">Access</th>
-                          <th className="text-center text-xs font-medium p-3">Action</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {csvPreviewData.map((user) => (
-                          <tr key={user.id} className="border-t hover:bg-muted/20">
-                            <td className="p-3 text-sm font-medium">{user.name}</td>
-                            <td className="p-3 text-sm">{user.phone}</td>
-                            <td className="p-3 text-sm text-muted-foreground">{user.email}</td>
-                            <td className="p-3 text-sm">
-                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
-                                {user.userType}
-                              </span>
-                            </td>
-                            <td className="p-3 text-center">
-                              <Switch
-                                checked={user.hasAccess}
-                                onCheckedChange={() => handleTogglePreviewUserAccess(user.id)}
-                              />
-                            </td>
-                            <td className="p-3 text-center">
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 text-destructive hover:text-destructive"
-                                onClick={() => handleRemovePreviewUser(user.id)}
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
-                  </div>
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead>Name</TableHead>
+                        <TableHead>Phone</TableHead>
+                        <TableHead>Email</TableHead>
+                        <TableHead>Type</TableHead>
+                        <TableHead>Access</TableHead>
+                        <TableHead>Action</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {csvPreviewData.map((user) => (
+                        <TableRow key={user.id}>
+                          <TableCell className="font-medium">{user.name}</TableCell>
+                          <TableCell className="text-sm">{user.phone}</TableCell>
+                          <TableCell className="text-sm">{user.email}</TableCell>
+                          <TableCell className="text-sm">{user.userType}</TableCell>
+                          <TableCell>
+                            <Switch
+                              checked={user.hasAccess}
+                              onCheckedChange={() => handleTogglePreviewUserAccess(user.id)}
+                            />
+                          </TableCell>
+                          <TableCell>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              onClick={() => handleRemovePreviewUser(user.id)}
+                            >
+                              <Trash2 className="w-4 h-4 text-destructive" />
+                            </Button>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="flex gap-3 pt-4">
-                  <Button
-                    variant="outline"
-                    onClick={handleCancelCsvImport}
-                    className="flex-1"
-                  >
+                <div className="flex gap-3">
+                  <Button variant="outline" onClick={handleCancelCsvImport} className="flex-1">
                     Cancel
                   </Button>
-                  <Button
-                    onClick={handleConfirmCsvImport}
-                    className="flex-1 gap-2"
-                    disabled={csvPreviewData.length === 0}
-                  >
-                    <Check className="w-4 h-4" />
-                    Confirm Import ({csvPreviewData.length})
+                  <Button onClick={handleConfirmCsvImport} className="flex-1">
+                    Confirm Import
                   </Button>
                 </div>
-              </>
+              </div>
+            )}
+
+            {/* Enrolled Users Mode */}
+            {drawerMode === 'enrol' && (
+              <div className="space-y-4">
+                <div>
+                  <h4 className="font-medium mb-2">Select Registered Users</h4>
+                  <p className="text-sm text-muted-foreground">
+                    Choose users who are already registered in the system
+                  </p>
+                </div>
+
+                {loadingEnrolledUsers ? (
+                  <div className="py-12 text-center">
+                    <p className="text-muted-foreground">Loading users...</p>
+                  </div>
+                ) : enrolledUsers.length === 0 ? (
+                  <div className="py-12 text-center text-muted-foreground">
+                    <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
+                    <p className="font-medium">No registered users found</p>
+                    <p className="text-sm mt-1">There are no users registered in the system yet</p>
+                  </div>
+                ) : (
+                  <>
+                    <div className="border rounded-lg max-h-96 overflow-y-auto">
+                      <Table>
+                        <TableHeader>
+                          <TableRow>
+                            <TableHead className="w-12"></TableHead>
+                            <TableHead>Name</TableHead>
+                            <TableHead>Email</TableHead>
+                            <TableHead>Phone</TableHead>
+                          </TableRow>
+                        </TableHeader>
+                        <TableBody>
+                          {enrolledUsers.map((user) => (
+                            <TableRow key={user.id}>
+                              <TableCell>
+                                <Checkbox
+                                  checked={selectedEnrolledIds.includes(user.id)}
+                                  onCheckedChange={(checked) => {
+                                    if (checked) {
+                                      setSelectedEnrolledIds([...selectedEnrolledIds, user.id]);
+                                    } else {
+                                      setSelectedEnrolledIds(selectedEnrolledIds.filter(id => id !== user.id));
+                                    }
+                                  }}
+                                />
+                              </TableCell>
+                              <TableCell className="font-medium">{user.name}</TableCell>
+                              <TableCell className="text-sm">{user.email}</TableCell>
+                              <TableCell className="text-sm">{user.phone || 'N/A'}</TableCell>
+                            </TableRow>
+                          ))}
+                        </TableBody>
+                      </Table>
+                    </div>
+
+                    <Button
+                      onClick={handleAddEnrolledUsers}
+                      className="w-full"
+                      disabled={selectedEnrolledIds.length === 0}
+                    >
+                      Add Selected Users ({selectedEnrolledIds.length})
+                    </Button>
+                  </>
+                )}
+              </div>
             )}
           </div>
         </SheetContent>
