@@ -7,10 +7,12 @@ import { Input } from '@/components/ui/input';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { toast } from 'sonner';
-import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useSharedUsers, type SharedUser } from '@/hooks/useSharedUsers';
 
@@ -348,12 +350,20 @@ export default function ShareCartCheckout() {
             <div className="p-2.5 bg-primary/10 rounded-xl">
               <ShoppingBag className="h-6 w-6 text-primary" />
             </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">
-                {isQuickMode ? 'Quick Cart Payment' : 'Share Cart Checkout'}
-              </h1>
+            <div className="flex-1">
+              <div className="flex items-center gap-3">
+                <h1 className="text-2xl font-bold tracking-tight">
+                  {isQuickMode ? 'Quick Cart Payment' : 'Share Cart Checkout'}
+                </h1>
+                {isQuickMode && (
+                  <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 gap-1.5 px-3 py-1">
+                    <Zap className="h-3.5 w-3.5" />
+                    Quick Mode
+                  </Badge>
+                )}
+              </div>
               <p className="text-muted-foreground text-sm mt-0.5">
-                {isQuickMode ? 'Quick payment with user management' : 'Manage shared users and complete your order'}
+                {isQuickMode ? 'Fast checkout with shared user access' : 'Manage shared users and complete your order'}
               </p>
             </div>
           </div>
@@ -596,35 +606,52 @@ export default function ShareCartCheckout() {
                   <Users className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <p className="text-sm font-medium">Shared User</p>
                 </button>
-                <button
-                  onClick={() => {
-                    if (!isQuickMode) {
-                      setSelfRenderConfirmDialogOpen(true);
-                    }
-                  }}
-                  disabled={isQuickMode}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    isQuickMode 
-                      ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
-                      : shareMethod === 'edited' 
-                        ? 'border-primary bg-primary/5' 
-                        : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <Edit className={`w-8 h-8 mx-auto mb-2 ${
-                    isQuickMode 
-                      ? 'text-muted-foreground/50' 
-                      : shareMethod === 'edited' 
-                        ? 'text-primary' 
-                        : 'text-muted-foreground'
-                  }`} />
-                  <p className={`text-sm font-medium ${isQuickMode ? 'text-muted-foreground' : ''}`}>
-                    Self & Render
-                  </p>
-                  {isQuickMode && (
-                    <p className="text-xs text-muted-foreground mt-1">Not available</p>
-                  )}
-                </button>
+                
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <button
+                        onClick={() => {
+                          if (!isQuickMode) {
+                            setSelfRenderConfirmDialogOpen(true);
+                          }
+                        }}
+                        disabled={isQuickMode}
+                        className={`p-4 rounded-lg border-2 transition-all relative ${
+                          isQuickMode 
+                            ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
+                            : shareMethod === 'edited' 
+                              ? 'border-primary bg-primary/5' 
+                              : 'border-border hover:border-primary/50'
+                        }`}
+                      >
+                        <Edit className={`w-8 h-8 mx-auto mb-2 ${
+                          isQuickMode 
+                            ? 'text-muted-foreground/50' 
+                            : shareMethod === 'edited' 
+                              ? 'text-primary' 
+                              : 'text-muted-foreground'
+                        }`} />
+                        <p className={`text-sm font-medium ${isQuickMode ? 'text-muted-foreground' : ''}`}>
+                          Self & Render
+                        </p>
+                        {isQuickMode && (
+                          <div className="flex items-center justify-center gap-1 mt-1">
+                            <Info className="h-3 w-3 text-muted-foreground" />
+                            <p className="text-xs text-muted-foreground">Disabled</p>
+                          </div>
+                        )}
+                      </button>
+                    </TooltipTrigger>
+                    {isQuickMode && (
+                      <TooltipContent side="bottom" className="max-w-xs">
+                        <p className="text-sm">
+                          Self & Render is not available in Quick Mode. Quick Mode is designed for fast checkout with shared user access only.
+                        </p>
+                      </TooltipContent>
+                    )}
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </Card>
 
@@ -732,8 +759,66 @@ export default function ShareCartCheckout() {
               </div>
             </Card>
 
+            {/* Payment Summary Card - Quick Mode */}
+            {isQuickMode && (
+              <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
+                <div className="flex items-center gap-2 mb-4">
+                  <Zap className="h-5 w-5 text-primary" />
+                  <h3 className="font-semibold text-primary">Quick Payment Summary</h3>
+                </div>
+                <div className="space-y-3">
+                  {/* Template Info */}
+                  <div className="flex items-start gap-3 p-3 bg-background/80 rounded-lg">
+                    <img 
+                      src={template.thumbnailUrl || '/placeholder.svg'} 
+                      alt={template.title}
+                      className="w-16 h-16 rounded-md object-cover"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-sm truncate">{template.title}</p>
+                      <div className="flex items-center gap-2 mt-1">
+                        <Badge variant="secondary" className="text-xs">
+                          {template.duration}
+                        </Badge>
+                        <Badge variant="outline" className="text-xs">
+                          {template.resolution}
+                        </Badge>
+                      </div>
+                    </div>
+                  </div>
+                  
+                  {/* Users Count */}
+                  <div className="flex items-center justify-between p-3 bg-background/80 rounded-lg">
+                    <div className="flex items-center gap-2">
+                      <Users className="h-4 w-4 text-muted-foreground" />
+                      <span className="text-sm font-medium">Shared Users</span>
+                    </div>
+                    <Badge variant="default" className="bg-primary">
+                      {sharedUsers.length || 0} {sharedUsers.length === 1 ? 'user' : 'users'}
+                    </Badge>
+                  </div>
+                  
+                  {/* Total Price */}
+                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 rounded-lg border border-emerald-500/20">
+                    <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Total Amount</span>
+                    <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
+                      ₹ {pricing.total.toFixed(2)}
+                    </span>
+                  </div>
+                  
+                  {/* Quick Info */}
+                  <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                    <p className="text-xs text-blue-700 dark:text-blue-300">
+                      After payment, you'll be able to manage and add enrolled users to share this template.
+                    </p>
+                  </div>
+                </div>
+              </Card>
+            )}
+
             {/* Proceed Button */}
-            <Button 
+            <Button
               onClick={handleProceedToPayment}
               className="w-full h-14 text-base font-semibold shadow-lg"
               size="lg"
