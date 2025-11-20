@@ -9,6 +9,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/comp
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X, Upload, Download, Check, XCircle, Search } from 'lucide-react';
@@ -1281,13 +1282,39 @@ export default function ShareCartCheckout() {
 
                 {/* Example */}
                 <div className="bg-muted/30 p-4 rounded-lg">
-                  <h4 className="text-sm font-semibold mb-2">Example CSV Content:</h4>
-                  <pre className="text-xs bg-background p-3 rounded overflow-x-auto">
-{`name,phone,email,userType
-John Doe,+91 9876543210,john@example.com,Family
-Jane Smith,+91 9876543211,jane@example.com,Friend
-Bob Johnson,+91 9876543212,bob@example.com,Colleague`}
-                  </pre>
+                  <h4 className="text-sm font-semibold mb-3">Example CSV Content:</h4>
+                  <div className="bg-background rounded-lg border overflow-hidden">
+                    <Table>
+                      <TableHeader>
+                        <TableRow>
+                          <TableHead className="font-semibold">name</TableHead>
+                          <TableHead className="font-semibold">phone</TableHead>
+                          <TableHead className="font-semibold">email</TableHead>
+                          <TableHead className="font-semibold">userType</TableHead>
+                        </TableRow>
+                      </TableHeader>
+                      <TableBody>
+                        <TableRow>
+                          <TableCell>John Doe</TableCell>
+                          <TableCell>+91 9876543210</TableCell>
+                          <TableCell>john@example.com</TableCell>
+                          <TableCell>Family</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Jane Smith</TableCell>
+                          <TableCell>+91 9876543211</TableCell>
+                          <TableCell>jane@example.com</TableCell>
+                          <TableCell>Friend</TableCell>
+                        </TableRow>
+                        <TableRow>
+                          <TableCell>Bob Johnson</TableCell>
+                          <TableCell>+91 9876543212</TableCell>
+                          <TableCell>bob@example.com</TableCell>
+                          <TableCell>Colleague</TableCell>
+                        </TableRow>
+                      </TableBody>
+                    </Table>
+                  </div>
                 </div>
               </>
             ) : (
