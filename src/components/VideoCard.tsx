@@ -28,6 +28,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [videoLoaded, setVideoLoaded] = useState(false);
   const [isBuffering, setIsBuffering] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const [hasAnimated, setHasAnimated] = useState(false);
   const [variationsOpen, setVariationsOpen] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
@@ -65,6 +66,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
         entries.forEach((entry) => {
           if (entry.isIntersecting) {
             setIsInView(true);
+            // Trigger animation after a small delay for better visual effect
+            setTimeout(() => setHasAnimated(true), 50);
           }
         });
       },
@@ -144,7 +147,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   return (
     <article 
       ref={cardRef}
-      className={`group relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-[var(--shadow-card)] transition-shadow duration-300 hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''}`}
+      className={`group relative overflow-hidden rounded-lg bg-white dark:bg-gray-900 shadow-[var(--shadow-card)] transition-all duration-500 hover:shadow-[var(--shadow-card-hover)] cursor-pointer break-inside-avoid mb-5 ${isSelected ? 'ring-4 ring-primary' : ''} ${hasAnimated ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'}`}
       onClick={handleCardClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
