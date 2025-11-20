@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
+import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { toast } from 'sonner';
 import { ArrowLeft, Trash2, Edit, UserPlus, Users, UserCheck, Wallet, CreditCard, X } from 'lucide-react';
@@ -55,6 +56,8 @@ export default function ShareCartCheckout() {
   const [selectedUserType, setSelectedUserType] = useState('');
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<SharedUser | null>(null);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [bulkDeleteDialogOpen, setBulkDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -112,10 +115,42 @@ export default function ShareCartCheckout() {
   const confirmRemoveUser = () => {
     if (userToDelete) {
       setSharedUsers(sharedUsers.filter(u => u.id !== userToDelete.id));
+      setSelectedUserIds(selectedUserIds.filter(id => id !== userToDelete.id));
       toast.success('User removed from shared list');
       setDeleteDialogOpen(false);
       setUserToDelete(null);
     }
+  };
+
+  const handleToggleUserSelection = (userId: string) => {
+    setSelectedUserIds(prev => 
+      prev.includes(userId) 
+        ? prev.filter(id => id !== userId)
+        : [...prev, userId]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (selectedUserIds.length === sharedUsers.length) {
+      setSelectedUserIds([]);
+    } else {
+      setSelectedUserIds(sharedUsers.map(u => u.id));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedUserIds.length === 0) {
+      toast.error('No users selected');
+      return;
+    }
+    setBulkDeleteDialogOpen(true);
+  };
+
+  const confirmBulkDelete = () => {
+    setSharedUsers(sharedUsers.filter(u => !selectedUserIds.includes(u.id)));
+    toast.success(`${selectedUserIds.length} user(s) removed from shared list`);
+    setSelectedUserIds([]);
+    setBulkDeleteDialogOpen(false);
   };
 
   const handleToggleAccess = (userId: string) => {
@@ -152,7 +187,9 @@ export default function ShareCartCheckout() {
 
   const handleProceedToPayment = () => {
     if (sharedUsers.length === 0) {
-      toast.error('Please add at least one shared user');
+      toast.error('Please add at least one shared user', {
+        description: 'You need to add at least one user to share this template with before proceeding to payment.',
+      });
       return;
     }
     toast.success('Processing payment...', {
@@ -223,16 +260,38 @@ export default function ShareCartCheckout() {
 
             {/* User List */}
             <Card className="p-6">
-              <div className="mb-4">
-                <h3 className="font-semibold text-lg">Confirm User list</h3>
-                <p className="text-sm text-muted-foreground">Editable for shared users.</p>
+              <div className="mb-4 flex items-center justify-between">
+                <div>
+                  <h3 className="font-semibold text-lg">Confirm User list</h3>
+                  <p className="text-sm text-muted-foreground">Editable for shared users.</p>
+                </div>
+                {sharedUsers.length > 0 && selectedUserIds.length > 0 && (
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={handleBulkDelete}
+                    className="gap-2"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                    Delete Selected ({selectedUserIds.length})
+                  </Button>
+                )}
               </div>
 
               {/* Table Header */}
               <div className="grid grid-cols-12 gap-4 pb-3 border-b text-sm font-medium text-muted-foreground">
+                <div className="col-span-1 flex items-center">
+                  {sharedUsers.length > 0 && (
+                    <Checkbox
+                      checked={selectedUserIds.length === sharedUsers.length && sharedUsers.length > 0}
+                      onCheckedChange={handleToggleSelectAll}
+                      aria-label="Select all users"
+                    />
+                  )}
+                </div>
                 <div className="col-span-3">SHARED NAME</div>
                 <div className="col-span-3">CONTACT</div>
-                <div className="col-span-3">STATUS</div>
+                <div className="col-span-2">STATUS</div>
                 <div className="col-span-3">ACTION</div>
               </div>
 
@@ -240,7 +299,8 @@ export default function ShareCartCheckout() {
               {sharedUsers.length === 0 ? (
                 <div className="py-12 text-center text-muted-foreground">
                   <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
-                  <p>No shared users added yet</p>
+                  <p className="font-medium">No shared users added yet</p>
+                  <p className="text-sm mt-1">Add at least one user to proceed with checkout</p>
                   <Button variant="link" onClick={() => setDrawerOpen(true)} className="mt-2">
                     Add your first user
                   </Button>
@@ -249,6 +309,13 @@ export default function ShareCartCheckout() {
                 <div className="space-y-3 mt-4">
                   {sharedUsers.map((sharedUser) => (
                     <div key={sharedUser.id} className="grid grid-cols-12 gap-4 items-center py-3 border-b last:border-b-0">
+                      <div className="col-span-1 flex items-center">
+                        <Checkbox
+                          checked={selectedUserIds.includes(sharedUser.id)}
+                          onCheckedChange={() => handleToggleUserSelection(sharedUser.id)}
+                          aria-label={`Select ${sharedUser.name}`}
+                        />
+                      </div>
                       <div className="col-span-3">
                         <div className="flex items-center gap-3">
                           <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold">
@@ -264,13 +331,13 @@ export default function ShareCartCheckout() {
                         <p>{sharedUser.phone}</p>
                         <p className="text-muted-foreground">{sharedUser.email}</p>
                       </div>
-                      <div className="col-span-3">
+                      <div className="col-span-2">
                         <div className="flex items-center gap-2">
                           <Switch
                             checked={sharedUser.hasAccess}
                             onCheckedChange={() => handleToggleAccess(sharedUser.id)}
                           />
-                          <span className="text-sm">{sharedUser.hasAccess ? 'Order Access' : 'No Access'}</span>
+                          <span className="text-sm">{sharedUser.hasAccess ? 'Access' : 'No Access'}</span>
                         </div>
                       </div>
                       <div className="col-span-3 flex gap-2">
@@ -421,10 +488,16 @@ export default function ShareCartCheckout() {
               onClick={handleProceedToPayment}
               className="w-full h-12 text-base font-semibold"
               size="lg"
+              disabled={sharedUsers.length === 0}
             >
               <CreditCard className="w-5 h-5 mr-2" />
               Proceed to Payment
             </Button>
+            {sharedUsers.length === 0 && (
+              <p className="text-sm text-center text-muted-foreground mt-2">
+                Please add at least one shared user to proceed
+              </p>
+            )}
           </div>
         </div>
       </div>
@@ -567,6 +640,28 @@ export default function ShareCartCheckout() {
               className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
             >
               Remove User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Bulk Delete Confirmation Dialog */}
+      <AlertDialog open={bulkDeleteDialogOpen} onOpenChange={setBulkDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Remove Multiple Users</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove <span className="font-semibold text-foreground">{selectedUserIds.length} user(s)</span> from the shared user list? 
+              They will no longer have access to this template. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={confirmBulkDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Remove {selectedUserIds.length} User(s)
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
