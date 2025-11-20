@@ -69,6 +69,7 @@ export default function MyTemplates() {
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [columnCount, setColumnCount] = useState(3);
   const [sortBy, setSortBy] = useState('newest');
+  const [publishFilter, setPublishFilter] = useState<'all' | 'in-cart' | 'not-in-cart'>('all');
   
   // Filter states
   const [selectedAspectRatios, setSelectedAspectRatios] = useState<string[]>([]);
@@ -301,16 +302,24 @@ export default function MyTemplates() {
     setSelectedDurations([]);
     setSelectedMainCategory(null);
     setSelectedSubcategory(null);
+    setPublishFilter('all');
     toast.success('Filters reset');
   }, []);
 
   const hasActiveFilters = Boolean(searchQuery || selectedAspectRatios.length > 0 || 
-    selectedDurations.length > 0 || selectedMainCategory || selectedSubcategory);
+    selectedDurations.length > 0 || selectedMainCategory || selectedSubcategory || publishFilter !== 'all');
 
   // Filter and sort templates
   const filteredAndSortedTemplates = useMemo(() => {
     // Show all templates (don't filter out published ones)
     let filtered = templates;
+
+    // Filter by publish status
+    if (publishFilter === 'in-cart') {
+      filtered = filtered.filter(template => template.published);
+    } else if (publishFilter === 'not-in-cart') {
+      filtered = filtered.filter(template => !template.published);
+    }
 
     // Search by title or ID prefix
     if (searchQuery) {
@@ -360,7 +369,7 @@ export default function MyTemplates() {
     });
 
     return sorted;
-  }, [templates, searchQuery, sortBy]);
+  }, [templates, searchQuery, sortBy, selectedAspectRatios, selectedDurations, publishFilter]);
 
   if (loading) {
     return (
@@ -478,6 +487,38 @@ export default function MyTemplates() {
               
               {/* Controls */}
               <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                {/* Publish Status Filter */}
+                <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+                  <Button
+                    variant={publishFilter === 'all' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPublishFilter('all')}
+                    className="h-8 px-3 transition-all duration-200 text-xs"
+                    title="Show all templates"
+                  >
+                    All
+                  </Button>
+                  <Button
+                    variant={publishFilter === 'in-cart' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPublishFilter('in-cart')}
+                    className="h-8 px-3 transition-all duration-200 text-xs"
+                    title="Show only templates in publish cart"
+                  >
+                    <ShoppingCart className="w-3.5 h-3.5 mr-1.5" />
+                    In Cart
+                  </Button>
+                  <Button
+                    variant={publishFilter === 'not-in-cart' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setPublishFilter('not-in-cart')}
+                    className="h-8 px-3 transition-all duration-200 text-xs"
+                    title="Show only templates not in publish cart"
+                  >
+                    Not In Cart
+                  </Button>
+                </div>
+
                 {/* Reset Filters Button */}
                 {hasActiveFilters && (
                   <Button
