@@ -52,6 +52,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
@@ -61,15 +62,38 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
     // Check current session
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
     });
 
     // Listen for auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfileData(null);
+      }
     });
 
     return () => subscription.unsubscribe();
   }, []);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setProfileData(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -412,7 +436,11 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild className="hidden md:flex">
                     <Avatar className="w-9 h-9 border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all cursor-pointer">
-                      <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || 'User'} />
+                      <AvatarImage 
+                        src={profileData?.avatar_url || user.user_metadata?.avatar_url} 
+                        alt={profileData?.full_name || user.user_metadata?.full_name || 'User'}
+                        key={profileData?.avatar_url} 
+                      />
                       <AvatarFallback className="bg-gradient-to-br from-gray-800 to-gray-600 text-white text-sm">
                         <User className="w-4 h-4" />
                       </AvatarFallback>
@@ -466,7 +494,11 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
       )}
 
       <AuthDrawer open={authDrawerOpen} onOpenChange={setAuthDrawerOpen} />
-      <ProfileDrawer open={profileDrawerOpen} onOpenChange={setProfileDrawerOpen} />
+      <ProfileDrawer 
+        open={profileDrawerOpen} 
+        onOpenChange={setProfileDrawerOpen}
+        onProfileUpdate={() => user && fetchProfile(user.id)}
+      />
     </>
   );
 };
