@@ -31,6 +31,7 @@ export default function ShareCartCheckout() {
   const location = useLocation();
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [template, setTemplate] = useState<TemplateData | null>(null);
+  const [isQuickMode, setIsQuickMode] = useState(false);
   
   // User management hook
   const {
@@ -65,12 +66,36 @@ export default function ShareCartCheckout() {
 
   useEffect(() => {
     checkUser();
-    const templateData = location.state?.template;
-    if (templateData) {
-      setTemplate(templateData);
+    
+    // Check if this is quick mode from URL params
+    const searchParams = new URLSearchParams(location.search);
+    const mode = searchParams.get('mode');
+    const videoId = searchParams.get('videoId');
+    
+    if (mode === 'quick' && videoId) {
+      setIsQuickMode(true);
+      setShareMethod('cart'); // Pre-select Share User Cart
+      // You can load video data here if needed
+      // For now, we'll use a placeholder template
+      setTemplate({
+        id: videoId,
+        title: 'Quick Cart Template',
+        price: 999,
+        mrp: 1499,
+        discount: '33%',
+        duration: '30s',
+        orientation: 'Landscape',
+        resolution: '1920x1080',
+        thumbnailUrl: '/placeholder.svg'
+      });
     } else {
-      toast.error('No template selected');
-      navigate('/publish-cart');
+      const templateData = location.state?.template;
+      if (templateData) {
+        setTemplate(templateData);
+      } else {
+        toast.error('No template selected');
+        navigate('/publish-cart');
+      }
     }
   }, []);
 
@@ -197,7 +222,19 @@ export default function ShareCartCheckout() {
       toast.error('Please add at least one shared user');
       return;
     }
-    toast.success('Processing payment...');
+    
+    if (isQuickMode) {
+      toast.success('Payment successful! Opening user management...', {
+        duration: 3000
+      });
+      // After payment, show user management drawer
+      setTimeout(() => {
+        setAddUserSheetOpen(true);
+        toast.info('Add users to share this template');
+      }, 1000);
+    } else {
+      toast.success('Processing payment...');
+    }
   };
 
   const handleExportUsers = () => {
@@ -257,10 +294,10 @@ export default function ShareCartCheckout() {
             </div>
             <div>
               <h1 className="text-2xl font-bold tracking-tight">
-                Share Cart Checkout
+                {isQuickMode ? 'Quick Cart Payment' : 'Share Cart Checkout'}
               </h1>
               <p className="text-muted-foreground text-sm mt-0.5">
-                Manage shared users and complete your order
+                {isQuickMode ? 'Quick payment with user management' : 'Manage shared users and complete your order'}
               </p>
             </div>
           </div>
