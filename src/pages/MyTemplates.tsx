@@ -192,6 +192,39 @@ export default function MyTemplates() {
     }
   };
 
+  const handleRemoveFromPublishCart = async (templateId: string) => {
+    // Optimistic update
+    const previousTemplates = [...templates];
+    
+    // Update UI immediately
+    setTemplates(templates.map(t => 
+      t.id === templateId ? { ...t, published: false, published_at: null } : t
+    ));
+    
+    // Show optimistic feedback
+    toast.success('Removing from publish cart...', { duration: 1000 });
+    
+    try {
+      const { error } = await supabase
+        .from('user_templates')
+        .update({ 
+          published: false,
+          published_at: null
+        })
+        .eq('id', templateId);
+
+      if (error) throw error;
+
+      // Confirm success
+      toast.success('Template removed from publish cart');
+    } catch (error: any) {
+      // Revert on failure
+      setTemplates(previousTemplates);
+      toast.error('Failed to remove from publish cart');
+      console.error('Error removing from publish cart:', error);
+    }
+  };
+
   const handlePublishConfirm = async (video: VideoItem) => {
     // Find the template
     const template = templates.find(t => t.video_variations.video_id === video.id);
@@ -609,45 +642,60 @@ export default function MyTemplates() {
                         </Badge>
                       )}
                       
-                      {/* Action buttons - only show if not published */}
-                      {!template.published && (
-                        <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                      {/* Action buttons */}
+                      <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        {template.published ? (
                           <Button
                             variant="secondary"
                             size="icon"
-                            className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                            className="h-7 w-7 bg-red-500 hover:bg-red-600 text-white shadow-md hover:shadow-lg transition-all"
                             onClick={(e) => {
                               e.stopPropagation();
-                              handleAddToPublishCart(template.id);
+                              handleRemoveFromPublishCart(template.id);
                             }}
-                            title="Add to Publish Cart"
+                            title="Remove from Publish Cart"
                           >
-                            <ShoppingCart className="h-3.5 w-3.5" />
+                            <X className="h-3.5 w-3.5" />
                           </Button>
-                          <Button
-                            variant="default"
-                            size="icon"
-                            className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              navigate(`/template-editor/${template.variation_id}`);
-                            }}
-                          >
-                            <Edit className="h-3.5 w-3.5" />
-                          </Button>
-                          <Button
-                            variant="destructive"
-                            size="icon"
-                            className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleDeleteTemplate(template.id);
-                            }}
-                          >
-                            <Trash2 className="h-3.5 w-3.5" />
-                          </Button>
-                        </div>
-                      )}
+                        ) : (
+                          <>
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleAddToPublishCart(template.id);
+                              }}
+                              title="Add to Publish Cart"
+                            >
+                              <ShoppingCart className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="default"
+                              size="icon"
+                              className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/template-editor/${template.variation_id}`);
+                              }}
+                            >
+                              <Edit className="h-3.5 w-3.5" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteTemplate(template.id);
+                              }}
+                            >
+                              <Trash2 className="h-3.5 w-3.5" />
+                            </Button>
+                          </>
+                        )}
+                      </div>
                     </div>
                   </div>
                 );
@@ -704,8 +752,23 @@ export default function MyTemplates() {
                             {video.duration} • {video.orientation} • {video.resolution}
                           </p>
                         </div>
-                        {/* Action buttons - only show if not published */}
-                        {!template.published && (
+                        {/* Action buttons */}
+                        {template.published ? (
+                          <div className="flex gap-2">
+                            <Button
+                              variant="secondary"
+                              size="icon"
+                              className="h-8 w-8 bg-red-500 hover:bg-red-600 text-white transition-transform hover:scale-110"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleRemoveFromPublishCart(template.id);
+                              }}
+                              title="Remove from Publish Cart"
+                            >
+                              <X className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        ) : (
                           <div className="flex gap-2">
                             <Button
                               variant="secondary"
