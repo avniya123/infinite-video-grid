@@ -19,9 +19,10 @@ interface VariationsDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRequestAuth?: () => void;
+  hideShareButton?: boolean;
 }
 
-export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false }: VariationsDrawerProps) => {
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
@@ -128,7 +129,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
       onRequestAuth?.();
       return;
     }
-    toast.success('Added to cart');
+    // Navigate to Share Cart Checkout page
+    window.location.href = '/share-cart-checkout';
   };
 
   const handleEdit = async (variationId?: string) => {
@@ -266,10 +268,12 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
               
               {/* Action Buttons */}
               <div className="flex gap-2">
-                <Button size="sm" onClick={handleShareCart} className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
-                  <ShoppingCart className="h-3.5 w-3.5" />
-                  Share Cart
-                </Button>
+                {!hideShareButton && (
+                  <Button size="sm" onClick={handleShareCart} className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
+                    <ShoppingCart className="h-3.5 w-3.5" />
+                    Share Cart
+                  </Button>
+                )}
                 <Button size="sm" onClick={() => handleEdit()} variant="outline" className="gap-2">
                   <Edit className="h-3.5 w-3.5" />
                   Edit
