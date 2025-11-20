@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
-import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -63,8 +63,6 @@ export default function PublishCart() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishedTemplates, setPublishedTemplates] = useState<PublishedTemplate[]>([]);
-  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   
   // View controls state
   const [searchQuery, setSearchQuery] = useState('');
@@ -158,10 +156,6 @@ export default function PublishCart() {
     }
   };
 
-  const handlePlayVideo = (video: VideoItem) => {
-    setSelectedVideo(video);
-    setDrawerOpen(true);
-  };
 
   const getSubcategoryPriceMultiplier = (subcategory: string): number => {
     // Premium categories (higher prices)
@@ -635,8 +629,6 @@ export default function PublishCart() {
                     <div className="relative group mb-5">
                       <VideoCard
                         video={video}
-                        onPlay={handlePlayVideo}
-                        onClick={handlePlayVideo}
                         showShareButton={false}
                         showPrice={true}
                       />
@@ -688,8 +680,7 @@ export default function PublishCart() {
                 return (
                   <div 
                     key={template.id} 
-                    className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
-                    onClick={() => handlePlayVideo(video)}
+                    className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in"
                   >
                     <div className="relative w-64 flex-shrink-0">
                       <img
@@ -764,13 +755,6 @@ export default function PublishCart() {
         </main>
       )}
 
-      {selectedVideo && (
-        <VideoPlayerDrawer
-          open={drawerOpen}
-          onOpenChange={setDrawerOpen}
-          video={selectedVideo}
-        />
-      )}
     </div>
   );
 }
