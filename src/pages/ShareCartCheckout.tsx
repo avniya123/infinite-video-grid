@@ -936,31 +936,32 @@ export default function ShareCartCheckout() {
 
           {/* Right Column - Summary & Payment */}
           <div className="space-y-8">
-            {/* Share Method */}
+            {/* Render Process */}
             <Card className="p-6 shadow-sm border-border/50 hover:shadow-md transition-shadow">
-              <h2 className="text-lg font-semibold mb-5 text-foreground">Share Method</h2>
+              <h3 className="font-semibold mb-4 text-foreground">Render Process</h3>
+              <p className="text-xs text-muted-foreground mb-4">Default logged-in user data will be used for rendering</p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setShareMethod('cart')}
-                  className={`p-5 rounded-xl border-2 transition-all duration-200 ${
+                  className={`p-4 rounded-lg border-2 transition-all ${
                     shareMethod === 'cart' 
-                      ? 'border-primary bg-primary/10 shadow-sm' 
-                      : 'border-border hover:border-primary/40 hover:bg-accent/5'
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <Users className={`w-7 h-7 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className="text-sm font-semibold">Share Cart</p>
+                  <Users className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className="text-sm font-medium">Share Cart</p>
                 </button>
                 <button
                   onClick={() => setShareMethod('edited')}
-                  className={`p-5 rounded-xl border-2 transition-all duration-200 ${
+                  className={`p-4 rounded-lg border-2 transition-all ${
                     shareMethod === 'edited' 
-                      ? 'border-primary bg-primary/10 shadow-sm' 
-                      : 'border-border hover:border-primary/40 hover:bg-accent/5'
+                      ? 'border-primary bg-primary/5' 
+                      : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <Edit className={`w-7 h-7 mx-auto mb-2 ${shareMethod === 'edited' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className="text-sm font-semibold">Edited Template</p>
+                  <Edit className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'edited' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className="text-sm font-medium">Self & Render</p>
                 </button>
               </div>
             </Card>
