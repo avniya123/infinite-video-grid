@@ -462,9 +462,23 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                     </Avatar>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end" className="w-56 bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700">
+                    <DropdownMenuLabel className="text-gray-700 dark:text-gray-200">My Account</DropdownMenuLabel>
+                    <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
                     <DropdownMenuItem onClick={() => setProfileDrawerOpen(true)} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                       <User className="mr-2 h-4 w-4" />
                       <span>Profile</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/my-templates')} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <LayoutTemplate className="mr-2 h-4 w-4" />
+                      <span>My Templates</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/my-users')} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <User className="mr-2 h-4 w-4" />
+                      <span>My Users</span>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/publish-cart')} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                      <span>Publish Cart</span>
                     </DropdownMenuItem>
                     <DropdownMenuSeparator className="bg-gray-200 dark:bg-gray-700" />
                     <DropdownMenuItem onClick={handleLogout} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
