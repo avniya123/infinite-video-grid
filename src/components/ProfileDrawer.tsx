@@ -32,9 +32,10 @@ import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 interface ProfileDrawerProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onProfileUpdate?: () => void;
 }
 
-export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps) {
+export default function ProfileDrawer({ open, onOpenChange, onProfileUpdate }: ProfileDrawerProps) {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -246,6 +247,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
       setAvatarUrl(publicUrl);
       toast.success('Avatar updated successfully');
+      onProfileUpdate?.();
     } catch (error: any) {
       console.error('Error uploading avatar:', error);
       toast.error('Failed to upload avatar');
@@ -281,6 +283,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
       toast.success('Profile updated successfully');
       setErrors({});
+      onProfileUpdate?.();
     } catch (error: any) {
       if (error.errors) {
         const formattedErrors: Partial<Record<keyof ProfileFormData, string>> = {};
