@@ -1397,11 +1397,43 @@ export default function ShareCartCheckout() {
             {/* Enrolled Users Mode */}
             {drawerMode === 'enrol' && (
               <div className="space-y-4">
-                <div>
-                  <h4 className="font-medium mb-2">Select Registered Users</h4>
-                  <p className="text-sm text-muted-foreground">
-                    Choose users who are already registered in the system
-                  </p>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h4 className="font-medium mb-2">Select Registered Users</h4>
+                    <p className="text-sm text-muted-foreground">
+                      Choose users who are already registered in the system
+                    </p>
+                  </div>
+                  {enrolledUsers.length > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        const csvHeader = 'name,phone,email';
+                        const csvRows = enrolledUsers.map(user => 
+                          `${user.name},${user.phone || 'N/A'},${user.email}`
+                        );
+                        const csvContent = [csvHeader, ...csvRows].join('\n');
+                        
+                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+                        const url = window.URL.createObjectURL(blob);
+                        const a = document.createElement('a');
+                        a.href = url;
+                        const timestamp = new Date().toISOString().split('T')[0];
+                        a.download = `enrolled_users_${timestamp}.csv`;
+                        a.click();
+                        window.URL.revokeObjectURL(url);
+                        
+                        toast.success('Enrolled users exported', {
+                          description: `${enrolledUsers.length} user(s) exported to CSV`,
+                        });
+                      }}
+                      className="gap-2"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export All
+                    </Button>
+                  )}
                 </div>
 
                 {/* User Type Selection */}
