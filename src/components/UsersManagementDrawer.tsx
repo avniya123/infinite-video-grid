@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
+import { DRAWER_PRESETS, getDrawerHeaderClassName, getDrawerContentClassName } from '@/config/drawer';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -248,8 +249,8 @@ export function UsersManagementDrawer({
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
-        <SheetHeader className="p-6 pb-4 border-b">
+      <SheetContent side="right" className={DRAWER_PRESETS.form}>
+        <SheetHeader className={getDrawerHeaderClassName('standard')}>
           <div className="flex items-center justify-between">
             <SheetTitle>
               {editingUser ? 'Edit Shared User' : 'Manage Users'}
@@ -265,7 +266,7 @@ export function UsersManagementDrawer({
           </p>
         </SheetHeader>
 
-        <div className="p-6 space-y-6">
+        <div className={getDrawerContentClassName('standard')}>
           {editingUser ? (
             /* Edit User Form */
             <div className="space-y-4">

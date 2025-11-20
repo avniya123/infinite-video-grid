@@ -7,6 +7,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
 import {
   Select,
   SelectContent,
@@ -384,10 +385,10 @@ export const AuthDrawer = ({ open, onOpenChange }: AuthDrawerProps) => {
 
   return (
     <Sheet open={open} onOpenChange={handleDrawerChange}>
-      <SheetContent side="right" className="w-full sm:max-w-md p-0 border-none overflow-y-auto">
+      <SheetContent side="right" className={DRAWER_PRESETS.auth}>
         <div className="h-full bg-card flex flex-col">
           {/* Header */}
-          <SheetHeader className="px-6 py-4 border-b border-border sticky top-0 bg-card z-10">
+          <SheetHeader className={getDrawerHeaderClassName('sticky')}>
             <SheetTitle className="text-xl font-semibold">
               {view === 'login' && 'Welcome Back'}
               {view === 'signup' && 'Create Account'}
