@@ -213,10 +213,38 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
-            {/* Price Section */}
-            <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-800 dark:text-white px-2.5 py-1.5 rounded-md shadow-sm border border-gray-200 dark:border-gray-700">
-              <div className="text-xs font-semibold">₹ {video.price}</div>
-            </div>
+            {/* Price Section with Tooltip */}
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="bg-white/95 dark:bg-gray-800/95 backdrop-blur-sm text-gray-800 dark:text-white px-2.5 py-1.5 rounded-md shadow-sm border border-gray-200 dark:border-gray-700 cursor-help">
+                    <div className="text-xs font-semibold">₹ {video.price}</div>
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent 
+                  side="left" 
+                  className="bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700 shadow-lg"
+                >
+                  <div className="space-y-1.5 min-w-[160px]">
+                    <div className="text-xs font-semibold text-gray-900 dark:text-white border-b border-gray-200 dark:border-gray-700 pb-1.5 mb-1.5">
+                      Pricing Breakdown
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-600 dark:text-gray-400">MRP:</span>
+                      <span className="text-gray-900 dark:text-white line-through">₹ {video.mrp}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs">
+                      <span className="text-gray-600 dark:text-gray-400">Discount:</span>
+                      <span className="text-green-600 dark:text-green-400 font-semibold">{video.discount}</span>
+                    </div>
+                    <div className="flex justify-between items-center text-xs pt-1.5 border-t border-gray-200 dark:border-gray-700">
+                      <span className="font-semibold text-gray-900 dark:text-white">Final Price:</span>
+                      <span className="font-bold text-primary">₹ {video.price}</span>
+                    </div>
+                  </div>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
             
             {/* Share Button - visible on hover */}
             <div 
