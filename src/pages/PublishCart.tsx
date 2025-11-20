@@ -374,6 +374,15 @@ export default function PublishCart() {
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
             <div className="flex items-center gap-4">
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/my-templates')}
+                className="gap-2"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                Back
+              </Button>
+              
               <div className="p-2.5 bg-primary/10 rounded-xl">
                 <ShoppingCart className="h-6 w-6 text-primary" />
               </div>
@@ -384,6 +393,14 @@ export default function PublishCart() {
                 </p>
               </div>
             </div>
+            <Button
+              variant="outline"
+              onClick={() => navigate('/my-templates')}
+              className="gap-2"
+            >
+              Back to Templates
+              <ArrowLeft className="h-4 w-4 rotate-180" />
+            </Button>
           </div>
         </div>
 
@@ -420,6 +437,15 @@ export default function PublishCart() {
         {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/my-templates')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </Button>
+            
             <div className="p-2.5 bg-primary/10 rounded-xl">
               <ShoppingCart className="h-6 w-6 text-primary" />
             </div>
@@ -433,12 +459,12 @@ export default function PublishCart() {
             </div>
           </div>
           <Button
-            variant="ghost"
+            variant="outline"
             onClick={() => navigate('/my-templates')}
             className="gap-2"
           >
-            <ArrowLeft className="h-4 w-4" />
-            Back
+            Back to Templates
+            <ArrowLeft className="h-4 w-4 rotate-180" />
           </Button>
         </div>
 
