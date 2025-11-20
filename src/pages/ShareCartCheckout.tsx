@@ -250,16 +250,20 @@ export default function ShareCartCheckout() {
         </div>
 
         {/* Header */}
-        <div className="mb-10">
-          <div className="flex items-center gap-3 mb-3">
-            <ShoppingBag className="h-8 w-8 text-primary" />
-            <h1 className="text-4xl font-bold tracking-tight">
-              Share Cart Checkout
-            </h1>
+        <div className="mb-6">
+          <div className="flex items-center gap-4 mb-3">
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <ShoppingBag className="h-6 w-6 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-2xl font-bold tracking-tight">
+                Share Cart Checkout
+              </h1>
+              <p className="text-muted-foreground text-sm mt-0.5">
+                Manage shared users and complete your order
+              </p>
+            </div>
           </div>
-          <p className="text-muted-foreground text-lg">
-            Manage shared users and complete your order
-          </p>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">

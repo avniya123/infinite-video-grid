@@ -196,15 +196,19 @@ export default function MyUsers() {
         </div>
 
         {/* Header */}
-        <div className="mb-8 flex items-center justify-between">
-          <div>
-            <div className="flex items-center gap-3 mb-2">
-              <Users className="h-8 w-8 text-primary" />
-              <h1 className="text-3xl font-bold">My Users</h1>
+        <div className="mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <Users className="h-6 w-6 text-primary" />
             </div>
-            <p className="text-muted-foreground">
-              Manage your saved enrolled users ({savedUsers.length} total)
-            </p>
+            <div>
+              <h1 className="text-2xl font-bold">
+                My Users {savedUsers.length > 0 && `(${savedUsers.length})`}
+              </h1>
+              <p className="text-muted-foreground text-sm mt-0.5">
+                Manage your saved enrolled users
+              </p>
+            </div>
           </div>
           <Button onClick={() => setUsersDrawerOpen(true)}>
             <Users className="w-4 h-4 mr-2" />
