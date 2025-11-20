@@ -1,6 +1,7 @@
 import { Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
+import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -140,8 +141,8 @@ export const FilterDrawer = ({
           )}
         </Button>
       </SheetTrigger>
-      <SheetContent side="right" className="w-full sm:max-w-2xl p-0">
-        <SheetHeader className="space-y-4 p-6 pb-4 border-b">
+      <SheetContent side="right" className={DRAWER_PRESETS.form}>
+        <SheetHeader className={`${getDrawerHeaderClassName('standard')} space-y-4`}>
           <SheetDescription className="sr-only">
             Filter videos by categories, subcategories, duration, aspect ratio, and price range
           </SheetDescription>

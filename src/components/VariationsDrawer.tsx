@@ -1,4 +1,5 @@
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
+import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
@@ -112,8 +113,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
-        <SheetHeader className="p-6 pb-4 border-b">
+      <SheetContent side="right" className={DRAWER_PRESETS.content}>
+        <SheetHeader className={getDrawerHeaderClassName('standard')}>
           <SheetTitle className="text-xl">Video Variations</SheetTitle>
           <SheetDescription>
             Explore different versions and formats of this video

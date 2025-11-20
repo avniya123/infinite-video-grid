@@ -26,6 +26,7 @@ import {
   SheetHeader,
   SheetTitle,
 } from '@/components/ui/sheet';
+import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
 
 interface ProfileDrawerProps {
   open: boolean;
@@ -367,7 +368,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
   if (loading) {
     return (
       <Sheet open={open} onOpenChange={onOpenChange}>
-        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
+        <SheetContent side="right" className={DRAWER_PRESETS.settings}>
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
           </div>
@@ -378,8 +379,8 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto p-0">
-        <SheetHeader className="p-6 pb-4 border-b">
+      <SheetContent side="right" className={DRAWER_PRESETS.settings}>
+        <SheetHeader className={getDrawerHeaderClassName('standard')}>
           <SheetTitle className="text-xl">Settings</SheetTitle>
           <SheetDescription>Manage your account settings and preferences</SheetDescription>
         </SheetHeader>
