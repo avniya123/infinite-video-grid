@@ -443,12 +443,6 @@ export default function PublishCart() {
               <ArrowLeft className="h-4 w-4" />
               Back
             </Button>
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground">Total</div>
-              <div className="text-2xl font-bold text-primary">
-                ₹{calculateTotalPrice().toLocaleString()}
-              </div>
-            </div>
           </div>
         </div>
 
