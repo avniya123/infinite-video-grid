@@ -121,7 +121,7 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className="w-full sm:w-[650px] md:w-[700px] p-0 overflow-y-auto">
+      <SheetContent side="right" className="w-full sm:max-w-2xl p-0 overflow-y-auto">
         <SheetHeader className="sr-only">
           <h2>{video.title}</h2>
           <SheetDescription>Video player with playback controls and filters</SheetDescription>
