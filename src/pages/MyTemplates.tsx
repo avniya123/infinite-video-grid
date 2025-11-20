@@ -8,6 +8,7 @@ import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft, Trash2, Edit, FileVideo, X, Search, Columns3, List, ShoppingCart } from 'lucide-react';
 import { FilterDrawer } from '@/components/FilterDrawer';
@@ -275,8 +276,8 @@ export default function MyTemplates() {
 
   // Filter and sort templates
   const filteredAndSortedTemplates = useMemo(() => {
-    // First filter out published templates
-    let filtered = templates.filter(template => !template.published);
+    // Show all templates (don't filter out published ones)
+    let filtered = templates;
 
     // Search by title or ID prefix
     if (searchQuery) {
@@ -599,6 +600,15 @@ export default function MyTemplates() {
                         showShareButton={false}
                         hideVariationsShareButton={true}
                       />
+                      
+                      {/* In Cart Badge */}
+                      {template.published && (
+                        <Badge className="absolute top-3 left-3 bg-cyan-500 text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-20 border-0">
+                          <ShoppingCart className="h-3 w-3 mr-1" />
+                          In Cart
+                        </Badge>
+                      )}
+                      
                       {/* Action buttons */}
                       <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
                         {!template.published && (
@@ -678,6 +688,13 @@ export default function MyTemplates() {
                         alt={video.title}
                         className="w-full h-40 object-cover rounded-lg"
                       />
+                      {/* In Cart Badge for List View */}
+                      {template.published && (
+                        <Badge className="absolute top-2 left-2 bg-cyan-500 text-white font-semibold text-xs px-2 py-1 shadow-lg border-0">
+                          <ShoppingCart className="h-3.5 w-3.5 mr-1" />
+                          In Cart
+                        </Badge>
+                      )}
                     </div>
                     <div className="flex-1 flex flex-col">
                       <div className="flex items-start justify-between mb-2">
