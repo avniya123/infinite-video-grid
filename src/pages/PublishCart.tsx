@@ -238,6 +238,36 @@ export default function PublishCart() {
                 );
               })}
             </div>
+
+            {/* Proceed to Checkout Button */}
+            <div className="mt-12 flex justify-center">
+              <Button 
+                size="lg"
+                className="px-12 py-6 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all"
+                onClick={() => {
+                  if (publishedTemplates.length > 0) {
+                    const template = publishedTemplates[0];
+                    navigate('/share-cart-checkout', {
+                      state: {
+                        template: {
+                          id: template.id,
+                          title: template.video_variations.title,
+                          price: 450,
+                          mrp: 1000,
+                          discount: '55% Off',
+                          duration: template.video_variations.duration,
+                          orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
+                          resolution: 'HD',
+                          thumbnailUrl: template.video_variations.thumbnail_url,
+                        }
+                      }
+                    });
+                  }
+                }}
+              >
+                Proceed to Checkout
+              </Button>
+            </div>
           </>
         )}
       </div>
