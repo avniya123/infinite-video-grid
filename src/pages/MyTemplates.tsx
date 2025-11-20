@@ -2,10 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
+import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2, Edit, Play } from 'lucide-react';
+import { Loader2, ArrowLeft, Trash2, Edit } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 
@@ -174,77 +175,58 @@ export default function MyTemplates() {
           </div>
         ) : (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {templates.map((template) => (
-              <div key={template.id} className="relative group">
-                <div 
-                  className="bg-card rounded-lg overflow-hidden shadow-sm hover:shadow-md transition-all cursor-pointer"
-                  onClick={() => {
-                    const video: VideoItem = {
-                      id: template.video_variations.video_id,
-                      title: template.custom_title || template.video_variations.title,
-                      image: template.video_variations.thumbnail_url || '/placeholder.svg',
-                      duration: template.video_variations.duration,
-                      category: 'Nature',
-                      mainCategory: 'Personal Celebrations',
-                      subcategory: '',
-                      orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
-                                  template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                      price: '$0',
-                      mrp: '$0',
-                      discount: '0%',
-                      trending: false,
-                      resolution: 'HD',
-                      videoUrl: template.video_variations.video_url || undefined,
-                    };
-                    handlePlayVideo(video);
-                  }}
-                >
-                  <div className="relative aspect-video">
-                    <img 
-                      src={template.video_variations.thumbnail_url || '/placeholder.svg'} 
-                      alt={template.custom_title || template.video_variations.title}
-                      className="w-full h-full object-cover"
-                    />
-                    <div className="absolute inset-0 bg-black/0 group-hover:bg-black/40 transition-all flex items-center justify-center">
-                      <Play className="h-12 w-12 text-white opacity-0 group-hover:opacity-100 transition-all" fill="white" />
-                    </div>
-                  </div>
-                  <div className="p-4">
-                    <h3 className="font-semibold text-foreground line-clamp-2 mb-2">
-                      {template.custom_title || template.video_variations.title}
-                    </h3>
-                    <div className="flex items-center gap-2 text-xs text-muted-foreground">
-                      <span>{template.video_variations.duration}</span>
-                      <span>•</span>
-                      <span>{template.video_variations.aspect_ratio}</span>
-                    </div>
+            {templates.map((template) => {
+              const video: VideoItem = {
+                id: template.video_variations.video_id,
+                title: template.custom_title || template.video_variations.title,
+                image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                duration: template.video_variations.duration,
+                category: 'Nature',
+                mainCategory: 'Personal Celebrations',
+                subcategory: '',
+                orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                            template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                price: '$0',
+                mrp: '$0',
+                discount: '0%',
+                trending: false,
+                resolution: 'HD',
+                videoUrl: template.video_variations.video_url || undefined,
+              };
+
+              return (
+                <div key={template.id} className="relative group">
+                  <VideoCard
+                    video={video}
+                    onPlay={handlePlayVideo}
+                    onClick={handlePlayVideo}
+                  />
+                  <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Button
+                      variant="default"
+                      size="icon"
+                      className="bg-primary hover:bg-primary/90"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        navigate(`/template-editor/${template.variation_id}`);
+                      }}
+                    >
+                      <Edit className="h-4 w-4" />
+                    </Button>
+                    <Button
+                      variant="destructive"
+                      size="icon"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeleteTemplate(template.id);
+                      }}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
                   </div>
                 </div>
-                <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity z-10">
-                  <Button
-                    variant="default"
-                    size="icon"
-                    className="bg-primary hover:bg-primary/90"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      navigate(`/template-editor/${template.variation_id}`);
-                    }}
-                  >
-                    <Edit className="h-4 w-4" />
-                  </Button>
-                  <Button
-                    variant="destructive"
-                    size="icon"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      handleDeleteTemplate(template.id);
-                    }}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         )}
       </div>
