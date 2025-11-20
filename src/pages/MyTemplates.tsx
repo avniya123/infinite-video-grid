@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
@@ -7,6 +7,9 @@ import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft, Trash2, Edit, FileVideo } from 'lucide-react';
+import { VideoControls } from '@/features/videos/VideoControls';
+import { VideoGrid } from '@/features/videos/VideoGrid';
+import { VideoListView } from '@/features/videos/VideoListView';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 
@@ -28,6 +31,14 @@ interface UserTemplate {
   };
 }
 
+type ViewMode = 'masonry' | 'list';
+
+const sortOptions = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'title', label: 'Title A-Z' },
+];
+
 export default function MyTemplates() {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -35,6 +46,12 @@ export default function MyTemplates() {
   const [templates, setTemplates] = useState<UserTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  
+  // View controls state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('masonry');
+  const [columnCount, setColumnCount] = useState(3);
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     checkUser();
@@ -142,6 +159,39 @@ export default function MyTemplates() {
     }
   };
 
+  // Filter and sort templates
+  const filteredAndSortedTemplates = useMemo(() => {
+    let filtered = templates;
+
+    // Search by title or ID prefix
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(template => {
+        const title = (template.custom_title || template.video_variations.title).toLowerCase();
+        const idPrefix = template.video_variations.video_id.toString();
+        return title.includes(query) || idPrefix.startsWith(query);
+      });
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.created_at).getTime() - new Date(a.created_at).getTime();
+        case 'oldest':
+          return new Date(a.created_at).getTime() - new Date(b.created_at).getTime();
+        case 'title':
+          const titleA = (a.custom_title || a.video_variations.title).toLowerCase();
+          const titleB = (b.custom_title || b.video_variations.title).toLowerCase();
+          return titleA.localeCompare(titleB);
+        default:
+          return 0;
+      }
+    });
+
+    return sorted;
+  }, [templates, searchQuery, sortBy]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -191,10 +241,27 @@ export default function MyTemplates() {
               </p>
             </div>
             <div className="text-sm text-muted-foreground">
-              {templates.length} {templates.length === 1 ? 'template' : 'templates'}
+              {filteredAndSortedTemplates.length} of {templates.length} {templates.length === 1 ? 'template' : 'templates'}
             </div>
           </div>
         </div>
+
+        {/* Search and Controls */}
+        {templates.length > 0 && (
+          <div className="mb-6">
+            <VideoControls
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              columnCount={columnCount}
+              onColumnCountChange={setColumnCount}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              sortOptions={sortOptions}
+            />
+          </div>
+        )}
 
         {templates.length === 0 ? (
           <div className="text-center py-16">
@@ -210,64 +277,161 @@ export default function MyTemplates() {
               </Button>
             </div>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {templates.map((template) => {
-              const video: VideoItem = {
-                id: template.video_variations.video_id,
-                title: template.custom_title || template.video_variations.title,
-                image: template.video_variations.thumbnail_url || '/placeholder.svg',
-                duration: template.video_variations.duration,
-                category: 'Nature',
-                mainCategory: 'Personal Celebrations',
-                subcategory: '',
-                orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
-                            template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                price: '$0',
-                mrp: '$0',
-                discount: '0%',
-                trending: false,
-                resolution: 'HD',
-                videoUrl: template.video_variations.video_url || undefined,
-              };
-
-              return (
-                <div key={template.id} className="relative group">
-                  <VideoCard
-                    video={video}
-                    onPlay={handlePlayVideo}
-                    onClick={handlePlayVideo}
-                    showShareButton={false}
-                  />
-                  {/* Edit and Delete buttons positioned above Variations button */}
-                  <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                    <Button
-                      variant="default"
-                      size="icon"
-                      className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/template-editor/${template.variation_id}`);
-                      }}
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteTemplate(template.id);
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
-                </div>
-              );
-            })}
+        ) : filteredAndSortedTemplates.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No templates found
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Try adjusting your search query.
+              </p>
+              <Button onClick={() => setSearchQuery('')} variant="outline">
+                Clear Search
+              </Button>
+            </div>
           </div>
+        ) : (
+          <>
+            {/* Masonry View */}
+            {viewMode === 'masonry' && (
+              <div 
+                className="gap-5 [column-fill:balance]"
+                style={{ columnCount }}
+              >
+                {filteredAndSortedTemplates.map((template) => {
+                  const video: VideoItem = {
+                    id: template.video_variations.video_id,
+                    title: template.custom_title || template.video_variations.title,
+                    image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                    duration: template.video_variations.duration,
+                    category: 'Nature',
+                    mainCategory: 'Personal Celebrations',
+                    subcategory: '',
+                    orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                                template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                    price: '$0',
+                    mrp: '$0',
+                    discount: '0%',
+                    trending: false,
+                    resolution: 'HD',
+                    videoUrl: template.video_variations.video_url || undefined,
+                  };
+
+                  return (
+                    <div key={template.id} className="relative group mb-5">
+                      <VideoCard
+                        video={video}
+                        onPlay={handlePlayVideo}
+                        onClick={handlePlayVideo}
+                        showShareButton={false}
+                      />
+                      {/* Edit and Delete buttons positioned above Variations button */}
+                      <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
+                        <Button
+                          variant="default"
+                          size="icon"
+                          className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            navigate(`/template-editor/${template.variation_id}`);
+                          }}
+                        >
+                          <Edit className="h-3.5 w-3.5" />
+                        </Button>
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleDeleteTemplate(template.id);
+                          }}
+                        >
+                          <Trash2 className="h-3.5 w-3.5" />
+                        </Button>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* List View */}
+            {viewMode === 'list' && (
+              <div className="flex flex-col gap-4">
+                {filteredAndSortedTemplates.map((template) => {
+                  const video: VideoItem = {
+                    id: template.video_variations.video_id,
+                    title: template.custom_title || template.video_variations.title,
+                    image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                    duration: template.video_variations.duration,
+                    category: 'Nature',
+                    mainCategory: 'Personal Celebrations',
+                    subcategory: '',
+                    orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                                template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                    price: '$0',
+                    mrp: '$0',
+                    discount: '0%',
+                    trending: false,
+                    resolution: 'HD',
+                    videoUrl: template.video_variations.video_url || undefined,
+                  };
+
+                  return (
+                    <div 
+                      key={template.id} 
+                      className="group flex gap-4 bg-card p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                      onClick={() => handlePlayVideo(video)}
+                    >
+                      <div className="relative w-64 flex-shrink-0">
+                        <img
+                          src={video.image}
+                          alt={video.title}
+                          className="w-full h-40 object-cover rounded-lg"
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {video.duration} • {video.orientation} • {video.resolution}
+                            </p>
+                          </div>
+                          <div className="flex gap-2">
+                            <Button
+                              variant="default"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                navigate(`/template-editor/${template.variation_id}`);
+                              }}
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="destructive"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteTemplate(template.id);
+                              }}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+          </>
         )}
       </div>
 
