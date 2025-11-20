@@ -10,6 +10,7 @@ import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
+import { PublishConfirmDialog } from '@/components/PublishConfirmDialog';
 import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
@@ -40,6 +41,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [isSaved, setIsSaved] = useState(false);
   const [savingTemplate, setSavingTemplate] = useState(false);
+  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -135,6 +137,12 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const handleSaveTemplate = async (e: React.MouseEvent) => {
     e.stopPropagation();
     
+    // If in publish mode, show confirmation dialog
+    if (publishMode) {
+      setPublishDialogOpen(true);
+      return;
+    }
+    
     const { data: { session } } = await supabase.auth.getSession();
     if (!session) {
       setAuthDrawerOpen(true);
@@ -188,6 +196,12 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     } finally {
       setSavingTemplate(false);
     }
+  };
+
+  const handlePublishConfirm = async () => {
+    setPublishDialogOpen(false);
+    // TODO: Implement actual publish logic here
+    toast.success('Template published successfully!');
   };
 
   const handlePlayClick = (e: React.MouseEvent) => {
@@ -465,6 +479,13 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
       <AuthDrawer 
         open={authDrawerOpen} 
         onOpenChange={setAuthDrawerOpen} 
+      />
+
+      <PublishConfirmDialog
+        open={publishDialogOpen}
+        onOpenChange={setPublishDialogOpen}
+        video={video}
+        onConfirm={handlePublishConfirm}
       />
     </article>
   );
