@@ -1,9 +1,10 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { Monitor, ShoppingCart, User, Bell, LogOut, ChevronDown, Check } from 'lucide-react';
+import { Monitor, ShoppingCart, User, Bell, LogOut, ChevronDown, Check, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
+import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -51,6 +52,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   
   const isVideosPage = location.pathname === '/videos';
 
@@ -106,6 +108,122 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
       <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex h-16 items-center justify-between">
+            {/* Mobile Menu Button */}
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild className="md:hidden">
+                <Button variant="ghost" size="icon">
+                  <Menu className="h-5 w-5" />
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                <nav className="flex flex-col gap-4 mt-8">
+                  {/* Categories */}
+                  <div className="space-y-4">
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-sm text-muted-foreground px-2">Personals</h3>
+                      {personalCategories.map((category) => (
+                        <Button
+                          key={category}
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            selectCategory(category);
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          {selectedCategory === category && <Check className="mr-2 h-4 w-4" />}
+                          {category}
+                        </Button>
+                      ))}
+                    </div>
+                    <div className="space-y-2">
+                      <h3 className="font-semibold text-sm text-muted-foreground px-2">Business</h3>
+                      {businessCategories.map((category) => (
+                        <Button
+                          key={category}
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            selectCategory(category);
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          {selectedCategory === category && <Check className="mr-2 h-4 w-4" />}
+                          {category}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* User Actions */}
+                  {user && (
+                    <div className="border-t pt-4 space-y-2">
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Monitor className="mr-2 h-4 w-4" />
+                        Monitor
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        Cart
+                      </Button>
+                      <Button variant="ghost" className="w-full justify-start">
+                        <Bell className="mr-2 h-4 w-4" />
+                        Notifications
+                      </Button>
+                    </div>
+                  )}
+
+                  {/* Auth Actions */}
+                  <div className="border-t pt-4 space-y-2">
+                    {user ? (
+                      <>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            setProfileDrawerOpen(true);
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <User className="mr-2 h-4 w-4" />
+                          Profile
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          className="w-full justify-start"
+                          onClick={() => {
+                            handleLogout();
+                            setMobileMenuOpen(false);
+                          }}
+                        >
+                          <LogOut className="mr-2 h-4 w-4" />
+                          Logout
+                        </Button>
+                      </>
+                    ) : (
+                      <Button
+                        className="w-full"
+                        onClick={() => {
+                          setAuthDrawerOpen(true);
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        Sign In
+                      </Button>
+                    )}
+                  </div>
+
+                  {/* Theme Toggle */}
+                  <div className="border-t pt-4">
+                    <div className="flex items-center justify-between px-2">
+                      <span className="text-sm font-medium">Theme</span>
+                      <ThemeToggle />
+                    </div>
+                  </div>
+                </nav>
+              </SheetContent>
+            </Sheet>
+
             {/* Logo and Brand */}
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-2 cursor-pointer group">
@@ -226,13 +344,15 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                 </>
               )}
 
-              {/* Theme Toggle */}
-              <ThemeToggle />
+              {/* Theme Toggle - Desktop Only */}
+              <div className="hidden md:block">
+                <ThemeToggle />
+              </div>
 
-              {/* Sign In / User Profile */}
+              {/* Sign In / User Profile - Desktop Only */}
               {user ? (
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger asChild className="hidden md:flex">
                     <Avatar className="w-9 h-9 border-2 border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 transition-all cursor-pointer">
                       <AvatarImage src={user.user_metadata?.avatar_url} alt={user.user_metadata?.full_name || 'User'} />
                       <AvatarFallback className="bg-gradient-to-br from-gray-800 to-gray-600 text-white text-sm">
@@ -255,7 +375,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
               ) : (
                 <Button
                   onClick={() => setAuthDrawerOpen(true)}
-                  className="h-9 px-6 rounded-lg bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium shadow-sm hover:shadow-md transition-all border-0"
+                  className="hidden md:inline-flex h-9 px-6 rounded-lg bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 font-medium shadow-sm hover:shadow-md transition-all border-0"
                 >
                   Sign In
                 </Button>
