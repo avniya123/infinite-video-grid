@@ -13,6 +13,7 @@ import { VideoPlayer } from "@/components/VideoPlayer";
 import { VariationCard } from "@/components/VariationCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
+import { useNavigate } from "react-router-dom";
 
 interface VariationsDrawerProps {
   video: VideoItem | null;
@@ -22,6 +23,7 @@ interface VariationsDrawerProps {
 }
 
 export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: VariationsDrawerProps) => {
+  const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
@@ -146,7 +148,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
       return;
     }
     
-    window.location.href = `/template-editor/${targetVariationId}`;
+    navigate(`/template-editor/${targetVariationId}`);
   };
 
   return (
