@@ -20,9 +20,10 @@ interface VariationsDrawerProps {
   onOpenChange: (open: boolean) => void;
   onRequestAuth?: () => void;
   hideShareButton?: boolean;
+  hideEditButton?: boolean;
 }
 
-export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false }: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false }: VariationsDrawerProps) => {
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
@@ -274,10 +275,12 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                     Share Cart
                   </Button>
                 )}
-                <Button size="sm" onClick={() => handleEdit()} variant="outline" className="gap-2">
-                  <Edit className="h-3.5 w-3.5" />
-                  Edit
-                </Button>
+                {!hideEditButton && (
+                  <Button size="sm" onClick={() => handleEdit()} variant="outline" className="gap-2">
+                    <Edit className="h-3.5 w-3.5" />
+                    Edit
+                  </Button>
+                )}
               </div>
             </div>
           </div>
