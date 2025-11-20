@@ -4,6 +4,7 @@ import { ArrowRight, Sparkles, Gift, Calendar, FileText, PartyPopper, Zap, Trend
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card } from '@/components/ui/card';
+import { Layout } from '@/components/Layout';
 
 const Landing = () => {
   const [hoveredCard, setHoveredCard] = useState<number | null>(null);
@@ -29,33 +30,10 @@ const Landing = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-background via-background to-muted/20">
-      {/* Navigation */}
-      <nav className="sticky top-0 z-50 backdrop-blur-lg bg-background/80 border-b border-border">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <div className="flex h-16 items-center justify-between">
-            <div className="flex items-center gap-2">
-              <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-primary to-primary/70 flex items-center justify-center shadow-lg">
-                <span className="text-primary-foreground font-bold text-lg">V</span>
-              </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-primary to-primary/70 bg-clip-text text-transparent">
-                VideoMart
-              </span>
-            </div>
-            <div className="flex items-center gap-4">
-              <Link to="/videos">
-                <Button variant="ghost">Browse Videos</Button>
-              </Link>
-              <Link to="/videos">
-                <Button>Get Started</Button>
-              </Link>
-            </div>
-          </div>
-        </div>
-      </nav>
-
-      {/* Hero Section */}
-      <section className="relative overflow-hidden py-20 px-4">
+    <Layout>
+      <div className="bg-gradient-to-b from-background via-background to-muted/20">
+        {/* Hero Section */}
+        <section className="relative overflow-hidden py-20 px-4">
         <div className="absolute inset-0 bg-gradient-to-br from-primary/5 via-transparent to-accent/5" />
         <div className="max-w-7xl mx-auto relative">
           <div className="text-center space-y-6 animate-fade-in">
@@ -239,13 +217,14 @@ const Landing = () => {
         </div>
       </section>
 
-      {/* Footer */}
-      <footer className="border-t border-border py-8 px-4">
-        <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
-          <p>© 2024 VideoMart. All rights reserved.</p>
-        </div>
-      </footer>
-    </div>
+        {/* Footer */}
+        <footer className="border-t border-border py-8 px-4">
+          <div className="max-w-7xl mx-auto text-center text-sm text-muted-foreground">
+            <p>© 2024 VideoMart. All rights reserved.</p>
+          </div>
+        </footer>
+      </div>
+    </Layout>
   );
 };
 
