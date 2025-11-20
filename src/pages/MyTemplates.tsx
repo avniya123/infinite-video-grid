@@ -4,7 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
-import { TemplateEditorDrawer } from '@/components/TemplateEditorDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -51,8 +50,6 @@ export default function MyTemplates() {
   const [templates, setTemplates] = useState<UserTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const [editorDrawerOpen, setEditorDrawerOpen] = useState(false);
-  const [selectedVariationId, setSelectedVariationId] = useState<string | null>(null);
   const [viewMode, setViewMode] = useState<ViewMode>('masonry');
   const [columnCount, setColumnCount] = useState(3);
 
@@ -452,8 +449,9 @@ export default function MyTemplates() {
                           className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedVariationId(video.variationId || null);
-                            setEditorDrawerOpen(true);
+                            if (video.variationId) {
+                              navigate(`/template-editor/${video.variationId}`);
+                            }
                           }}
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -500,8 +498,9 @@ export default function MyTemplates() {
                           className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md"
                           onClick={(e) => {
                             e.stopPropagation();
-                            setSelectedVariationId(video.variationId || null);
-                            setEditorDrawerOpen(true);
+                            if (video.variationId) {
+                              navigate(`/template-editor/${video.variationId}`);
+                            }
                           }}
                         >
                           <Edit className="h-3.5 w-3.5" />
@@ -552,14 +551,6 @@ export default function MyTemplates() {
           open={drawerOpen}
           onOpenChange={setDrawerOpen}
           video={selectedVideo}
-        />
-      )}
-
-      {selectedVariationId && (
-        <TemplateEditorDrawer
-          open={editorDrawerOpen}
-          onOpenChange={setEditorDrawerOpen}
-          variationId={selectedVariationId}
         />
       )}
     </div>

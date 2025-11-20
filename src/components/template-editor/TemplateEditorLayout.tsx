@@ -15,7 +15,6 @@ interface TemplateEditorLayoutProps {
     aspect_ratio: string;
     duration: string;
   };
-  onClose?: () => void;
 }
 
 export interface Layer {
@@ -36,16 +35,8 @@ export interface Card {
   layers: Layer[];
 }
 
-export const TemplateEditorLayout = ({ variationId, variationData, onClose }: TemplateEditorLayoutProps) => {
+export const TemplateEditorLayout = ({ variationId, variationData }: TemplateEditorLayoutProps) => {
   const navigate = useNavigate();
-  
-  const handleBackClick = () => {
-    if (onClose) {
-      onClose();
-    } else {
-      navigate("/my-templates");
-    }
-  };
   const [activeCard, setActiveCard] = useState<string>("card-1");
   
   // Sample template data
@@ -118,7 +109,7 @@ export const TemplateEditorLayout = ({ variationId, variationData, onClose }: Te
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={handleBackClick}
+                onClick={() => navigate("/my-templates")}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
