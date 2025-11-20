@@ -361,7 +361,7 @@ export default function ShareCartCheckout() {
             <div className="flex-1">
               <div className="flex items-center gap-3">
                 <h1 className="text-2xl font-bold tracking-tight">
-                  {isQuickMode ? 'Quick Publish Cart' : 'Publish Cart Checkout'}
+                  {isQuickMode ? 'Quick Publish Cart (1)' : 'Publish Cart Checkout (1)'}
                 </h1>
                 {isQuickMode && (
                   <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 gap-1.5 px-3 py-1">
