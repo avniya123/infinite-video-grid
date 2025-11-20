@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
-import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
@@ -62,8 +62,6 @@ export default function MyTemplates() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [templates, setTemplates] = useState<UserTemplate[]>([]);
-  const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
-  const [drawerOpen, setDrawerOpen] = useState(false);
   
   // View controls state
   const [searchQuery, setSearchQuery] = useState('');
@@ -158,10 +156,6 @@ export default function MyTemplates() {
     }
   };
 
-  const handlePlayVideo = (video: VideoItem) => {
-    setSelectedVideo(video);
-    setDrawerOpen(true);
-  };
 
   const handleAddToPublishCart = async (templateId: string) => {
     // Optimistic update
@@ -601,8 +595,6 @@ export default function MyTemplates() {
                     <div className="relative group mb-5">
                       <VideoCard
                         video={video}
-                        onPlay={handlePlayVideo}
-                        onClick={handlePlayVideo}
                         showShareButton={false}
                       />
                       {/* Action buttons */}
@@ -676,8 +668,7 @@ export default function MyTemplates() {
                 return (
                   <div 
                     key={template.id} 
-                    className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in cursor-pointer"
-                    onClick={() => handlePlayVideo(video)}
+                    className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in"
                   >
                     <div className="relative w-64 flex-shrink-0">
                       <img
@@ -744,13 +735,6 @@ export default function MyTemplates() {
         </main>
       )}
 
-      {selectedVideo && (
-        <VideoPlayerDrawer
-          open={drawerOpen}
-          onOpenChange={setDrawerOpen}
-          video={selectedVideo}
-        />
-      )}
     </div>
   );
 }

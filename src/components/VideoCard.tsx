@@ -17,8 +17,8 @@ import { toast } from 'sonner';
 
 interface VideoCardProps {
   video: VideoItem;
-  onPlay: (video: VideoItem, seekTime?: number) => void;
-  onClick: (video: VideoItem) => void;
+  onPlay?: (video: VideoItem, seekTime?: number) => void;
+  onClick?: (video: VideoItem) => void;
   isSelected?: boolean;
   onSelect?: (video: VideoItem) => void;
   showShareButton?: boolean;
@@ -102,11 +102,11 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
-    onPlay(video, 0);
+    onPlay?.(video, 0);
   };
 
   const handleCardClick = () => {
-    onClick(video);
+    onClick?.(video);
   };
 
   const handleSelectClick = (e: React.MouseEvent) => {
