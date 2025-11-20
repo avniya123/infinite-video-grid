@@ -1245,8 +1245,31 @@ export default function ShareCartCheckout() {
                   </p>
                 </div>
 
+                {/* File Upload */}
+                <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                  <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                  <p className="text-sm font-medium mb-2">Upload CSV File</p>
+                  <p className="text-xs text-muted-foreground mb-4">
+                    Click to select a CSV file from your computer
+                  </p>
+                  <label className="cursor-pointer">
+                    <input
+                      type="file"
+                      accept=".csv"
+                      onChange={handleCsvImport}
+                      className="hidden"
+                    />
+                    <Button variant="default" asChild>
+                      <span>
+                        <Upload className="w-4 h-4 mr-2" />
+                        Choose File
+                      </span>
+                    </Button>
+                  </label>
+                </div>
+
                 {/* Download Template */}
-                <div className="flex flex-col gap-3">
+                <div className="text-center">
                   <Button
                     variant="outline"
                     onClick={handleDownloadTemplate}
@@ -1255,29 +1278,6 @@ export default function ShareCartCheckout() {
                     <Download className="w-4 h-4" />
                     Download CSV Template
                   </Button>
-
-                  {/* File Upload */}
-                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-                    <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                    <p className="text-sm font-medium mb-2">Upload CSV File</p>
-                    <p className="text-xs text-muted-foreground mb-4">
-                      Click to select a CSV file from your computer
-                    </p>
-                    <label className="cursor-pointer">
-                      <input
-                        type="file"
-                        accept=".csv"
-                        onChange={handleCsvImport}
-                        className="hidden"
-                      />
-                      <Button variant="default" asChild>
-                        <span>
-                          <Upload className="w-4 h-4 mr-2" />
-                          Choose File
-                        </span>
-                      </Button>
-                    </label>
-                  </div>
                 </div>
 
                 {/* Example */}
