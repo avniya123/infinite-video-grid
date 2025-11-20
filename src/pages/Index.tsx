@@ -20,6 +20,7 @@ import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { useVideoFilters } from '@/hooks/useVideoFilters';
 import { useKeyboardShortcuts } from '@/hooks/useKeyboardShortcuts';
+import { useImagePreloader } from '@/hooks/useImagePreloader';
 
 const PAGE_SIZE = 8;
 
@@ -78,6 +79,13 @@ const Index = () => {
     handleClearPriceRanges,
     handleResetFilters,
   } = useVideoFilters(videos);
+
+  // Preload images for smoother scrolling
+  const imagesToPreload = filteredVideos.slice(0, 12).map(video => video.image);
+  useImagePreloader(imagesToPreload, { 
+    enabled: true, 
+    preloadDistance: 8 
+  });
 
   // Load next page of videos
   const loadNextPage = useCallback(async () => {
