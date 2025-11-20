@@ -200,6 +200,8 @@ export default function MyTemplates() {
                     video={video}
                     onPlay={handlePlayVideo}
                     onClick={handlePlayVideo}
+                    showShareButton={false}
+                    publishMode={true}
                   />
                   <div className="absolute top-2 right-2 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
                     <Button

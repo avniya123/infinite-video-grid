@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, Check, List, Bookmark, BookmarkCheck } from 'lucide-react';
+import { Play, Check, List, Bookmark, BookmarkCheck, ShoppingCart } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -21,9 +21,11 @@ interface VideoCardProps {
   onClick: (video: VideoItem) => void;
   isSelected?: boolean;
   onSelect?: (video: VideoItem) => void;
+  showShareButton?: boolean;
+  publishMode?: boolean;
 }
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, publishMode = false }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -359,14 +361,16 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </TooltipProvider>
             
             {/* Share Button - visible on hover */}
-            <div 
-              className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
-              onClick={(e) => e.stopPropagation()}
-            >
-              <ShareButton video={video} variant="outline" size="icon" />
-            </div>
+            {showShareButton && (
+              <div 
+                className="opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <ShareButton video={video} variant="outline" size="icon" />
+              </div>
+            )}
 
-            {/* Save to My Templates Button */}
+            {/* Save to My Templates / Publish Button */}
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
@@ -377,7 +381,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                     disabled={savingTemplate}
                     className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 dark:bg-gray-800/95 border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800"
                   >
-                    {isSaved ? (
+                    {publishMode ? (
+                      <ShoppingCart className="h-4 w-4" />
+                    ) : isSaved ? (
                       <BookmarkCheck className="h-4 w-4 text-primary" />
                     ) : (
                       <Bookmark className="h-4 w-4" />
@@ -385,7 +391,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent side="left">
-                  <p>{isSaved ? 'Saved to My Templates' : 'Save to My Templates'}</p>
+                  <p>{publishMode ? 'Publish' : isSaved ? 'Saved to My Templates' : 'Save to My Templates'}</p>
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
