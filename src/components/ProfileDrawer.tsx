@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Eye, AlertCircle } from 'lucide-react';
+import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Eye, AlertCircle, RotateCcw } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
@@ -256,6 +256,36 @@ export default function ProfileDrawer({ open, onOpenChange, onProfileUpdate }: P
     }
   };
 
+  const handleResetAvatar = async () => {
+    if (!user) return;
+
+    setUploading(true);
+    try {
+      // Remove the avatar from storage if exists
+      if (avatarUrl) {
+        const oldPath = avatarUrl.split('/').slice(-2).join('/');
+        await supabase.storage.from('avatars').remove([oldPath]);
+      }
+
+      // Update profile to remove avatar URL
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ avatar_url: null })
+        .eq('id', user.id);
+
+      if (updateError) throw updateError;
+
+      setAvatarUrl(null);
+      toast.success('Avatar reset to default');
+      onProfileUpdate?.();
+    } catch (error: any) {
+      console.error('Error resetting avatar:', error);
+      toast.error('Failed to reset avatar');
+    } finally {
+      setUploading(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
@@ -423,7 +453,7 @@ export default function ProfileDrawer({ open, onOpenChange, onProfileUpdate }: P
                       <User className="h-12 w-12" />
                     </AvatarFallback>
                   </Avatar>
-                  <div className="relative">
+                  <div className="flex gap-2">
                     <input
                       type="file"
                       id="avatar"
@@ -450,6 +480,17 @@ export default function ProfileDrawer({ open, onOpenChange, onProfileUpdate }: P
                         </>
                       )}
                     </Button>
+                    {avatarUrl && (
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        disabled={uploading}
+                        onClick={handleResetAvatar}
+                      >
+                        <RotateCcw className="mr-2 h-4 w-4" />
+                        Reset
+                      </Button>
+                    )}
                   </div>
                 </CardContent>
               </Card>
