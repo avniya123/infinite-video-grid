@@ -171,157 +171,180 @@ export default function MyTemplates() {
     setDrawerOpen(true);
   };
 
-  const handlePublishConfirm = async (video: VideoItem) => {
-    try {
-      // Find the template in the templates array
-      const template = templates.find(t => t.video_variations.video_id === video.id);
-      if (!template) {
-        toast.error('Template not found');
-        return;
-      }
-
-      // Update the template to mark it as published
-      const { error } = await supabase
-        .from('user_templates')
-        .update({ 
-          published: true, 
-          published_at: new Date().toISOString() 
-        })
-        .eq('id', template.id);
-
-      if (error) throw error;
-
-      toast.success('Template published successfully!');
-      
-      // Redirect to publish cart page
-      setTimeout(() => {
-        navigate('/publish-cart');
-      }, 1000);
-    } catch (error: any) {
-      toast.error('Failed to publish template');
-      console.error('Error publishing template:', error);
-    }
-  };
-
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
-        <Header 
-          selectedMainCategory={null}
-          selectedSubcategory={null}
-          onMainCategorySelect={() => {}}
-          onSubcategorySelect={() => {}}
-        />
-        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
-        </div>
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-primary" />
       </div>
     );
   }
 
-  if (!user) return null;
+  const gridCols = {
+    2: "grid-cols-1 sm:grid-cols-2",
+    3: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3",
+    4: "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4",
+  }[columnCount] || "grid-cols-1 sm:grid-cols-2 lg:grid-cols-3";
 
   return (
     <div className="min-h-screen bg-background">
-      <Header 
-        selectedMainCategory={null}
-        selectedSubcategory={null}
-        onMainCategorySelect={() => {}}
-        onSubcategorySelect={() => {}}
-      />
-      
       <div className="container mx-auto px-4 py-8">
-        <div className="mb-8">
+        {/* Header */}
+        <div className="flex items-center justify-between mb-4">
+          <div>
+            <h1 className="text-3xl font-bold">My Templates</h1>
+            <p className="text-sm text-muted-foreground mt-1">
+              {filteredVideos.length} {filteredVideos.length === 1 ? 'template' : 'templates'}
+            </p>
+          </div>
           <Button
-            variant="ghost"
-            onClick={() => navigate('/videos')}
-            className="mb-4"
+            variant="outline"
+            onClick={() => navigate('/')}
+            className="gap-2"
           >
-            <ArrowLeft className="mr-2 h-4 w-4" />
+            <ArrowLeft className="h-4 w-4" />
             Back to Videos
           </Button>
-
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
-              <p className="text-muted-foreground mt-2">
-                Manage your saved video templates
-              </p>
-            </div>
-            <div className="text-sm text-muted-foreground">
-              {templates.length} {templates.length === 1 ? 'template' : 'templates'}
-            </div>
-          </div>
         </div>
 
-        {templates.length === 0 ? (
-          <div className="text-center py-16">
-            <div className="max-w-md mx-auto">
-              <h3 className="text-lg font-semibold text-foreground mb-2">
-                No templates yet
-              </h3>
-              <p className="text-muted-foreground mb-6">
-                Start exploring video templates and save the ones you like to your collection.
-              </p>
-              <Button onClick={() => navigate('/videos')}>
-                Browse Templates
-              </Button>
+        {/* Search and View Controls */}
+        <div className="mb-6 space-y-4">
+          {/* Search Bar */}
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+            <Input
+              type="text"
+              placeholder="Search templates..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-9 pr-9"
+            />
+            {searchQuery && (
+              <button
+                onClick={() => setSearchQuery('')}
+                className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+              >
+                <X className="h-4 w-4" />
+              </button>
+            )}
+          </div>
+
+          {/* View Controls */}
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+              {/* View Mode Toggle */}
+              <div className="flex gap-1 border rounded-lg p-1">
+                <Button
+                  variant={viewMode === 'masonry' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('masonry')}
+                  className="gap-2"
+                >
+                  <Columns3 className="h-4 w-4" />
+                  Masonry
+                </Button>
+                <Button
+                  variant={viewMode === 'list' ? 'default' : 'ghost'}
+                  size="sm"
+                  onClick={() => setViewMode('list')}
+                  className="gap-2"
+                >
+                  <List className="h-4 w-4" />
+                  List
+                </Button>
+              </div>
+
+              {/* Filter Drawer */}
+              <FilterDrawer
+                selectedMainCategory={selectedMainCategory}
+                selectedSubcategory={selectedSubcategory}
+                selectedDurations={selectedDurations}
+                selectedAspectRatios={selectedAspectRatios}
+                selectedPriceRanges={selectedPriceRanges}
+                onMainCategorySelect={handleMainCategorySelect}
+                onSubcategorySelect={handleSubcategorySelect}
+                onDurationToggle={handleDurationToggle}
+                onAspectRatioToggle={handleAspectRatioToggle}
+                onPriceRangeToggle={handlePriceRangeToggle}
+                onSelectAllDurations={handleSelectAllDurations}
+                onClearDurations={handleClearDurations}
+                onSelectAllAspectRatios={handleSelectAllAspectRatios}
+                onClearAspectRatios={handleClearAspectRatios}
+                onSelectAllPriceRanges={handleSelectAllPriceRanges}
+                onClearPriceRanges={handleClearPriceRanges}
+                onResetFilters={handleResetFilters}
+                hasActiveFilters={hasActiveFilters}
+              />
             </div>
+
+            {/* Sort Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="gap-2">
+                  <ArrowUpDown className="h-4 w-4" />
+                  Sort by
+                  <ChevronDown className="h-4 w-4" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-48">
+                <DropdownMenuLabel>Sort by</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                {sortOptions.map((option) => (
+                  <DropdownMenuItem
+                    key={option.value}
+                    onClick={() => setSortBy(option.value as any)}
+                    className={sortBy === option.value ? 'bg-accent' : ''}
+                  >
+                    {option.label}
+                  </DropdownMenuItem>
+                ))}
+              </DropdownMenuContent>
+            </DropdownMenu>
+          </div>
+
+          {/* Column Count Slider (only for masonry view) */}
+          {viewMode === 'masonry' && (
+            <div className="flex items-center gap-4">
+              <span className="text-sm text-muted-foreground whitespace-nowrap">Columns: {columnCount}</span>
+              <Slider
+                value={[columnCount]}
+                onValueChange={(value) => setColumnCount(value[0])}
+                min={2}
+                max={4}
+                step={1}
+                className="w-32"
+              />
+            </div>
+          )}
+        </div>
+
+        {filteredVideos.length === 0 ? (
+          <div className="text-center py-12">
+            <p className="text-muted-foreground mb-4">
+              {templates.length === 0 ? "You haven't saved any templates yet" : "No templates match your search"}
+            </p>
+            {templates.length === 0 && (
+              <Button onClick={() => navigate('/')}>
+                Browse Videos
+              </Button>
+            )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {templates.map((template) => {
-              const video: VideoItem = {
-                id: template.video_variations.video_id,
-                title: template.custom_title || template.video_variations.title,
-                image: template.video_variations.thumbnail_url || '/placeholder.svg',
-                duration: template.video_variations.duration,
-                category: 'Nature',
-                mainCategory: 'Personal Celebrations',
-                subcategory: '',
-                orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
-                            template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                price: '$0',
-                mrp: '$0',
-                discount: '0%',
-                trending: false,
-                resolution: 'HD',
-                videoUrl: template.video_variations.video_url || undefined,
-              };
+          <div className={viewMode === 'masonry' ? `grid ${gridCols} gap-6` : 'space-y-4'}>
+            {filteredVideos.map((video) => {
+              const template = templates.find(t => t.video_variations.video_id === video.id);
+              if (!template) return null;
 
               return (
-                <div key={template.id} className="relative group">
+                <div key={template.id}>
                   <VideoCard
                     video={video}
-                    onPlay={handlePlayVideo}
-                    onClick={handlePlayVideo}
-                    showShareButton={false}
+                    onPlay={(v) => handlePlayVideo(v)}
+                    onClick={(v) => handlePlayVideo(v)}
+                    showTemplateActions
+                    templateId={template.id}
+                    onEditTemplate={() => navigate(`/template-editor/${template.variation_id}`)}
+                    onDeleteTemplate={() => handleDeleteTemplate(template.id)}
                   />
-                  {/* Edit and Delete buttons positioned above Variations button */}
-                  <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
-                    <Button
-                      variant="default"
-                      size="icon"
-                      className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        navigate(`/template-editor/${template.variation_id}`);
-                      }}
-                    >
-                      <Edit className="h-3.5 w-3.5" />
-                    </Button>
-                    <Button
-                      variant="destructive"
-                      size="icon"
-                      className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleDeleteTemplate(template.id);
-                      }}
-                    >
-                      <Trash2 className="h-3.5 w-3.5" />
-                    </Button>
-                  </div>
                 </div>
               );
             })}
@@ -329,13 +352,11 @@ export default function MyTemplates() {
         )}
       </div>
 
-      {selectedVideo && (
-        <VideoPlayerDrawer
-          open={drawerOpen}
-          onOpenChange={setDrawerOpen}
-          video={selectedVideo}
-        />
-      )}
+      <VideoPlayerDrawer
+        video={selectedVideo}
+        open={drawerOpen}
+        onOpenChange={setDrawerOpen}
+      />
     </div>
   );
 }
