@@ -577,7 +577,9 @@ export default function ShareCartCheckout() {
             {/* Render Process */}
             <Card className="p-6">
               <h3 className="font-semibold mb-4">Render Process</h3>
-              <p className="text-xs text-muted-foreground mb-4">Choose how to render the template</p>
+              <p className="text-xs text-muted-foreground mb-4">
+                {isQuickMode ? 'Quick cart mode - Shared user access only' : 'Choose how to render the template'}
+              </p>
               <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => {
@@ -592,18 +594,36 @@ export default function ShareCartCheckout() {
                   }`}
                 >
                   <Users className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className="text-sm font-medium">Share Cart</p>
+                  <p className="text-sm font-medium">Shared User</p>
                 </button>
                 <button
-                  onClick={() => setSelfRenderConfirmDialogOpen(true)}
+                  onClick={() => {
+                    if (!isQuickMode) {
+                      setSelfRenderConfirmDialogOpen(true);
+                    }
+                  }}
+                  disabled={isQuickMode}
                   className={`p-4 rounded-lg border-2 transition-all ${
-                    shareMethod === 'edited' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-primary/50'
+                    isQuickMode 
+                      ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
+                      : shareMethod === 'edited' 
+                        ? 'border-primary bg-primary/5' 
+                        : 'border-border hover:border-primary/50'
                   }`}
                 >
-                  <Edit className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'edited' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className="text-sm font-medium">Self & Render</p>
+                  <Edit className={`w-8 h-8 mx-auto mb-2 ${
+                    isQuickMode 
+                      ? 'text-muted-foreground/50' 
+                      : shareMethod === 'edited' 
+                        ? 'text-primary' 
+                        : 'text-muted-foreground'
+                  }`} />
+                  <p className={`text-sm font-medium ${isQuickMode ? 'text-muted-foreground' : ''}`}>
+                    Self & Render
+                  </p>
+                  {isQuickMode && (
+                    <p className="text-xs text-muted-foreground mt-1">Not available</p>
+                  )}
                 </button>
               </div>
             </Card>
@@ -622,7 +642,7 @@ export default function ShareCartCheckout() {
                     {shareMethod === 'cart' ? (
                       <>
                         <Users className="w-3.5 h-3.5" />
-                        Share Cart
+                        Shared User
                       </>
                     ) : (
                       <>
