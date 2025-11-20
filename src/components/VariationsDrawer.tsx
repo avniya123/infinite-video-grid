@@ -124,14 +124,14 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     });
   };
 
-  const handleShareCart = () => {
+  const handleQuickCart = () => {
     if (!user) {
-      toast.error('Please sign in to add items to cart');
+      toast.error('Please sign in to proceed');
       onRequestAuth?.();
       return;
     }
-    // Navigate to Share Cart Checkout page
-    window.location.href = '/share-cart-checkout';
+    // Navigate to Quick Cart payment page with video data
+    window.location.href = `/share-cart-checkout?mode=quick&videoId=${video.id}`;
   };
 
   const handleEdit = async (variationId?: string) => {
@@ -270,9 +270,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
               {/* Action Buttons */}
               <div className="flex gap-2">
                 {!hideShareButton && (
-                  <Button size="sm" onClick={handleShareCart} className="bg-cyan-500 hover:bg-cyan-600 text-white gap-2">
+                  <Button size="sm" onClick={handleQuickCart} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2">
                     <ShoppingCart className="h-3.5 w-3.5" />
-                    Share Cart
+                    Quick Cart
                   </Button>
                 )}
                 {!hideEditButton && (
