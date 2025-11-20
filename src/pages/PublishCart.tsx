@@ -385,12 +385,12 @@ export default function PublishCart() {
               </div>
             </div>
             <Button
-              variant="outline"
+              variant="ghost"
               onClick={() => navigate('/my-templates')}
               className="gap-2"
             >
+              <ArrowLeft className="h-4 w-4" />
               Back to Templates
-              <ArrowLeft className="h-4 w-4 rotate-180" />
             </Button>
           </div>
         </div>
@@ -441,12 +441,12 @@ export default function PublishCart() {
             </div>
           </div>
           <Button
-            variant="outline"
+            variant="ghost"
             onClick={() => navigate('/my-templates')}
             className="gap-2"
           >
+            <ArrowLeft className="h-4 w-4" />
             Back to Templates
-            <ArrowLeft className="h-4 w-4 rotate-180" />
           </Button>
         </div>
 
