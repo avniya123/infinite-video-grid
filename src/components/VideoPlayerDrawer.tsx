@@ -15,15 +15,9 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import {
-  Drawer,
-  DrawerContent,
-  DrawerHeader,
-  DrawerTitle,
-  DrawerTrigger,
-} from '@/components/ui/drawer';
+
 import { Slider } from '@/components/ui/slider';
-import { Download, Settings, RotateCcw, Play, Clock, Maximize2, Tag, TrendingUp, X } from 'lucide-react';
+import { Download, Settings, RotateCcw, Play, Clock, Maximize2, Tag, TrendingUp, X, ChevronDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useState, useRef, useEffect } from 'react';
 import { ShareButton } from '@/components/ShareButton';
@@ -237,85 +231,89 @@ export function VideoPlayerDrawer({ video, open, onOpenChange, startTime = 0 }: 
                 </DropdownMenuContent>
               </DropdownMenu>
 
-              <Drawer open={filtersOpen} onOpenChange={setFiltersOpen}>
-                <DrawerTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5 text-xs h-8">
-                    <Settings className="w-3.5 h-3.5" />
-                    Filters
-                  </Button>
-                </DrawerTrigger>
-                <DrawerContent>
-                  <DrawerHeader>
-                    <DrawerTitle className="text-base">Adjust Video Filters</DrawerTitle>
-                  </DrawerHeader>
-                  <div className="px-6 pb-6 space-y-4">
-                    {/* Brightness Control */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium">Brightness</label>
-                        <span className="text-xs font-semibold text-primary">{brightness}%</span>
-                      </div>
-                      <Slider
-                        value={[brightness]}
-                        onValueChange={(value) => setBrightness(value[0])}
-                        min={0}
-                        max={200}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-
-                    {/* Contrast Control */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium">Contrast</label>
-                        <span className="text-xs font-semibold text-primary">{contrast}%</span>
-                      </div>
-                      <Slider
-                        value={[contrast]}
-                        onValueChange={(value) => setContrast(value[0])}
-                        min={0}
-                        max={200}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-
-                    {/* Saturation Control */}
-                    <div className="space-y-2">
-                      <div className="flex items-center justify-between">
-                        <label className="text-xs font-medium">Saturation</label>
-                        <span className="text-xs font-semibold text-primary">{saturation}%</span>
-                      </div>
-                      <Slider
-                        value={[saturation]}
-                        onValueChange={(value) => setSaturation(value[0])}
-                        min={0}
-                        max={200}
-                        step={1}
-                        className="w-full"
-                      />
-                    </div>
-
-                    <Separator />
-
-                    {/* Reset Button */}
-                    <Button
-                      variant="outline"
-                      onClick={handleResetFilters}
-                      size="sm"
-                      className="w-full gap-1.5 text-xs"
-                    >
-                      <RotateCcw className="w-3.5 h-3.5" />
-                      Reset Filters
-                    </Button>
-                  </div>
-                </DrawerContent>
-              </Drawer>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="gap-1.5 text-xs h-8"
+                onClick={() => setFiltersOpen(!filtersOpen)}
+              >
+                <Settings className="w-3.5 h-3.5" />
+                Filters
+                <ChevronDown className={`w-3 h-3 transition-transform ${filtersOpen ? 'rotate-180' : ''}`} />
+              </Button>
 
               <ShareButton video={video} variant="outline" size="sm" />
             </div>
           </div>
+
+          {/* Video Filters - Collapsible Section */}
+          {filtersOpen && (
+            <div className="space-y-4 pt-2">
+              <Separator />
+              <div className="space-y-4">
+                <h3 className="text-sm font-semibold text-foreground">Adjust Video Filters</h3>
+                
+                {/* Brightness Control */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium">Brightness</label>
+                    <span className="text-xs font-semibold text-primary">{brightness}%</span>
+                  </div>
+                  <Slider
+                    value={[brightness]}
+                    onValueChange={(value) => setBrightness(value[0])}
+                    min={0}
+                    max={200}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Contrast Control */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium">Contrast</label>
+                    <span className="text-xs font-semibold text-primary">{contrast}%</span>
+                  </div>
+                  <Slider
+                    value={[contrast]}
+                    onValueChange={(value) => setContrast(value[0])}
+                    min={0}
+                    max={200}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Saturation Control */}
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-xs font-medium">Saturation</label>
+                    <span className="text-xs font-semibold text-primary">{saturation}%</span>
+                  </div>
+                  <Slider
+                    value={[saturation]}
+                    onValueChange={(value) => setSaturation(value[0])}
+                    min={0}
+                    max={200}
+                    step={1}
+                    className="w-full"
+                  />
+                </div>
+
+                {/* Reset Button */}
+                <Button
+                  variant="outline"
+                  onClick={handleResetFilters}
+                  size="sm"
+                  className="w-full gap-1.5 text-xs"
+                >
+                  <RotateCcw className="w-3.5 h-3.5" />
+                  Reset Filters
+                </Button>
+              </div>
+            </div>
+          )}
 
           <Separator />
 
