@@ -10,7 +10,7 @@ import { Switch } from '@/components/ui/switch';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { X, Check, XCircle, Search, Upload, Users as UsersIcon, Trash2 } from 'lucide-react';
+import { X, Check, XCircle, Search, Upload, Users as UsersIcon, Trash2, UserPlus, UserCheck, FileSpreadsheet } from 'lucide-react';
 
 interface SharedUser {
   id: string;
@@ -285,11 +285,6 @@ export function UsersManagementDrawer({
   };
 
   const handleAddEnrolledUsers = () => {
-    if (!enrolledUserType) {
-      toast.error('Please select a user type');
-      return;
-    }
-
     if (selectedEnrolledIds.length === 0) {
       toast.error('Please select at least one user');
       return;
@@ -298,15 +293,15 @@ export function UsersManagementDrawer({
     const usersToAdd = enrolledUsers
       .filter(u => selectedEnrolledIds.includes(u.id))
       .map(u => ({ 
-        ...u, 
-        userType: enrolledUserType, 
+        ...u,
         hasAccess: true 
       }));
     
     onAddEnrolledUsers(usersToAdd);
     setSelectedEnrolledIds([]);
     setEnrolledSearchQuery('');
-    toast.success(`Added ${usersToAdd.length} user(s) as ${enrolledUserType}`);
+    setEnrolledFilterType('all');
+    toast.success(`Added ${usersToAdd.length} user(s)`);
   };
 
   const filteredEnrolledUsers = enrolledUsers.filter(user => {
@@ -452,9 +447,18 @@ export function UsersManagementDrawer({
             /* Tabs for Different User Management Options */
             <Tabs value={activeTab} onValueChange={(val) => setActiveTab(val as typeof activeTab)} className="w-full">
               <TabsList className="grid w-full grid-cols-3 mb-6">
-                <TabsTrigger value="single" className="text-xs sm:text-sm">Single User</TabsTrigger>
-                <TabsTrigger value="enrolled" className="text-xs sm:text-sm">Enrolled Users</TabsTrigger>
-                <TabsTrigger value="import" className="text-xs sm:text-sm">Import CSV</TabsTrigger>
+                <TabsTrigger value="single" className="text-xs sm:text-sm flex items-center gap-2">
+                  <UserPlus className="w-4 h-4" />
+                  Single User
+                </TabsTrigger>
+                <TabsTrigger value="enrolled" className="text-xs sm:text-sm flex items-center gap-2">
+                  <UserCheck className="w-4 h-4" />
+                  Enrolled Users
+                </TabsTrigger>
+                <TabsTrigger value="import" className="text-xs sm:text-sm flex items-center gap-2">
+                  <FileSpreadsheet className="w-4 h-4" />
+                  Import CSV
+                </TabsTrigger>
               </TabsList>
 
               {/* Single User Tab */}
@@ -609,27 +613,6 @@ export function UsersManagementDrawer({
 
               {/* Enrolled Users Tab */}
               <TabsContent value="enrolled" className="space-y-4 mt-0">
-                <div>
-                  <label className="text-sm font-medium">
-                    Assign User Type <span className="text-destructive">*</span>
-                  </label>
-                  <Select value={enrolledUserType} onValueChange={setEnrolledUserType}>
-                    <SelectTrigger className="mt-2">
-                      <SelectValue placeholder="Select user type..." />
-                    </SelectTrigger>
-                    <SelectContent className="bg-background z-50">
-                      {allUserTypes.map((type) => (
-                        <SelectItem key={type} value={type} className="capitalize">
-                          {type}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    All selected users will be added with this user type
-                  </p>
-                </div>
-
                 {loadingEnrolledUsers ? (
                   <div className="py-12 text-center">
                     <p className="text-muted-foreground">Loading users...</p>
@@ -751,7 +734,7 @@ export function UsersManagementDrawer({
                         <Button
                           onClick={handleAddEnrolledUsers}
                           className="w-full"
-                          disabled={selectedEnrolledIds.length === 0 || !enrolledUserType}
+                          disabled={selectedEnrolledIds.length === 0}
                         >
                           Add Selected Users ({selectedEnrolledIds.length})
                         </Button>
