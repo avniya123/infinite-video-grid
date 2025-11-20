@@ -5,9 +5,10 @@ import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2, Edit, FileVideo, X } from 'lucide-react';
-import { VideoControls } from '@/features/videos/VideoControls';
+import { Loader2, ArrowLeft, Trash2, Edit, FileVideo, X, Search, Columns3, List } from 'lucide-react';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { FilterChips } from '@/components/FilterChips';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -348,39 +349,76 @@ export default function MyTemplates() {
           </div>
         ) : (
           <>
-            {/* Search and Controls - matching /videos page */}
+            {/* Search and Controls - matching /videos page exactly */}
             <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-              {/* Search integrated in VideoControls but we'll add the count here */}
-              <div className="flex-1 w-full">
-                <VideoControls
-                  searchQuery={searchQuery}
-                  onSearchChange={setSearchQuery}
-                  viewMode={viewMode}
-                  onViewModeChange={setViewMode}
-                  columnCount={columnCount}
-                  onColumnCountChange={setColumnCount}
-                  sortBy={sortBy}
-                  onSortChange={setSortBy}
-                  sortOptions={sortOptions}
+              {/* Search Bar */}
+              <div className="relative flex-1 sm:w-96">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search templates by title..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
+                  className="pl-10 pr-4 h-10 w-full transition-all duration-200 focus:ring-2"
                 />
+              </div>
+              
+              {/* Controls */}
+              <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                {/* Reset Filters Button */}
+                {hasActiveFilters && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleResetFilters}
+                    className="h-10 whitespace-nowrap transition-all duration-200 hover:scale-105"
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Reset
+                  </Button>
+                )}
+                
+                {/* View Mode Toggle */}
+                <div className="flex items-center gap-1 bg-muted p-1 rounded-lg">
+                  <Button
+                    variant={viewMode === 'masonry' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('masonry')}
+                    className="h-8 px-3 transition-all duration-200"
+                    title="Masonry View"
+                  >
+                    <Columns3 className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant={viewMode === 'list' ? 'default' : 'ghost'}
+                    size="sm"
+                    onClick={() => setViewMode('list')}
+                    className="h-8 px-3 transition-all duration-200"
+                    title="List View"
+                  >
+                    <List className="w-4 w-4" />
+                  </Button>
+                </div>
+
+                {/* Column Count Slider (only visible in masonry view) */}
+                {viewMode === 'masonry' && (
+                  <div className="flex items-center gap-3 bg-muted px-4 py-2 rounded-lg min-w-[180px]">
+                    <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Columns: {columnCount}</span>
+                    <Slider
+                      value={[columnCount]}
+                      onValueChange={(value) => setColumnCount(value[0])}
+                      min={2}
+                      max={6}
+                      step={1}
+                      className="w-24"
+                    />
+                  </div>
+                )}
               </div>
             </div>
 
-            {/* Sort and Filters - matching /videos page */}
+            {/* Sort and Filters - matching /videos page exactly */}
             <div className="flex gap-3 items-center flex-wrap">
-              {/* Reset Filters Button */}
-              {hasActiveFilters && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleResetFilters}
-                  className="h-10 whitespace-nowrap transition-all duration-200 hover:scale-105"
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Reset
-                </Button>
-              )}
-
               {/* Filter Drawer */}
               <FilterDrawer
                 selectedMainCategory={selectedMainCategory}
