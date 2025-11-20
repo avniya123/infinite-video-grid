@@ -114,13 +114,13 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
 
               {/* Category Navigation */}
               <nav className="hidden md:flex items-center gap-1">
-                {/* Landing Page Link */}
-                <Link to="/landing">
+                {/* Videos Link */}
+                <Link to="/videos">
                   <Button 
                     variant="ghost" 
                     className="h-9 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300"
                   >
-                    Landing
+                    Browse Videos
                   </Button>
                 </Link>
                 

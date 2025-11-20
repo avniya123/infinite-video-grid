@@ -43,10 +43,10 @@ const Landing = () => {
               </span>
             </div>
             <div className="flex items-center gap-4">
-              <Link to="/">
+              <Link to="/videos">
                 <Button variant="ghost">Browse Videos</Button>
               </Link>
-              <Link to="/">
+              <Link to="/videos">
                 <Button>Get Started</Button>
               </Link>
             </div>
@@ -75,7 +75,7 @@ const Landing = () => {
               we've got you covered with ready-to-use templates.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-              <Link to="/">
+              <Link to="/videos">
                 <Button size="lg" className="gap-2 group">
                   Explore Templates
                   <ArrowRight className="w-4 h-4 group-hover:translate-x-1 transition-transform" />
@@ -224,7 +224,7 @@ const Landing = () => {
                 Join thousands of creators using our platform to bring their ideas to life
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center pt-4">
-                <Link to="/">
+                <Link to="/videos">
                   <Button size="lg" className="gap-2">
                     Start Creating Now
                     <ArrowRight className="w-4 h-4" />
