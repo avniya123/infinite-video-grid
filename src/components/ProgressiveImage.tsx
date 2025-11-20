@@ -24,7 +24,7 @@ export const ProgressiveImage = ({
   const [currentSrc, setCurrentSrc] = useState(blurDataURL || '');
   const imgRef = useRef<HTMLDivElement>(null);
 
-  // Intersection Observer for lazy loading
+  // Intersection Observer for lazy loading with aggressive preloading
   useEffect(() => {
     if (!lazy || isInView) return;
 
@@ -39,7 +39,7 @@ export const ProgressiveImage = ({
       },
       {
         root: null,
-        rootMargin: '200px', // Start loading 200px before entering viewport
+        rootMargin: '600px', // Start loading 600px before entering viewport for smoother experience
         threshold: 0.01,
       }
     );
