@@ -98,7 +98,14 @@ export function UsersManagementDrawer({
   // Enrolled users
   const [selectedEnrolledIds, setSelectedEnrolledIds] = useState<string[]>([]);
   const [enrolledSearchQuery, setEnrolledSearchQuery] = useState('');
-  const [enrolledUserType, setEnrolledUserType] = useState('family');
+  const [enrolledUserType, setEnrolledUserType] = useState('');
+
+  // Initialize enrolled user type with first available type
+  useEffect(() => {
+    if (!enrolledUserType && allUserTypes.length > 0) {
+      setEnrolledUserType(allUserTypes[0]);
+    }
+  }, [allUserTypes]);
 
   const validateEmail = (email: string): boolean => {
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
@@ -269,21 +276,36 @@ export function UsersManagementDrawer({
   };
 
   const handleToggleAllEnrolled = () => {
-    if (selectedEnrolledIds.length === enrolledUsers.length) {
+    if (selectedEnrolledIds.length === filteredEnrolledUsers.length && filteredEnrolledUsers.length > 0) {
       setSelectedEnrolledIds([]);
     } else {
-      setSelectedEnrolledIds(enrolledUsers.map(u => u.id));
+      setSelectedEnrolledIds(filteredEnrolledUsers.map(u => u.id));
     }
   };
 
   const handleAddEnrolledUsers = () => {
+    if (!enrolledUserType) {
+      toast.error('Please select a user type');
+      return;
+    }
+
+    if (selectedEnrolledIds.length === 0) {
+      toast.error('Please select at least one user');
+      return;
+    }
+
     const usersToAdd = enrolledUsers
       .filter(u => selectedEnrolledIds.includes(u.id))
-      .map(u => ({ ...u, userType: enrolledUserType, hasAccess: true }));
+      .map(u => ({ 
+        ...u, 
+        userType: enrolledUserType, 
+        hasAccess: true 
+      }));
     
     onAddEnrolledUsers(usersToAdd);
     setSelectedEnrolledIds([]);
     setEnrolledSearchQuery('');
+    toast.success(`Added ${usersToAdd.length} user(s) as ${enrolledUserType}`);
   };
 
   const filteredEnrolledUsers = enrolledUsers.filter(user =>
