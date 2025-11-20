@@ -312,20 +312,13 @@ export default function PublishCart() {
                 Publish Cart ({publishedTemplates.length})
               </h1>
             </div>
-            <div className="flex items-center gap-4">
-              <div className="text-right">
-                <div className="text-2xl font-bold text-primary">
-                  ₹{calculateTotalPrice().toLocaleString()}
-                </div>
-              </div>
-              <Button
-                variant="ghost"
-                onClick={() => navigate('/my-templates')}
-              >
-                <ArrowLeft className="mr-2 h-4 w-4" />
-                Back to My Templates
-              </Button>
-            </div>
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/my-templates')}
+            >
+              <ArrowLeft className="mr-2 h-4 w-4" />
+              Back to My Templates
+            </Button>
           </div>
         </div>
 
@@ -527,7 +520,7 @@ export default function PublishCart() {
                           showShareButton={false}
                           showPrice={true}
                         />
-                        <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <div className="absolute top-16 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
                           <Button
                             variant="destructive"
                             size="icon"
