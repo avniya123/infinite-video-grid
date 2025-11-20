@@ -47,6 +47,13 @@ export function UsersManagementDrawer({
   onLoadEnrolledUsers,
 }: UsersManagementDrawerProps) {
   const [activeTab, setActiveTab] = useState<'single' | 'enrolled' | 'import'>('single');
+  const [customUserTypes, setCustomUserTypes] = useState<string[]>([]);
+  const [showAddUserType, setShowAddUserType] = useState(false);
+  const [newUserTypeName, setNewUserTypeName] = useState('');
+  
+  // Default user types
+  const defaultUserTypes = ['family', 'friend', 'colleague', 'client'];
+  const allUserTypes = [...defaultUserTypes, ...customUserTypes];
   
   // Single user form
   const [newUserName, setNewUserName] = useState('');
@@ -122,6 +129,22 @@ export function UsersManagementDrawer({
     setSelectedUserType('');
     setIsNewEmailValid(null);
     setIsNewPhoneValid(null);
+  };
+
+  const handleAddCustomUserType = () => {
+    const trimmedType = newUserTypeName.trim().toLowerCase();
+    if (!trimmedType) {
+      toast.error('Please enter a user type name');
+      return;
+    }
+    if (allUserTypes.includes(trimmedType)) {
+      toast.error('This user type already exists');
+      return;
+    }
+    setCustomUserTypes([...customUserTypes, trimmedType]);
+    setNewUserTypeName('');
+    setShowAddUserType(false);
+    toast.success('Custom user type added');
   };
 
   const handleEditEmailChange = (value: string) => {
@@ -275,11 +298,12 @@ export function UsersManagementDrawer({
                   <SelectTrigger className="mt-2">
                     <SelectValue placeholder="Select a User..." />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="family">Family</SelectItem>
-                    <SelectItem value="friend">Friend</SelectItem>
-                    <SelectItem value="colleague">Colleague</SelectItem>
-                    <SelectItem value="client">Client</SelectItem>
+                  <SelectContent className="bg-background z-50">
+                    {allUserTypes.map((type) => (
+                      <SelectItem key={type} value={type} className="capitalize">
+                        {type}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -391,13 +415,63 @@ export function UsersManagementDrawer({
                     <SelectTrigger className="mt-2">
                       <SelectValue placeholder="Select a User..." />
                     </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="family">Family</SelectItem>
-                      <SelectItem value="friend">Friend</SelectItem>
-                      <SelectItem value="colleague">Colleague</SelectItem>
-                      <SelectItem value="client">Client</SelectItem>
+                    <SelectContent className="bg-background z-50">
+                      {allUserTypes.map((type) => (
+                        <SelectItem key={type} value={type} className="capitalize">
+                          {type}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
+                  
+                  {!showAddUserType ? (
+                    <Button 
+                      variant="link" 
+                      size="sm"
+                      onClick={() => setShowAddUserType(true)}
+                      className="mt-2 p-0 h-auto text-xs"
+                    >
+                      + Add Custom User Type
+                    </Button>
+                  ) : (
+                    <div className="mt-3 p-3 border rounded-lg space-y-2 bg-muted/30">
+                      <Input
+                        placeholder="Enter custom user type (e.g., Partner, Vendor)"
+                        value={newUserTypeName}
+                        onChange={(e) => setNewUserTypeName(e.target.value)}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter') {
+                            handleAddCustomUserType();
+                          } else if (e.key === 'Escape') {
+                            setShowAddUserType(false);
+                            setNewUserTypeName('');
+                          }
+                        }}
+                        className="text-sm"
+                        autoFocus
+                      />
+                      <div className="flex gap-2">
+                        <Button 
+                          size="sm" 
+                          onClick={handleAddCustomUserType}
+                          className="flex-1"
+                        >
+                          Add Type
+                        </Button>
+                        <Button 
+                          size="sm" 
+                          variant="outline"
+                          onClick={() => {
+                            setShowAddUserType(false);
+                            setNewUserTypeName('');
+                          }}
+                          className="flex-1"
+                        >
+                          Cancel
+                        </Button>
+                      </div>
+                    </div>
+                  )}
                 </div>
 
                 <div>
