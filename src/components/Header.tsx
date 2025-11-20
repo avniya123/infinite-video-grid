@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate, Link, useLocation } from 'react-router-dom';
 import { Monitor, ShoppingCart, User, Bell, LogOut, ChevronDown, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
@@ -46,10 +46,13 @@ interface HeaderProps {
 
 export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategorySelect, onMainCategorySelect }: HeaderProps) => {
   const navigate = useNavigate();
+  const location = useLocation();
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const [profileDrawerOpen, setProfileDrawerOpen] = useState(false);
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  
+  const isVideosPage = location.pathname === '/videos';
 
   useEffect(() => {
     // Check current session
@@ -105,25 +108,15 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
           <div className="flex h-16 items-center justify-between">
             {/* Logo and Brand */}
             <div className="flex items-center gap-6">
-              <div className="flex items-center gap-2">
-                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-gray-600 dark:from-gray-700 dark:to-gray-500 flex items-center justify-center shadow-md">
+              <Link to="/" className="flex items-center gap-2 cursor-pointer group">
+                <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-gray-600 dark:from-gray-700 dark:to-gray-500 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                   <span className="text-white font-bold text-lg">V</span>
                 </div>
                 <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:inline">VideoStudio</span>
-              </div>
+              </Link>
 
               {/* Category Navigation */}
               <nav className="hidden md:flex items-center gap-1">
-                {/* Videos Link */}
-                <Link to="/videos">
-                  <Button 
-                    variant="ghost" 
-                    className="h-9 px-3 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 text-sm font-medium text-gray-700 dark:text-gray-300"
-                  >
-                    Browse Videos
-                  </Button>
-                </Link>
-                
                 {/* Personals Dropdown */}
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
