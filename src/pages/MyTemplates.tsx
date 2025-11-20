@@ -1,14 +1,18 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
-import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
+import { FilterDrawer } from '@/components/FilterDrawer';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, Trash2, Edit } from 'lucide-react';
+import { Loader2, ArrowLeft, Search, X, List, Columns3, ArrowUpDown, ChevronDown } from 'lucide-react';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { useVideoFilters } from '@/hooks/useVideoFilters';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
-import type { VideoItem } from '@/types/video';
+import type { VideoItem, VideoCategory } from '@/types/video';
 
 interface UserTemplate {
   id: string;
@@ -28,6 +32,15 @@ interface UserTemplate {
   };
 }
 
+type ViewMode = 'masonry' | 'list';
+
+const sortOptions: { value: string; label: string }[] = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'popular', label: 'Most Popular' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'price-high', label: 'Price: High to Low' },
+];
+
 export default function MyTemplates() {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -35,6 +48,54 @@ export default function MyTemplates() {
   const [templates, setTemplates] = useState<UserTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  const [viewMode, setViewMode] = useState<ViewMode>('masonry');
+  const [columnCount, setColumnCount] = useState(3);
+
+  // Convert templates to VideoItem format for filtering
+  const videosFromTemplates: VideoItem[] = templates.map(template => ({
+    id: template.video_variations.video_id,
+    title: template.custom_title || template.video_variations.title,
+    image: template.video_variations.thumbnail_url || '',
+    category: 'All' as VideoCategory,
+    subcategory: '',
+    duration: template.video_variations.duration,
+    aspectRatio: parseFloat(template.video_variations.aspect_ratio.split(':')[0]) / parseFloat(template.video_variations.aspect_ratio.split(':')[1]),
+    price: '0',
+    mrp: '0',
+    discount: '0%',
+    orientation: 'Landscape' as const,
+    trending: false,
+    resolution: 'HD' as const,
+    mainCategory: 'Personal Celebrations' as const,
+    videoUrl: template.video_variations.video_url || '',
+  }));
+
+  // Use filter hook
+  const {
+    selectedMainCategory,
+    selectedSubcategory,
+    selectedDurations,
+    selectedAspectRatios,
+    selectedPriceRanges,
+    searchQuery,
+    sortBy,
+    filteredVideos,
+    hasActiveFilters,
+    setSearchQuery,
+    setSortBy,
+    handleDurationToggle,
+    handleAspectRatioToggle,
+    handlePriceRangeToggle,
+    handleSubcategorySelect,
+    handleMainCategorySelect,
+    handleSelectAllDurations,
+    handleClearDurations,
+    handleSelectAllAspectRatios,
+    handleClearAspectRatios,
+    handleSelectAllPriceRanges,
+    handleClearPriceRanges,
+    handleResetFilters,
+  } = useVideoFilters(videosFromTemplates);
 
   useEffect(() => {
     checkUser();
@@ -98,10 +159,10 @@ export default function MyTemplates() {
       if (error) throw error;
 
       setTemplates(templates.filter(t => t.id !== templateId));
-      toast.success('Template removed from your collection');
-    } catch (error: any) {
-      toast.error('Failed to remove template');
+      toast.success('Template deleted successfully');
+    } catch (error) {
       console.error('Error deleting template:', error);
+      toast.error('Failed to delete template');
     }
   };
 
