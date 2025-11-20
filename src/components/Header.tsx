@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
 import { Sheet, SheetContent, SheetTrigger } from '@/components/ui/sheet';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -327,40 +328,68 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
               {user && (
                 <>
                   {/* Icon Buttons */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                  >
-                    <Monitor className="w-5 h-5" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      >
+                        <Monitor className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>My Videos</p>
+                    </TooltipContent>
+                  </Tooltip>
 
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                  >
-                    <ShoppingCart className="w-5 h-5" />
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="hidden sm:flex h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      >
+                        <ShoppingCart className="w-5 h-5" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Cart</p>
+                    </TooltipContent>
+                  </Tooltip>
 
                   {/* Notification Bell */}
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="relative h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                  >
-                    <Bell className="w-5 h-5" />
-                    <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full border-2 border-white dark:border-gray-900">
-                      3
-                    </Badge>
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        className="relative h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      >
+                        <Bell className="w-5 h-5" />
+                        <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full border-2 border-white dark:border-gray-900">
+                          3
+                        </Badge>
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Notifications</p>
+                    </TooltipContent>
+                  </Tooltip>
                 </>
               )}
 
               {/* Theme Toggle - Desktop Only */}
-              <div className="hidden md:block">
-                <ThemeToggle />
-              </div>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="hidden md:block">
+                    <ThemeToggle />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Toggle Theme</p>
+                </TooltipContent>
+              </Tooltip>
 
               {/* Sign In / User Profile - Desktop Only */}
               {user ? (
