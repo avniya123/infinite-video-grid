@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
@@ -7,6 +7,7 @@ import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
 import { Loader2, ArrowLeft, ShoppingCart, Trash2 } from 'lucide-react';
+import { VideoControls } from '@/features/videos/VideoControls';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 
@@ -28,6 +29,16 @@ interface PublishedTemplate {
   };
 }
 
+type ViewMode = 'masonry' | 'list';
+
+const sortOptions = [
+  { value: 'newest', label: 'Newest First' },
+  { value: 'oldest', label: 'Oldest First' },
+  { value: 'price-high', label: 'Price: High to Low' },
+  { value: 'price-low', label: 'Price: Low to High' },
+  { value: 'title', label: 'Title A-Z' },
+];
+
 export default function PublishCart() {
   const navigate = useNavigate();
   const [user, setUser] = useState<SupabaseUser | null>(null);
@@ -35,6 +46,12 @@ export default function PublishCart() {
   const [publishedTemplates, setPublishedTemplates] = useState<PublishedTemplate[]>([]);
   const [selectedVideo, setSelectedVideo] = useState<VideoItem | null>(null);
   const [drawerOpen, setDrawerOpen] = useState(false);
+  
+  // View controls state
+  const [searchQuery, setSearchQuery] = useState('');
+  const [viewMode, setViewMode] = useState<ViewMode>('masonry');
+  const [columnCount, setColumnCount] = useState(3);
+  const [sortBy, setSortBy] = useState('newest');
 
   useEffect(() => {
     checkUser();
@@ -194,13 +211,54 @@ export default function PublishCart() {
   };
 
   const calculateTotalPrice = () => {
-    return publishedTemplates.reduce((total, template) => {
-      // For now, we'll use 1 as variation count since we can't easily get it here
-      // In a real implementation, this would be fetched along with the template data
+    return filteredAndSortedTemplates.reduce((total, template) => {
       const pricing = calculateTemplatePrice(template, 1);
       return total + pricing.price;
     }, 0);
   };
+
+  // Filter and sort templates
+  const filteredAndSortedTemplates = useMemo(() => {
+    let filtered = publishedTemplates;
+
+    // Search by title or ID prefix
+    if (searchQuery) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(template => {
+        const title = (template.custom_title || template.video_variations.title).toLowerCase();
+        const idPrefix = template.video_variations.video_id.toString();
+        return title.includes(query) || idPrefix.startsWith(query);
+      });
+    }
+
+    // Sort
+    const sorted = [...filtered].sort((a, b) => {
+      switch (sortBy) {
+        case 'newest':
+          return new Date(b.published_at || 0).getTime() - new Date(a.published_at || 0).getTime();
+        case 'oldest':
+          return new Date(a.published_at || 0).getTime() - new Date(b.published_at || 0).getTime();
+        case 'price-high': {
+          const priceA = calculateTemplatePrice(a, 1).price;
+          const priceB = calculateTemplatePrice(b, 1).price;
+          return priceB - priceA;
+        }
+        case 'price-low': {
+          const priceA = calculateTemplatePrice(a, 1).price;
+          const priceB = calculateTemplatePrice(b, 1).price;
+          return priceA - priceB;
+        }
+        case 'title':
+          const titleA = (a.custom_title || a.video_variations.title).toLowerCase();
+          const titleB = (b.custom_title || b.video_variations.title).toLowerCase();
+          return titleA.localeCompare(titleB);
+        default:
+          return 0;
+      }
+    });
+
+    return sorted;
+  }, [publishedTemplates, searchQuery, sortBy]);
 
   if (loading) {
     return (
@@ -252,7 +310,7 @@ export default function PublishCart() {
             </div>
             <div className="text-right">
               <div className="text-sm text-muted-foreground mb-1">
-                {publishedTemplates.length} {publishedTemplates.length === 1 ? 'template' : 'templates'}
+                {filteredAndSortedTemplates.length} of {publishedTemplates.length} {publishedTemplates.length === 1 ? 'template' : 'templates'}
               </div>
               <div className="text-2xl font-bold text-primary">
                 ₹{calculateTotalPrice().toLocaleString()}
@@ -260,6 +318,23 @@ export default function PublishCart() {
             </div>
           </div>
         </div>
+
+        {/* Search and Controls */}
+        {publishedTemplates.length > 0 && (
+          <div className="mb-6">
+            <VideoControls
+              searchQuery={searchQuery}
+              onSearchChange={setSearchQuery}
+              viewMode={viewMode}
+              onViewModeChange={setViewMode}
+              columnCount={columnCount}
+              onColumnCountChange={setColumnCount}
+              sortBy={sortBy}
+              onSortChange={setSortBy}
+              sortOptions={sortOptions}
+            />
+          </div>
+        )}
 
         {publishedTemplates.length === 0 ? (
           <div className="text-center py-16">
@@ -276,58 +351,146 @@ export default function PublishCart() {
               </Button>
             </div>
           </div>
+        ) : filteredAndSortedTemplates.length === 0 ? (
+          <div className="text-center py-16">
+            <div className="max-w-md mx-auto">
+              <h3 className="text-lg font-semibold text-foreground mb-2">
+                No templates found
+              </h3>
+              <p className="text-muted-foreground mb-6">
+                Try adjusting your search query.
+              </p>
+              <Button onClick={() => setSearchQuery('')} variant="outline">
+                Clear Search
+              </Button>
+            </div>
+          </div>
         ) : (
           <>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
-              {publishedTemplates.map((template) => {
-                // Get variation count - default to 1 if not available
-                const variationCount = 1; // This would ideally come from a query
-                const pricing = calculateTemplatePrice(template, variationCount);
-                const video: VideoItem = {
-                  id: template.video_variations.video_id,
-                  title: template.custom_title || template.video_variations.title,
-                  image: template.video_variations.thumbnail_url || '/placeholder.svg',
-                  duration: template.video_variations.duration,
-                  category: 'Nature',
-                  mainCategory: 'Personal Celebrations',
-                  subcategory: '',
-                  orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
-                              template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
-                  price: `₹${pricing.price}`,
-                  mrp: `₹${pricing.mrp}`,
-                  discount: pricing.discount,
-                  trending: false,
-                  resolution: 'HD',
-                  videoUrl: template.video_variations.video_url || undefined,
-                };
+            {/* Masonry View */}
+            {viewMode === 'masonry' && (
+              <div 
+                className="gap-5 [column-fill:balance] mb-8"
+                style={{ columnCount }}
+              >
+                {filteredAndSortedTemplates.map((template) => {
+                  const variationCount = 1;
+                  const pricing = calculateTemplatePrice(template, variationCount);
+                  const video: VideoItem = {
+                    id: template.video_variations.video_id,
+                    title: template.custom_title || template.video_variations.title,
+                    image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                    duration: template.video_variations.duration,
+                    category: 'Nature',
+                    mainCategory: 'Personal Celebrations',
+                    subcategory: '',
+                    orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                                template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                    price: `₹${pricing.price}`,
+                    mrp: `₹${pricing.mrp}`,
+                    discount: pricing.discount,
+                    trending: false,
+                    resolution: 'HD',
+                    videoUrl: template.video_variations.video_url || undefined,
+                  };
 
-                return (
-                  <div key={template.id} className="relative group">
-                    <VideoCard
-                      video={video}
-                      onPlay={handlePlayVideo}
-                      onClick={handlePlayVideo}
-                      showShareButton={false}
-                      showPrice={true}
-                    />
-                    {/* Remove from cart button */}
-                    <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
-                      <Button
-                        variant="destructive"
-                        size="icon"
-                        className="h-8 w-8 shadow-lg"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleRemoveFromCart(template.id);
-                        }}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                  return (
+                    <div key={template.id} className="relative group mb-5">
+                      <VideoCard
+                        video={video}
+                        onPlay={handlePlayVideo}
+                        onClick={handlePlayVideo}
+                        showShareButton={false}
+                        showPrice={true}
+                      />
+                      {/* Remove from cart button */}
+                      <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                        <Button
+                          variant="destructive"
+                          size="icon"
+                          className="h-8 w-8 shadow-lg"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleRemoveFromCart(template.id);
+                          }}
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </div>
                     </div>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
+
+            {/* List View */}
+            {viewMode === 'list' && (
+              <div className="flex flex-col gap-4 mb-8">
+                {filteredAndSortedTemplates.map((template) => {
+                  const variationCount = 1;
+                  const pricing = calculateTemplatePrice(template, variationCount);
+                  const video: VideoItem = {
+                    id: template.video_variations.video_id,
+                    title: template.custom_title || template.video_variations.title,
+                    image: template.video_variations.thumbnail_url || '/placeholder.svg',
+                    duration: template.video_variations.duration,
+                    category: 'Nature',
+                    mainCategory: 'Personal Celebrations',
+                    subcategory: '',
+                    orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 
+                                template.video_variations.aspect_ratio === '9:16' ? 'Portrait' : 'Square',
+                    price: `₹${pricing.price}`,
+                    mrp: `₹${pricing.mrp}`,
+                    discount: pricing.discount,
+                    trending: false,
+                    resolution: 'HD',
+                    videoUrl: template.video_variations.video_url || undefined,
+                  };
+
+                  return (
+                    <div 
+                      key={template.id} 
+                      className="group flex gap-4 bg-card p-4 rounded-lg shadow-md hover:shadow-lg transition-all duration-300 cursor-pointer"
+                      onClick={() => handlePlayVideo(video)}
+                    >
+                      <div className="relative w-64 flex-shrink-0">
+                        <img
+                          src={video.image}
+                          alt={video.title}
+                          className="w-full h-40 object-cover rounded-lg"
+                        />
+                      </div>
+                      <div className="flex-1 flex flex-col">
+                        <div className="flex items-start justify-between mb-2">
+                          <div className="flex-1">
+                            <h3 className="text-lg font-semibold mb-2">{video.title}</h3>
+                            <p className="text-sm text-muted-foreground mb-2">
+                              {video.duration} • {video.orientation} • {video.resolution}
+                            </p>
+                          </div>
+                          <Button
+                            variant="destructive"
+                            size="icon"
+                            className="h-8 w-8"
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleRemoveFromCart(template.id);
+                            }}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                        <div className="flex items-center gap-2 mt-auto">
+                          <span className="text-xl font-bold text-primary">₹{pricing.price}</span>
+                          <span className="text-sm text-muted-foreground line-through">₹{pricing.mrp}</span>
+                          <span className="text-sm font-semibold text-green-600">{pricing.discount}</span>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
 
             {/* Proceed to Checkout Button */}
             <div className="mt-16 mb-12 flex justify-center">
@@ -335,8 +498,8 @@ export default function PublishCart() {
                 size="lg"
                 className="px-16 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105"
                 onClick={() => {
-                  if (publishedTemplates.length > 0) {
-                    const template = publishedTemplates[0];
+                  if (filteredAndSortedTemplates.length > 0) {
+                    const template = filteredAndSortedTemplates[0];
                     const pricing = calculateTemplatePrice(template, 1);
                     navigate('/share-cart-checkout', {
                       state: {
