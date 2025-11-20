@@ -1,5 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { cn } from '@/lib/utils';
+import { getOptimizedImageUrl, getFallbackUrl } from '@/utils/imageFormat';
 
 interface ProgressiveImageProps {
   src: string;
@@ -22,6 +23,7 @@ export const ProgressiveImage = ({
   const [isLoading, setIsLoading] = useState(true);
   const [isInView, setIsInView] = useState(!lazy);
   const [currentSrc, setCurrentSrc] = useState(blurDataURL || '');
+  const [imageError, setImageError] = useState(false);
   const imgRef = useRef<HTMLDivElement>(null);
 
   // Intersection Observer for lazy loading with aggressive preloading
@@ -53,17 +55,21 @@ export const ProgressiveImage = ({
     };
   }, [lazy, isInView]);
 
-  // Load image when in view
+  // Load image when in view with WebP optimization
   useEffect(() => {
     if (!isInView || !src) return;
 
     setIsLoading(true);
+    setImageError(false);
+    
+    // Try loading WebP format first
+    const optimizedSrc = getOptimizedImageUrl(src);
     const img = new Image();
-    img.src = src;
+    img.src = optimizedSrc;
     
     img.onload = () => {
       setTimeout(() => {
-        setCurrentSrc(src);
+        setCurrentSrc(optimizedSrc);
         setIsLoaded(true);
         setIsLoading(false);
         onLoad?.();
@@ -71,14 +77,34 @@ export const ProgressiveImage = ({
     };
 
     img.onerror = () => {
-      setIsLoading(false);
+      // If WebP fails and we tried WebP, fallback to original format
+      if (optimizedSrc !== src && !imageError) {
+        setImageError(true);
+        const fallbackImg = new Image();
+        fallbackImg.src = getFallbackUrl(src);
+        
+        fallbackImg.onload = () => {
+          setTimeout(() => {
+            setCurrentSrc(getFallbackUrl(src));
+            setIsLoaded(true);
+            setIsLoading(false);
+            onLoad?.();
+          }, 100);
+        };
+        
+        fallbackImg.onerror = () => {
+          setIsLoading(false);
+        };
+      } else {
+        setIsLoading(false);
+      }
     };
 
     return () => {
       img.onload = null;
       img.onerror = null;
     };
-  }, [src, onLoad, isInView]);
+  }, [src, onLoad, isInView, imageError]);
 
   return (
     <div ref={imgRef} className={cn("relative overflow-hidden bg-muted/20", className)}>
