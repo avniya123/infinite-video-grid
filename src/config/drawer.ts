@@ -82,6 +82,28 @@ export const DRAWER_CONFIG = {
   },
 
   /**
+   * Close Button Styles
+   * Standardized close button styling for all drawers
+   * Use square buttons (8x8) instead of round icon buttons
+   */
+  closeButton: {
+    /** Standard square close button (8x8) */
+    standard: 'h-8 w-8 p-0',
+    
+    /** Compact square close button (6x6) */
+    compact: 'h-6 w-6 p-0',
+    
+    /** Large square close button (10x10) */
+    large: 'h-10 w-10 p-0',
+    
+    /** Close button with background (for overlays) */
+    withBackground: 'h-8 w-8 p-0 bg-background/80 hover:bg-background backdrop-blur-sm',
+    
+    /** Close button on dark overlay (for video players) */
+    onDark: 'h-8 w-8 p-0 bg-black/50 hover:bg-black/70 text-white backdrop-blur-sm',
+  },
+
+  /**
    * Animation Settings
    * Consistent animation durations and easings
    */
@@ -133,6 +155,17 @@ export function getDrawerContentClassName(
   variant: keyof typeof DRAWER_CONFIG.content = 'standard'
 ): string {
   return DRAWER_CONFIG.content[variant];
+}
+
+/**
+ * Helper function to get close button className
+ * @param variant - Close button variant from DRAWER_CONFIG.closeButton
+ * @returns Close button className string
+ */
+export function getDrawerCloseButtonClassName(
+  variant: keyof typeof DRAWER_CONFIG.closeButton = 'standard'
+): string {
+  return DRAWER_CONFIG.closeButton[variant];
 }
 
 /**
