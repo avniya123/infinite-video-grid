@@ -109,39 +109,79 @@ export default function PublishCart() {
     setDrawerOpen(true);
   };
 
-  const calculateTemplatePrice = (template: PublishedTemplate) => {
-    // Base price calculation based on aspect ratio
-    let basePrice = 350;
+  const getSubcategoryPriceMultiplier = (subcategory: string): number => {
+    // Premium categories (higher prices)
+    const premiumCategories = ['Wedding', 'Anniversary', 'Concert', 'Award Ceremony', 'Product Launch'];
+    const highCategories = ['Engagement', 'Birthday', 'Team Building', 'Conference', 'Film Festival'];
+    const standardCategories = ['Diwali', 'Christmas', 'Eid', 'New Year', 'Independence Day'];
+    
+    if (premiumCategories.some(cat => subcategory.includes(cat))) {
+      return 1.5; // 50% premium
+    } else if (highCategories.some(cat => subcategory.includes(cat))) {
+      return 1.25; // 25% premium
+    } else if (standardCategories.some(cat => subcategory.includes(cat))) {
+      return 1.1; // 10% premium
+    }
+    return 1.0; // Base price
+  };
+
+  const calculateTemplatePrice = (template: PublishedTemplate, variationCount: number = 1) => {
+    // Base price starting point
+    let basePrice = 300;
+    
+    // 1. Aspect ratio pricing
     const aspectRatio = template.video_variations.aspect_ratio;
-    
-    // Aspect ratio pricing
     if (aspectRatio === '16:9') {
-      basePrice = 450; // Landscape (YouTube, presentations)
+      basePrice += 100; // Landscape (YouTube, presentations)
     } else if (aspectRatio === '9:16') {
-      basePrice = 550; // Portrait (Instagram Stories, TikTok)
+      basePrice += 150; // Portrait (Instagram Stories, TikTok) - Premium
     } else if (aspectRatio === '1:1') {
-      basePrice = 400; // Square (Instagram Posts)
+      basePrice += 75; // Square (Instagram Posts)
     }
     
-    // Platform multiplier
-    const platforms = template.video_variations.platforms || [];
-    if (platforms.length > 3) {
-      basePrice += 100; // Multi-platform support
-    }
-    
-    // Duration multiplier (parse duration like "0:30" or "1:45")
+    // 2. Duration-based pricing (parse duration like "0:30" or "1:45")
     const duration = template.video_variations.duration;
     const [minutes, seconds] = duration.split(':').map(Number);
     const totalSeconds = (minutes * 60) + seconds;
     
-    if (totalSeconds > 60) {
-      basePrice += 150; // Longer videos cost more
+    if (totalSeconds > 120) {
+      basePrice += 200; // 2+ minutes
+    } else if (totalSeconds > 60) {
+      basePrice += 120; // 1-2 minutes
     } else if (totalSeconds > 30) {
-      basePrice += 75;
+      basePrice += 60; // 30-60 seconds
+    } else {
+      basePrice += 30; // Under 30 seconds
     }
     
-    // Calculate MRP (base price + 120% markup)
-    const mrp = Math.round(basePrice * 2.2);
+    // 3. Platform count multiplier
+    const platforms = template.video_variations.platforms || [];
+    if (platforms.length >= 5) {
+      basePrice += 150; // Multi-platform support (5+)
+    } else if (platforms.length >= 3) {
+      basePrice += 80; // Good platform coverage (3-4)
+    } else if (platforms.length >= 2) {
+      basePrice += 40; // Basic multi-platform (2)
+    }
+    
+    // 4. Variation count bonus (more variations = more value)
+    if (variationCount > 5) {
+      basePrice += 100; // Extensive variations
+    } else if (variationCount > 3) {
+      basePrice += 60; // Good variation options
+    } else if (variationCount > 1) {
+      basePrice += 30; // Some variations
+    }
+    
+    // 5. Subcategory multiplier (applied at the end)
+    // We'll use a default subcategory since it's not in the current data structure
+    // In a real implementation, this would come from the video data
+    const subcategoryMultiplier = getSubcategoryPriceMultiplier(template.custom_title || '');
+    basePrice = Math.round(basePrice * subcategoryMultiplier);
+    
+    // Calculate MRP (base price + 100-150% markup depending on final price)
+    const markupPercent = basePrice > 600 ? 1.8 : basePrice > 400 ? 2.0 : 2.2;
+    const mrp = Math.round(basePrice * markupPercent);
     
     // Calculate discount percentage
     const discountPercent = Math.round(((mrp - basePrice) / mrp) * 100);
@@ -155,7 +195,9 @@ export default function PublishCart() {
 
   const calculateTotalPrice = () => {
     return publishedTemplates.reduce((total, template) => {
-      const pricing = calculateTemplatePrice(template);
+      // For now, we'll use 1 as variation count since we can't easily get it here
+      // In a real implementation, this would be fetched along with the template data
+      const pricing = calculateTemplatePrice(template, 1);
       return total + pricing.price;
     }, 0);
   };
@@ -238,7 +280,9 @@ export default function PublishCart() {
           <>
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 mb-8">
               {publishedTemplates.map((template) => {
-                const pricing = calculateTemplatePrice(template);
+                // Get variation count - default to 1 if not available
+                const variationCount = 1; // This would ideally come from a query
+                const pricing = calculateTemplatePrice(template, variationCount);
                 const video: VideoItem = {
                   id: template.video_variations.video_id,
                   title: template.custom_title || template.video_variations.title,
@@ -295,7 +339,7 @@ export default function PublishCart() {
                 onClick={() => {
                   if (publishedTemplates.length > 0) {
                     const template = publishedTemplates[0];
-                    const pricing = calculateTemplatePrice(template);
+                    const pricing = calculateTemplatePrice(template, 1);
                     navigate('/share-cart-checkout', {
                       state: {
                         template: {
