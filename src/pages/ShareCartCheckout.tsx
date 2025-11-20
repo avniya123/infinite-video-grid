@@ -5,7 +5,6 @@ import { Header } from '@/components/Header';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerClose } from '@/components/ui/drawer';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
@@ -42,7 +41,7 @@ export default function ShareCartCheckout() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [template, setTemplate] = useState<TemplateData | null>(null);
   const [sharedUsers, setSharedUsers] = useState<SharedUser[]>([]);
-  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [addUserSheetOpen, setAddUserSheetOpen] = useState(false);
   const [shareMethod, setShareMethod] = useState<'cart' | 'edited'>('cart');
   const [paymentMethod, setPaymentMethod] = useState<'paytm' | 'credit'>('paytm');
   const [discountCode, setDiscountCode] = useState('');
@@ -116,7 +115,7 @@ export default function ShareCartCheckout() {
     setNewUserPhone('');
     setNewUserEmail('');
     setSelectedUserType('');
-    setDrawerOpen(false);
+    setAddUserSheetOpen(false);
   };
 
   const handleRemoveUser = (user: SharedUser) => {
@@ -320,7 +319,7 @@ export default function ShareCartCheckout() {
               <Upload className="w-5 h-5" />
               Import CSV
             </Button>
-            <Button onClick={() => setDrawerOpen(true)} className="gap-2">
+            <Button onClick={() => setAddUserSheetOpen(true)} className="gap-2">
               <UserPlus className="w-5 h-5" />
               Add Share Users
             </Button>
@@ -397,7 +396,7 @@ export default function ShareCartCheckout() {
                   <Users className="w-12 h-12 mx-auto mb-3 opacity-50" />
                   <p className="font-medium">No shared users added yet</p>
                   <p className="text-sm mt-1">Add at least one user to proceed with checkout</p>
-                  <Button variant="link" onClick={() => setDrawerOpen(true)} className="mt-2">
+                  <Button variant="link" onClick={() => setAddUserSheetOpen(true)} className="mt-2">
                     Add your first user
                   </Button>
                 </div>
@@ -603,23 +602,23 @@ export default function ShareCartCheckout() {
         </div>
       </div>
 
-      {/* Add Shared User Drawer */}
-      <Drawer open={drawerOpen} onOpenChange={setDrawerOpen}>
-        <DrawerContent className="max-h-[90vh]">
-          <DrawerHeader className="border-b">
+      {/* Add Shared User Sheet */}
+      <Sheet open={addUserSheetOpen} onOpenChange={setAddUserSheetOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+          <SheetHeader className="border-b pb-4">
             <div className="flex items-center justify-between">
-              <DrawerTitle>Adding Shared User For Template</DrawerTitle>
-              <DrawerClose asChild>
+              <SheetTitle>Adding Shared User For Template</SheetTitle>
+              <SheetClose asChild>
                 <Button variant="ghost" size="icon">
                   <X className="w-4 h-4" />
                 </Button>
-              </DrawerClose>
+              </SheetClose>
             </div>
-          </DrawerHeader>
+          </SheetHeader>
 
-          <div className="p-6 overflow-y-auto">
+          <div className="py-6 space-y-6">
             {/* User Type Selection */}
-            <div className="grid grid-cols-3 gap-4 mb-6">
+            <div className="grid grid-cols-3 gap-4">
               <button
                 onClick={() => setUserType('single')}
                 className={`p-4 rounded-lg border-2 transition-all ${
@@ -698,13 +697,14 @@ export default function ShareCartCheckout() {
                     className="mt-2"
                   />
                 </div>
+
                 <div>
                   <label className="text-sm font-medium">
-                    Email Id <span className="text-destructive">*</span>
+                    User Email Id <span className="text-destructive">*</span>
                   </label>
                   <Input
                     type="email"
-                    placeholder="yourmail@mail.com"
+                    placeholder="Example@gmail.com"
                     value={newUserEmail}
                     onChange={(e) => setNewUserEmail(e.target.value)}
                     className="mt-2"
@@ -712,17 +712,13 @@ export default function ShareCartCheckout() {
                 </div>
               </div>
 
-              <Button 
-                onClick={handleAddSharedUser}
-                className="w-full mt-6"
-              >
-                <UserPlus className="w-4 h-4 mr-2" />
-                Add Shared User
+              <Button onClick={handleAddSharedUser} className="w-full">
+                Add User
               </Button>
             </div>
           </div>
-        </DrawerContent>
-      </Drawer>
+        </SheetContent>
+      </Sheet>
 
       {/* Edit User Drawer */}
       <Sheet open={editDrawerOpen} onOpenChange={setEditDrawerOpen}>
