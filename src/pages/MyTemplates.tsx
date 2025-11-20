@@ -486,10 +486,6 @@ export default function MyTemplates() {
                 hasActiveFilters={hasActiveFilters}
               />
 
-              {/* Results count */}
-              <div className="ml-auto text-sm text-muted-foreground">
-                {filteredAndSortedTemplates.length} of {templates.length} templates
-              </div>
             </div>
 
             {/* Active Filters Chips - matching /videos page */}

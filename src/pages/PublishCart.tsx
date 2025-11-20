@@ -561,10 +561,6 @@ export default function PublishCart() {
                 hasActiveFilters={hasActiveFilters}
               />
 
-              {/* Results count */}
-              <div className="ml-auto text-sm text-muted-foreground">
-                {filteredAndSortedTemplates.length} of {publishedTemplates.length} templates
-              </div>
             </div>
 
             {/* Active Filters Chips - matching /videos page */}
