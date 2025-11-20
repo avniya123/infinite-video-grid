@@ -76,6 +76,7 @@ export default function ShareCartCheckout() {
   const [loadingEnrolledUsers, setLoadingEnrolledUsers] = useState(false);
   const [selectedEnrolledIds, setSelectedEnrolledIds] = useState<string[]>([]);
   const [enrolledSearchQuery, setEnrolledSearchQuery] = useState('');
+  const [enrolledUserType, setEnrolledUserType] = useState('family');
   
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -529,7 +530,9 @@ export default function ShareCartCheckout() {
   };
 
   const handleAddEnrolledUsers = () => {
-    const usersToAdd = enrolledUsers.filter(u => selectedEnrolledIds.includes(u.id));
+    const usersToAdd = enrolledUsers
+      .filter(u => selectedEnrolledIds.includes(u.id))
+      .map(u => ({ ...u, userType: enrolledUserType }));
     
     // Filter out duplicates
     const newUsers = usersToAdd.filter(enrolledUser => 
@@ -548,14 +551,15 @@ export default function ShareCartCheckout() {
     
     const skipped = usersToAdd.length - newUsers.length;
     const message = skipped > 0 
-      ? `${newUsers.length} user(s) added. ${skipped} duplicate(s) skipped.`
-      : `${newUsers.length} enrolled user(s) added`;
+      ? `${newUsers.length} user(s) added as ${enrolledUserType}. ${skipped} duplicate(s) skipped.`
+      : `${newUsers.length} enrolled user(s) added as ${enrolledUserType}`;
     
     toast.success('Enrolled Users Added', {
       description: message,
     });
     
     setSelectedEnrolledIds([]);
+    setEnrolledUserType('family');
     setAddUserSheetOpen(false);
   };
 
@@ -1397,6 +1401,27 @@ export default function ShareCartCheckout() {
                   <h4 className="font-medium mb-2">Select Registered Users</h4>
                   <p className="text-sm text-muted-foreground">
                     Choose users who are already registered in the system
+                  </p>
+                </div>
+
+                {/* User Type Selection */}
+                <div>
+                  <label className="text-sm font-medium">
+                    Assign User Type <span className="text-destructive">*</span>
+                  </label>
+                  <Select value={enrolledUserType} onValueChange={setEnrolledUserType}>
+                    <SelectTrigger className="mt-2">
+                      <SelectValue placeholder="Select user type..." />
+                    </SelectTrigger>
+                    <SelectContent className="bg-background z-50">
+                      <SelectItem value="family">Family</SelectItem>
+                      <SelectItem value="friend">Friend</SelectItem>
+                      <SelectItem value="colleague">Colleague</SelectItem>
+                      <SelectItem value="client">Client</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    All selected users will be added with this user type
                   </p>
                 </div>
 
