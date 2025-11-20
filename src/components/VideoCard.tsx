@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, Check, List } from 'lucide-react';
+import { Play, Check, List, Bookmark, BookmarkCheck } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -12,6 +12,8 @@ import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
 import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -34,6 +36,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [playerOpen, setPlayerOpen] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
+  const [isSaved, setIsSaved] = useState(false);
+  const [savingTemplate, setSavingTemplate] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -95,6 +99,94 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
       videoRef.current.load();
     }
   }, [isInView, video.videoUrl]);
+
+  // Check if template is already saved
+  useEffect(() => {
+    const checkIfSaved = async () => {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session) return;
+
+      // First get the variation UUID from video_id
+      const { data: variation } = await supabase
+        .from('video_variations')
+        .select('id')
+        .eq('video_id', video.id)
+        .maybeSingle();
+
+      if (!variation) return;
+
+      const { data, error } = await supabase
+        .from('user_templates')
+        .select('id')
+        .eq('user_id', session.user.id)
+        .eq('variation_id', variation.id)
+        .maybeSingle();
+
+      if (!error && data) {
+        setIsSaved(true);
+      }
+    };
+
+    checkIfSaved();
+  }, [video.id]);
+
+  const handleSaveTemplate = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    
+    const { data: { session } } = await supabase.auth.getSession();
+    if (!session) {
+      setAuthDrawerOpen(true);
+      return;
+    }
+
+    setSavingTemplate(true);
+
+    try {
+      // First get the variation UUID from video_id
+      const { data: variation, error: variationError } = await supabase
+        .from('video_variations')
+        .select('id')
+        .eq('video_id', video.id)
+        .maybeSingle();
+
+      if (variationError || !variation) {
+        throw new Error('Template variation not found');
+      }
+
+      if (isSaved) {
+        // Remove from templates
+        const { error } = await supabase
+          .from('user_templates')
+          .delete()
+          .eq('user_id', session.user.id)
+          .eq('variation_id', variation.id);
+
+        if (error) throw error;
+
+        setIsSaved(false);
+        toast.success('Removed from My Templates');
+      } else {
+        // Add to templates
+        const { error } = await supabase
+          .from('user_templates')
+          .insert([{
+            user_id: session.user.id,
+            variation_id: variation.id,
+            custom_title: video.title,
+          }]);
+
+        if (error) throw error;
+
+        setIsSaved(true);
+        toast.success('Saved to My Templates');
+      }
+    } catch (error: any) {
+      console.error('Error saving template:', error);
+      toast.error('Failed to save template');
+    } finally {
+      setSavingTemplate(false);
+    }
+  };
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -273,6 +365,30 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             >
               <ShareButton video={video} variant="outline" size="icon" />
             </div>
+
+            {/* Save to My Templates Button */}
+            <TooltipProvider delayDuration={200}>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="outline"
+                    size="icon"
+                    onClick={handleSaveTemplate}
+                    disabled={savingTemplate}
+                    className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 dark:bg-gray-800/95 border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800"
+                  >
+                    {isSaved ? (
+                      <BookmarkCheck className="h-4 w-4 text-primary" />
+                    ) : (
+                      <Bookmark className="h-4 w-4" />
+                    )}
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent side="left">
+                  <p>{isSaved ? 'Saved to My Templates' : 'Save to My Templates'}</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           </div>
 
           {/* Play Button - hide when video is playing */}
