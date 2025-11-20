@@ -342,6 +342,46 @@ export default function ShareCartCheckout() {
     toast.success('CSV template downloaded');
   };
 
+  const handleExportUsers = () => {
+    const usersToExport = searchQuery ? filteredUsers : sharedUsers;
+    
+    if (usersToExport.length === 0) {
+      toast.error('No users to export');
+      return;
+    }
+
+    // Create CSV content with header
+    const header = 'name,phone,email,userType';
+    const rows = usersToExport.map(user => 
+      `${user.name},${user.phone},${user.email},${user.userType}`
+    );
+    const csvContent = [header, ...rows].join('\n');
+
+    // Create and download the file
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = window.URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    
+    // Create filename with timestamp
+    const timestamp = new Date().toISOString().split('T')[0];
+    const filename = searchQuery 
+      ? `filtered_shared_users_${timestamp}.csv`
+      : `shared_users_${timestamp}.csv`;
+    a.download = filename;
+    
+    a.click();
+    window.URL.revokeObjectURL(url);
+    
+    const message = searchQuery 
+      ? `Exported ${usersToExport.length} filtered user(s)`
+      : `Exported ${usersToExport.length} user(s)`;
+    
+    toast.success('Export successful', {
+      description: message,
+    });
+  };
+
   const handleCsvImport = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (!file) return;
@@ -591,28 +631,39 @@ export default function ShareCartCheckout() {
 
               {/* Search Bar */}
               {sharedUsers.length > 0 && (
-                <div className="mb-4">
-                  <div className="relative">
-                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-                    <Input
-                      placeholder="Search by name, email, phone, or type..."
-                      value={searchQuery}
-                      onChange={(e) => setSearchQuery(e.target.value)}
-                      className="pl-10"
-                    />
-                    {searchQuery && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
-                        onClick={() => setSearchQuery('')}
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    )}
+                <div className="mb-4 space-y-3">
+                  <div className="flex gap-2">
+                    <div className="relative flex-1">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
+                      <Input
+                        placeholder="Search by name, email, phone, or type..."
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        className="pl-10"
+                      />
+                      {searchQuery && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-1 top-1/2 -translate-y-1/2 h-7 w-7 p-0"
+                          onClick={() => setSearchQuery('')}
+                        >
+                          <X className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                    <Button
+                      variant="outline"
+                      size="default"
+                      onClick={handleExportUsers}
+                      className="gap-2 shrink-0"
+                    >
+                      <Download className="w-4 h-4" />
+                      Export {searchQuery ? 'Filtered' : 'All'}
+                    </Button>
                   </div>
                   {searchQuery && (
-                    <p className="text-xs text-muted-foreground mt-2">
+                    <p className="text-xs text-muted-foreground">
                       Found {filteredUsers.length} of {sharedUsers.length} user(s)
                     </p>
                   )}
