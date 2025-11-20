@@ -1408,30 +1408,39 @@ export default function ShareCartCheckout() {
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => {
-                        const csvHeader = 'name,phone,email';
-                        const csvRows = enrolledUsers.map(user => 
-                          `${user.name},${user.phone || 'N/A'},${user.email}`
-                        );
-                        const csvContent = [csvHeader, ...csvRows].join('\n');
-                        
-                        const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-                        const url = window.URL.createObjectURL(blob);
-                        const a = document.createElement('a');
-                        a.href = url;
-                        const timestamp = new Date().toISOString().split('T')[0];
-                        a.download = `enrolled_users_${timestamp}.csv`;
-                        a.click();
-                        window.URL.revokeObjectURL(url);
-                        
-                        toast.success('Enrolled users exported', {
-                          description: `${enrolledUsers.length} user(s) exported to CSV`,
-                        });
+                      onClick={async () => {
+                        if (!user) {
+                          toast.error('Please login to save users');
+                          return;
+                        }
+
+                        try {
+                          const usersToSave = enrolledUsers.map(enrolledUser => ({
+                            user_id: user.id,
+                            enrolled_user_name: enrolledUser.name,
+                            enrolled_user_phone: enrolledUser.phone,
+                            enrolled_user_email: enrolledUser.email,
+                            is_enabled: true,
+                          }));
+
+                          const { error } = await supabase
+                            .from('saved_enrolled_users')
+                            .insert(usersToSave);
+
+                          if (error) throw error;
+
+                          toast.success('Users saved successfully', {
+                            description: `${enrolledUsers.length} enrolled user(s) saved to My Users`,
+                          });
+                        } catch (error) {
+                          console.error('Error saving users:', error);
+                          toast.error('Failed to save users');
+                        }
                       }}
                       className="gap-2"
                     >
                       <Download className="w-4 h-4" />
-                      Export All
+                      Save All Users
                     </Button>
                   )}
                 </div>
