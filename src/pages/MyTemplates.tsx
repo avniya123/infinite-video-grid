@@ -129,6 +129,16 @@ export default function MyTemplates() {
   };
 
   const handleDeleteTemplate = async (templateId: string) => {
+    // Optimistic update - immediately remove from UI
+    const templateToDelete = templates.find(t => t.id === templateId);
+    const previousTemplates = [...templates];
+    
+    // Update UI immediately
+    setTemplates(templates.filter(t => t.id !== templateId));
+    
+    // Show optimistic feedback
+    toast.success('Removing template...', { duration: 1000 });
+    
     try {
       const { error } = await supabase
         .from('user_templates')
@@ -137,9 +147,11 @@ export default function MyTemplates() {
 
       if (error) throw error;
 
-      setTemplates(templates.filter(t => t.id !== templateId));
+      // Confirm success
       toast.success('Template removed from your collection');
     } catch (error: any) {
+      // Revert on failure
+      setTemplates(previousTemplates);
       toast.error('Failed to remove template');
       console.error('Error deleting template:', error);
     }
@@ -151,14 +163,17 @@ export default function MyTemplates() {
   };
 
   const handlePublishConfirm = async (video: VideoItem) => {
-    try {
-      // Find the template in the templates array
-      const template = templates.find(t => t.video_variations.video_id === video.id);
-      if (!template) {
-        toast.error('Template not found');
-        return;
-      }
+    // Find the template
+    const template = templates.find(t => t.video_variations.video_id === video.id);
+    if (!template) {
+      toast.error('Template not found');
+      return;
+    }
 
+    // Optimistic update - show publishing feedback
+    toast.success('Publishing template...', { duration: 1000 });
+
+    try {
       // Update the template to mark it as published
       const { error } = await supabase
         .from('user_templates')
@@ -632,22 +647,24 @@ export default function MyTemplates() {
                           <Button
                             variant="default"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 transition-transform hover:scale-110"
                             onClick={(e) => {
                               e.stopPropagation();
                               navigate(`/template-editor/${template.variation_id}`);
                             }}
+                            title="Edit template"
                           >
                             <Edit className="h-4 w-4" />
                           </Button>
                           <Button
                             variant="destructive"
                             size="icon"
-                            className="h-8 w-8"
+                            className="h-8 w-8 transition-transform hover:scale-110"
                             onClick={(e) => {
                               e.stopPropagation();
                               handleDeleteTemplate(template.id);
                             }}
+                            title="Delete template"
                           >
                             <Trash2 className="h-4 w-4" />
                           </Button>
