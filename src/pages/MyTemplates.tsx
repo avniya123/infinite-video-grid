@@ -359,7 +359,9 @@ export default function MyTemplates() {
           <div className="flex items-center gap-3">
             <FileVideo className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold text-foreground">My Templates</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                My Templates {templates.length > 0 && `(${templates.length})`}
+              </h1>
               <p className="text-muted-foreground text-sm mt-1">
                 Manage your saved video templates
               </p>

@@ -426,7 +426,9 @@ export default function PublishCart() {
           <div className="flex items-center gap-3">
             <ShoppingCart className="h-8 w-8 text-primary" />
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Publish Cart</h1>
+              <h1 className="text-3xl font-bold text-foreground">
+                Publish Cart {publishedTemplates.length > 0 && `(${publishedTemplates.length})`}
+              </h1>
               <p className="text-muted-foreground text-sm mt-1">
                 Review and manage your templates ready for publishing
               </p>
