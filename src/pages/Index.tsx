@@ -364,7 +364,7 @@ const Index = () => {
               </div>
             ))}
             {loading && Array.from({ length: 4 }).map((_, i) => (
-              <VideoCardSkeleton key={`skeleton-masonry-${i}`} />
+              <VideoCardSkeleton key={`skeleton-masonry-${i}`} index={i} />
             ))}
           </div>
         )}
@@ -428,7 +428,7 @@ const Index = () => {
               </div>
             ))}
             {loading && Array.from({ length: 2 }).map((_, i) => (
-              <VideoCardSkeleton key={`skeleton-list-${i}`} />
+              <VideoCardSkeleton key={`skeleton-list-${i}`} index={i} />
             ))}
           </div>
         )}
