@@ -371,6 +371,11 @@ export default function MyTemplates() {
     return sorted;
   }, [templates, searchQuery, sortBy, selectedAspectRatios, selectedDurations, publishFilter]);
 
+  // Calculate publish cart count
+  const publishCartCount = useMemo(() => {
+    return templates.filter(t => t.published).length;
+  }, [templates]);
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background transition-colors duration-300">
@@ -444,14 +449,28 @@ export default function MyTemplates() {
               </p>
             </div>
           </div>
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/videos')}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Videos
-          </Button>
+          <div className="flex items-center gap-2">
+            {publishCartCount > 0 && (
+              <Button
+                onClick={() => navigate('/publish-cart')}
+                className="gap-2 bg-green-500 hover:bg-green-600 text-white"
+              >
+                <ShoppingCart className="h-4 w-4" />
+                Publish Cart
+                <Badge className="ml-1 bg-white text-green-600 hover:bg-white">
+                  {publishCartCount}
+                </Badge>
+              </Button>
+            )}
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/videos')}
+              className="gap-2"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back to Videos
+            </Button>
+          </div>
         </div>
 
         {filteredAndSortedTemplates.length === 0 ? (
