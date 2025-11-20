@@ -2,7 +2,7 @@ import { useEffect, useRef, useState, useCallback } from 'react';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
-import { Header } from '@/components/Header';
+import { Layout } from '@/components/Layout';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FilterChips } from '@/components/FilterChips';
 import { FilterDrawer } from '@/components/FilterDrawer';
@@ -192,15 +192,13 @@ const Index = () => {
   });
 
   return (
-    <div className="min-h-screen bg-background transition-colors duration-300">
-      {/* Header */}
-      <Header 
-        selectedSubcategory={selectedSubcategory}
-        selectedMainCategory={selectedMainCategory}
-        onSubcategorySelect={handleSubcategorySelect}
-        onMainCategorySelect={handleMainCategorySelect}
-      />
-      
+    <Layout
+      showCategoryFilters={true}
+      selectedSubcategory={selectedSubcategory}
+      selectedMainCategory={selectedMainCategory}
+      onSubcategorySelect={handleSubcategorySelect}
+      onMainCategorySelect={handleMainCategorySelect}
+    >
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
         {/* Search and Controls */}
@@ -494,7 +492,7 @@ const Index = () => {
       />
 
       <ScrollToTop />
-    </div>
+    </Layout>
   );
 };
 
