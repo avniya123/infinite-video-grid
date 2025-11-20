@@ -1,9 +1,10 @@
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription, SheetClose } from "@/components/ui/sheet";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
+import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
-import { ShoppingCart, Edit, Play, X } from "lucide-react";
+import { ShoppingCart, Edit, Play } from "lucide-react";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -122,11 +123,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth }: V
                 Explore different versions and formats of this video
               </SheetDescription>
             </div>
-            <SheetClose asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <X className="w-4 h-4" />
-              </Button>
-            </SheetClose>
+            <DrawerCloseButton />
           </div>
         </SheetHeader>
 

@@ -1,7 +1,8 @@
 import { Filter, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription, SheetClose } from '@/components/ui/sheet';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetDescription } from '@/components/ui/sheet';
 import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
+import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Separator } from '@/components/ui/separator';
@@ -161,11 +162,7 @@ export const FilterDrawer = ({
                 </Button>
               )}
             </div>
-            <SheetClose asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <X className="w-4 h-4" />
-              </Button>
-            </SheetClose>
+            <DrawerCloseButton />
           </div>
         </SheetHeader>
         

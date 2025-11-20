@@ -16,7 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Switch } from '@/components/ui/switch';
 import { toast } from 'sonner';
-import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Eye, AlertCircle, X } from 'lucide-react';
+import { Camera, Loader2, LogOut, User, Shield, Info, Key, Mail, Eye, AlertCircle } from 'lucide-react';
 import { profileSchema, type ProfileFormData } from '@/lib/validations';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import {
@@ -25,9 +25,9 @@ import {
   SheetDescription,
   SheetHeader,
   SheetTitle,
-  SheetClose,
 } from '@/components/ui/sheet';
 import { DRAWER_PRESETS, getDrawerHeaderClassName } from '@/config/drawer';
+import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 
 interface ProfileDrawerProps {
   open: boolean;
@@ -387,11 +387,7 @@ export default function ProfileDrawer({ open, onOpenChange }: ProfileDrawerProps
               <SheetTitle className="text-xl">Settings</SheetTitle>
               <SheetDescription>Manage your account settings and preferences</SheetDescription>
             </div>
-            <SheetClose asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <X className="w-4 h-4" />
-              </Button>
-            </SheetClose>
+            <DrawerCloseButton />
           </div>
         </SheetHeader>
 
