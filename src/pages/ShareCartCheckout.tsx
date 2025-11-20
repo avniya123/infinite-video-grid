@@ -652,19 +652,6 @@ export default function ShareCartCheckout() {
           </p>
         </div>
 
-        {/* Action Buttons */}
-        <div className="flex flex-wrap gap-3 mb-8">
-          <Button 
-            onClick={() => {
-              setEditingUser(null);
-              setAddUserSheetOpen(true);
-            }} 
-            className="gap-2 font-medium shadow-sm hover:shadow-md transition-all"
-          >
-            <Users className="w-4 h-4" />
-            Users
-          </Button>
-        </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Template & Users */}
@@ -918,7 +905,11 @@ export default function ShareCartCheckout() {
               <p className="text-xs text-muted-foreground mb-4">Default logged-in user data will be used for rendering</p>
               <div className="grid grid-cols-2 gap-3">
                 <button
-                  onClick={() => setShareMethod('cart')}
+                  onClick={() => {
+                    setShareMethod('cart');
+                    setEditingUser(null);
+                    setAddUserSheetOpen(true);
+                  }}
                   className={`p-4 rounded-lg border-2 transition-all ${
                     shareMethod === 'cart' 
                       ? 'border-primary bg-primary/5' 
