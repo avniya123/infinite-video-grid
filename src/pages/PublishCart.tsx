@@ -305,32 +305,26 @@ export default function PublishCart() {
       
       <div className="container mx-auto px-4 py-8">
         <div className="mb-6">
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/my-templates')}
-            className="mb-4"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Back to My Templates
-          </Button>
-
           <div className="flex items-center justify-between mb-6">
-            <div>
-              <div className="flex items-center gap-3">
-                <ShoppingCart className="h-8 w-8 text-primary" />
-                <h1 className="text-3xl font-bold text-foreground">Publish Cart</h1>
-              </div>
-              <p className="text-muted-foreground mt-2">
-                Review and manage your templates ready for publishing
-              </p>
+            <div className="flex items-center gap-3">
+              <ShoppingCart className="h-8 w-8 text-primary" />
+              <h1 className="text-3xl font-bold text-foreground">
+                Publish Cart ({publishedTemplates.length})
+              </h1>
             </div>
-            <div className="text-right">
-              <div className="text-sm text-muted-foreground mb-1">
-                {publishedTemplates.length} {publishedTemplates.length === 1 ? 'template' : 'templates'}
+            <div className="flex items-center gap-4">
+              <div className="text-right">
+                <div className="text-2xl font-bold text-primary">
+                  ₹{calculateTotalPrice().toLocaleString()}
+                </div>
               </div>
-              <div className="text-2xl font-bold text-primary">
-                ₹{calculateTotalPrice().toLocaleString()}
-              </div>
+              <Button
+                variant="ghost"
+                onClick={() => navigate('/my-templates')}
+              >
+                <ArrowLeft className="mr-2 h-4 w-4" />
+                Back to My Templates
+              </Button>
             </div>
           </div>
         </div>
@@ -472,15 +466,6 @@ export default function PublishCart() {
                 onClearSearch={() => setSearchQuery('')}
               />
             )}
-
-            {/* Results Count */}
-            <div className="flex items-center justify-between">
-              <p className="text-sm text-muted-foreground">
-                Showing <span className="font-semibold text-foreground">{filteredVideos.length}</span> 
-                {' '}of {publishedTemplates.length} templates
-                {hasActiveFilters && ' with filters applied'}
-              </p>
-            </div>
           </div>
         )}
 
