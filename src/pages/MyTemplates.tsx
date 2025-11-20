@@ -275,7 +275,8 @@ export default function MyTemplates() {
 
   // Filter and sort templates
   const filteredAndSortedTemplates = useMemo(() => {
-    let filtered = templates;
+    // First filter out published templates
+    let filtered = templates.filter(template => !template.published);
 
     // Search by title or ID prefix
     if (searchQuery) {
@@ -393,7 +394,7 @@ export default function MyTemplates() {
             </div>
             <div>
               <h1 className="text-2xl font-bold text-foreground">
-                My Templates {templates.length > 0 && `(${templates.length})`}
+                My Templates {filteredAndSortedTemplates.length > 0 && `(${filteredAndSortedTemplates.length})`}
               </h1>
               <p className="text-muted-foreground text-sm mt-0.5">
                 Manage your saved video templates
@@ -410,7 +411,7 @@ export default function MyTemplates() {
           </Button>
         </div>
 
-        {templates.length === 0 ? (
+        {filteredAndSortedTemplates.length === 0 ? (
           <div className="text-center py-16">
             <div className="max-w-md mx-auto">
               <FileVideo className="h-16 w-16 text-muted-foreground mx-auto mb-4" />
