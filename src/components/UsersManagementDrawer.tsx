@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetClose } from '@/components/ui/sheet';
 import { DRAWER_PRESETS, getDrawerHeaderClassName, getDrawerContentClassName } from '@/config/drawer';
+import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -255,11 +256,7 @@ export function UsersManagementDrawer({
             <SheetTitle>
               {editingUser ? 'Edit Shared User' : 'Manage Users'}
             </SheetTitle>
-            <SheetClose asChild>
-              <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                <X className="w-4 h-4" />
-              </Button>
-            </SheetClose>
+            <DrawerCloseButton />
           </div>
           <p className="text-sm text-muted-foreground mt-2">
             Default logged-in user data will be used for rendering
