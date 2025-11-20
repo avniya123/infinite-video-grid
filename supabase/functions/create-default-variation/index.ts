@@ -90,9 +90,18 @@ Deno.serve(async (req) => {
 
   } catch (error) {
     console.error('Error in create-default-variation function:', error);
+    const err = error as any;
+    console.error('Error details:', {
+      message: err?.message,
+      name: err?.name,
+      stack: err?.stack,
+      code: err?.code,
+      details: err?.details,
+      hint: err?.hint
+    });
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     return new Response(
-      JSON.stringify({ error: errorMessage }),
+      JSON.stringify({ error: errorMessage, details: err?.details || null }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 500 }
     );
   }
