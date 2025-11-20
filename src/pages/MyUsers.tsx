@@ -6,8 +6,11 @@ import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
+import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { toast } from 'sonner';
-import { ArrowLeft, Search, Mail, Phone, Calendar, Trash2, Users } from 'lucide-react';
+import { ArrowLeft, Search, Mail, Phone, Calendar, Trash2, Users, Filter, X } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { useSharedUsers } from '@/hooks/useSharedUsers';
@@ -20,6 +23,7 @@ interface SavedUser {
   is_enabled: boolean;
   created_at: string;
   updated_at: string;
+  user_type?: string;
 }
 
 export default function MyUsers() {
@@ -28,6 +32,8 @@ export default function MyUsers() {
   const [savedUsers, setSavedUsers] = useState<SavedUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedUserType, setSelectedUserType] = useState<string>('all');
+  const [viewMode, setViewMode] = useState<'grid' | 'table'>('table');
   const [usersDrawerOpen, setUsersDrawerOpen] = useState(false);
   
   const {
@@ -112,12 +118,29 @@ export default function MyUsers() {
     }
   };
 
-  const filteredUsers = savedUsers.filter(user =>
-    user.enrolled_user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-    user.enrolled_user_email.toLowerCase().includes(searchQuery.toLowerCase())
-  );
+  const filteredUsers = savedUsers.filter(user => {
+    const matchesSearch = user.enrolled_user_name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      user.enrolled_user_email.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (user.enrolled_user_phone && user.enrolled_user_phone.includes(searchQuery));
+    
+    const matchesType = selectedUserType === 'all' || user.user_type === selectedUserType;
+    
+    return matchesSearch && matchesType;
+  });
+
+  const userTypes = ['all', ...new Set(savedUsers.map(u => u.user_type).filter(Boolean))];
+
+  const hasActiveFilters = selectedUserType !== 'all' || searchQuery.length > 0;
 
   const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric'
+    });
+  };
+
+  const formatDateTime = (dateString: string) => {
     return new Date(dateString).toLocaleDateString('en-US', {
       year: 'numeric',
       month: 'short',
@@ -125,6 +148,23 @@ export default function MyUsers() {
       hour: '2-digit',
       minute: '2-digit'
     });
+  };
+
+  const groupUsersByDate = () => {
+    const grouped: { [key: string]: SavedUser[] } = {};
+    filteredUsers.forEach(user => {
+      const date = formatDate(user.created_at);
+      if (!grouped[date]) {
+        grouped[date] = [];
+      }
+      grouped[date].push(user);
+    });
+    return grouped;
+  };
+
+  const clearFilters = () => {
+    setSearchQuery('');
+    setSelectedUserType('all');
   };
 
   return (
@@ -154,25 +194,52 @@ export default function MyUsers() {
           </Button>
         </div>
 
-        {/* Search Bar */}
-        {savedUsers.length > 0 && (
-          <div className="mb-6">
-            <div className="relative max-w-md">
+        {/* Search and Filters */}
+        <div className="mb-6 space-y-4">
+          <div className="flex flex-col sm:flex-row gap-4">
+            <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
               <Input
-                placeholder="Search by name or email..."
+                placeholder="Search by name, email, or phone..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="pl-10"
               />
             </div>
-            {searchQuery && (
-              <p className="text-xs text-muted-foreground mt-2">
-                Found {filteredUsers.length} of {savedUsers.length} user(s)
-              </p>
-            )}
+            
+            <Select value={selectedUserType} onValueChange={setSelectedUserType}>
+              <SelectTrigger className="w-full sm:w-48">
+                <Filter className="w-4 h-4 mr-2" />
+                <SelectValue placeholder="Filter by type" />
+              </SelectTrigger>
+              <SelectContent className="bg-background z-50">
+                <SelectItem value="all">All Types</SelectItem>
+                {userTypes.filter(type => type !== 'all').map(type => (
+                  <SelectItem key={type} value={type!} className="capitalize">
+                    {type}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
-        )}
+
+          {hasActiveFilters && (
+            <div className="flex items-center gap-2">
+              <Badge variant="secondary" className="gap-1">
+                {filteredUsers.length} of {savedUsers.length} users
+              </Badge>
+              <Button 
+                variant="ghost" 
+                size="sm" 
+                onClick={clearFilters}
+                className="h-7 px-2 text-xs"
+              >
+                <X className="w-3 h-3 mr-1" />
+                Clear filters
+              </Button>
+            </div>
+          )}
+        </div>
 
         {/* Content */}
         {loading ? (
@@ -185,73 +252,109 @@ export default function MyUsers() {
               <Search className="w-8 h-8" />
             </div>
             <p className="font-medium text-lg mb-2">
-              {searchQuery ? 'No users found' : 'No saved users yet'}
+              {hasActiveFilters ? 'No users found' : 'No saved users yet'}
             </p>
             <p className="text-sm">
-              {searchQuery 
-                ? 'Try adjusting your search query'
+              {hasActiveFilters 
+                ? 'Try adjusting your filters or search query'
                 : 'Users you save from the enrolled list will appear here'}
             </p>
-            {searchQuery && (
-              <Button variant="link" onClick={() => setSearchQuery('')} className="mt-2">
-                Clear search
+            {hasActiveFilters && (
+              <Button variant="link" onClick={clearFilters} className="mt-2">
+                Clear filters
               </Button>
             )}
           </div>
         ) : (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            {filteredUsers.map((savedUser) => (
-              <Card key={savedUser.id} className="p-5 hover:shadow-lg transition-shadow">
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex items-center gap-3">
-                    <div className="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center font-semibold text-lg">
-                      {savedUser.enrolled_user_name.charAt(0).toUpperCase()}
-                    </div>
-                    <div>
-                      <h3 className="font-semibold text-lg">
-                        {savedUser.enrolled_user_name}
-                      </h3>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Switch
-                          checked={savedUser.is_enabled}
-                          onCheckedChange={() => handleToggleEnabled(savedUser.id, savedUser.is_enabled)}
-                        />
-                        <span className={`text-xs font-medium ${
-                          savedUser.is_enabled ? 'text-green-600' : 'text-muted-foreground'
-                        }`}>
-                          {savedUser.is_enabled ? 'Enabled' : 'Disabled'}
-                        </span>
-                      </div>
-                    </div>
-                  </div>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    onClick={() => handleDeleteUser(savedUser.id)}
-                    className="text-destructive hover:text-destructive"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-sm">
-                    <Mail className="w-4 h-4 text-muted-foreground" />
-                    <span className="truncate">{savedUser.enrolled_user_email}</span>
-                  </div>
-                  {savedUser.enrolled_user_phone && (
-                    <div className="flex items-center gap-2 text-sm">
-                      <Phone className="w-4 h-4 text-muted-foreground" />
-                      <span>{savedUser.enrolled_user_phone}</span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2 text-xs text-muted-foreground pt-2 border-t">
-                    <Calendar className="w-3 h-3" />
-                    <span>Added {formatDate(savedUser.created_at)}</span>
-                  </div>
-                </div>
-              </Card>
-            ))}
+          <div className="space-y-8">
+            {/* Table View */}
+            <Card className="overflow-hidden">
+              <Table>
+                <TableHeader>
+                  <TableRow className="bg-muted/50">
+                    <TableHead className="w-12">#</TableHead>
+                    <TableHead>User</TableHead>
+                    <TableHead>Contact</TableHead>
+                    <TableHead>Type</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Added On</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {filteredUsers.map((savedUser, index) => (
+                    <TableRow key={savedUser.id} className="hover:bg-muted/30">
+                      <TableCell className="font-medium text-muted-foreground">
+                        {index + 1}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center font-semibold">
+                            {savedUser.enrolled_user_name.charAt(0).toUpperCase()}
+                          </div>
+                          <div>
+                            <p className="font-semibold">{savedUser.enrolled_user_name}</p>
+                          </div>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="space-y-1">
+                          <div className="flex items-center gap-2 text-sm">
+                            <Mail className="w-3 h-3 text-muted-foreground" />
+                            <span className="truncate max-w-[200px]">{savedUser.enrolled_user_email}</span>
+                          </div>
+                          {savedUser.enrolled_user_phone && (
+                            <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                              <Phone className="w-3 h-3" />
+                              <span>{savedUser.enrolled_user_phone}</span>
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        {savedUser.user_type ? (
+                          <Badge variant="outline" className="capitalize">
+                            {savedUser.user_type}
+                          </Badge>
+                        ) : (
+                          <span className="text-muted-foreground text-sm">-</span>
+                        )}
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Switch
+                            checked={savedUser.is_enabled}
+                            onCheckedChange={() => handleToggleEnabled(savedUser.id, savedUser.is_enabled)}
+                          />
+                          <Badge 
+                            variant={savedUser.is_enabled ? "default" : "secondary"}
+                            className="text-xs"
+                          >
+                            {savedUser.is_enabled ? 'Enabled' : 'Disabled'}
+                          </Badge>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Calendar className="w-3 h-3" />
+                          <span>{formatDate(savedUser.created_at)}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleDeleteUser(savedUser.id)}
+                          className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </Card>
           </div>
         )}
       </div>
