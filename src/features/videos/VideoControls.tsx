@@ -99,15 +99,15 @@ export const VideoControls = ({
 
       {/* Column Count Slider (Masonry View Only) */}
       {viewMode === "masonry" && (
-        <div className="flex items-center gap-4 p-4 rounded-lg border bg-card">
-          <span className="text-sm font-medium whitespace-nowrap">Columns: {columnCount}</span>
+        <div className="flex items-center gap-3 bg-muted px-4 py-2 rounded-lg min-w-[180px]">
+          <span className="text-xs font-medium text-muted-foreground whitespace-nowrap">Columns: {columnCount}</span>
           <Slider
             value={[columnCount]}
             onValueChange={(value) => onColumnCountChange(value[0])}
             min={2}
-            max={4}
+            max={6}
             step={1}
-            className="flex-1"
+            className="w-24"
           />
         </div>
       )}
