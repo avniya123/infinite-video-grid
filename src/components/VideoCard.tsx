@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, Check, List, Bookmark, BookmarkCheck, ShoppingCart } from 'lucide-react';
+import { Play, Check, List } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -10,8 +10,6 @@ import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
-import { PublishConfirmDialog } from '@/components/PublishConfirmDialog';
-import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -23,13 +21,10 @@ interface VideoCardProps {
   isSelected?: boolean;
   onSelect?: (video: VideoItem) => void;
   showShareButton?: boolean;
-  showSaveButton?: boolean;
   showPrice?: boolean;
-  publishMode?: boolean;
-  onPublish?: (video: VideoItem) => Promise<void>;
 }
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showSaveButton = true, showPrice = true, publishMode = false, onPublish }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showPrice = true }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -42,14 +37,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [playerOpen, setPlayerOpen] = useState(false);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
-  const [isSaved, setIsSaved] = useState(false);
-  const [savingTemplate, setSavingTemplate] = useState(false);
-  const [publishDialogOpen, setPublishDialogOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
 
   // Calculate aspect ratio based on orientation
   const getAspectRatio = () => {
@@ -106,110 +96,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
       videoRef.current.load();
     }
   }, [isInView, video.videoUrl]);
-
-  // Check if template is already saved
-  useEffect(() => {
-    const checkIfSaved = async () => {
-      const { data: { session } } = await supabase.auth.getSession();
-      if (!session) return;
-
-      // First get the variation UUID from video_id
-      const { data: variation } = await supabase
-        .from('video_variations')
-        .select('id')
-        .eq('video_id', video.id)
-        .maybeSingle();
-
-      if (!variation) return;
-
-      const { data, error } = await supabase
-        .from('user_templates')
-        .select('id')
-        .eq('user_id', session.user.id)
-        .eq('variation_id', variation.id)
-        .maybeSingle();
-
-      if (!error && data) {
-        setIsSaved(true);
-      }
-    };
-
-    checkIfSaved();
-  }, [video.id]);
-
-  const handleSaveTemplate = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    
-    // If in publish mode, show confirmation dialog
-    if (publishMode) {
-      setPublishDialogOpen(true);
-      return;
-    }
-    
-    const { data: { session } } = await supabase.auth.getSession();
-    if (!session) {
-      setAuthDrawerOpen(true);
-      return;
-    }
-
-    setSavingTemplate(true);
-
-    try {
-      // First get the variation UUID from video_id
-      const { data: variation, error: variationError } = await supabase
-        .from('video_variations')
-        .select('id')
-        .eq('video_id', video.id)
-        .maybeSingle();
-
-      if (variationError || !variation) {
-        throw new Error('Template variation not found');
-      }
-
-      if (isSaved) {
-        // Remove from templates
-        const { error } = await supabase
-          .from('user_templates')
-          .delete()
-          .eq('user_id', session.user.id)
-          .eq('variation_id', variation.id);
-
-        if (error) throw error;
-
-        setIsSaved(false);
-        toast.success('Removed from My Templates');
-      } else {
-        // Add to templates
-        const { error } = await supabase
-          .from('user_templates')
-          .insert([{
-            user_id: session.user.id,
-            variation_id: variation.id,
-            custom_title: video.title,
-          }]);
-
-        if (error) throw error;
-
-        setIsSaved(true);
-        toast.success('Saved to My Templates');
-      }
-    } catch (error: any) {
-      console.error('Error saving template:', error);
-      toast.error('Failed to save template');
-    } finally {
-      setSavingTemplate(false);
-    }
-  };
-
-  const handlePublishConfirm = async () => {
-    setPublishDialogOpen(false);
-    
-    if (onPublish) {
-      await onPublish(video);
-    } else {
-      toast.success('Template published successfully!');
-    }
-  };
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -341,11 +227,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-            01/{String(variationsCount + 1).padStart(2, '0')}
-          </Badge>
-
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
             {/* Price Section with Tooltip */}
@@ -391,34 +272,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               >
                 <ShareButton video={video} variant="outline" size="icon" />
               </div>
-            )}
-
-            {/* Save to My Templates / Publish Button */}
-            {showSaveButton && (
-              <TooltipProvider delayDuration={200}>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      onClick={handleSaveTemplate}
-                      disabled={savingTemplate}
-                      className="opacity-0 group-hover:opacity-100 transition-opacity duration-200 bg-white/95 dark:bg-gray-800/95 border-gray-200 dark:border-gray-700 hover:bg-white dark:hover:bg-gray-800"
-                    >
-                      {publishMode ? (
-                        <ShoppingCart className="h-4 w-4" />
-                      ) : isSaved ? (
-                        <BookmarkCheck className="h-4 w-4 text-primary" />
-                      ) : (
-                        <Bookmark className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent side="left">
-                    <p>{publishMode ? 'Publish' : isSaved ? 'Saved to My Templates' : 'Save to My Templates'}</p>
-                  </TooltipContent>
-                </Tooltip>
-              </TooltipProvider>
             )}
           </div>
 
@@ -490,13 +343,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
       <AuthDrawer 
         open={authDrawerOpen} 
         onOpenChange={setAuthDrawerOpen} 
-      />
-
-      <PublishConfirmDialog
-        open={publishDialogOpen}
-        onOpenChange={setPublishDialogOpen}
-        video={video}
-        onConfirm={handlePublishConfirm}
       />
     </article>
   );

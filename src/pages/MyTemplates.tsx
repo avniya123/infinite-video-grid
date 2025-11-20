@@ -235,8 +235,6 @@ export default function MyTemplates() {
                     onPlay={handlePlayVideo}
                     onClick={handlePlayVideo}
                     showShareButton={false}
-                    publishMode={true}
-                    onPublish={handlePublishConfirm}
                   />
                   {/* Edit and Delete buttons positioned above Variations button */}
                   <div className="absolute bottom-[60px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
