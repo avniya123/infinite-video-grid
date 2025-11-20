@@ -204,28 +204,28 @@ export default function MyTemplates() {
                     publishMode={true}
                   />
                   {/* Edit and Delete buttons positioned above Variations button */}
-                  <div className="absolute bottom-12 right-3 z-30 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="absolute bottom-[52px] right-3 z-30 flex gap-1.5 opacity-0 group-hover:opacity-100 transition-all duration-200">
                     <Button
                       variant="default"
                       size="icon"
-                      className="h-8 w-8 bg-primary hover:bg-primary/90 shadow-lg"
+                      className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
                       onClick={(e) => {
                         e.stopPropagation();
                         navigate(`/template-editor/${template.variation_id}`);
                       }}
                     >
-                      <Edit className="h-4 w-4" />
+                      <Edit className="h-3.5 w-3.5" />
                     </Button>
                     <Button
                       variant="destructive"
                       size="icon"
-                      className="h-8 w-8 shadow-lg"
+                      className="h-7 w-7 shadow-md hover:shadow-lg transition-all"
                       onClick={(e) => {
                         e.stopPropagation();
                         handleDeleteTemplate(template.id);
                       }}
                     >
-                      <Trash2 className="h-4 w-4" />
+                      <Trash2 className="h-3.5 w-3.5" />
                     </Button>
                   </div>
                 </div>
