@@ -69,6 +69,8 @@ export default function ShareCartCheckout() {
   
   // CSV import states
   const [csvImportDrawerOpen, setCsvImportDrawerOpen] = useState(false);
+  const [csvPreviewData, setCsvPreviewData] = useState<SharedUser[]>([]);
+  const [csvImportErrors, setCsvImportErrors] = useState<{ duplicates: string[], invalidFormats: string[] }>({ duplicates: [], invalidFormats: [] });
   
   // Search/filter state
   const [searchQuery, setSearchQuery] = useState('');
@@ -437,7 +439,7 @@ export default function ShareCartCheckout() {
           }
           
           newUsers.push({
-            id: Date.now().toString() + i,
+            id: Date.now().toString() + i + Math.random(),
             name: name,
             phone: phone,
             email: email,
@@ -447,22 +449,11 @@ export default function ShareCartCheckout() {
         }
       }
       
-      if (newUsers.length > 0) {
-        setSharedUsers([...sharedUsers, ...newUsers]);
-        
-        let message = `${newUsers.length} user(s) imported successfully`;
-        if (duplicates.length > 0) {
-          message += `. ${duplicates.length} duplicate(s) skipped`;
-        }
-        if (invalidFormats.length > 0) {
-          message += `. ${invalidFormats.length} invalid format(s) skipped`;
-        }
-        
-        toast.success('CSV Import Complete', {
-          description: message,
-        });
-        setCsvImportDrawerOpen(false);
-      } else {
+      // Store in preview state instead of immediately adding
+      setCsvPreviewData(newUsers);
+      setCsvImportErrors({ duplicates, invalidFormats });
+      
+      if (newUsers.length === 0) {
         let errorMessage = 'No valid users found in CSV file';
         let description = '';
         
@@ -481,6 +472,50 @@ export default function ShareCartCheckout() {
       }
     };
     reader.readAsText(file);
+    
+    // Reset file input
+    event.target.value = '';
+  };
+
+  const handleConfirmCsvImport = () => {
+    if (csvPreviewData.length === 0) {
+      toast.error('No users to import');
+      return;
+    }
+
+    setSharedUsers([...sharedUsers, ...csvPreviewData]);
+    
+    let message = `${csvPreviewData.length} user(s) imported successfully`;
+    if (csvImportErrors.duplicates.length > 0) {
+      message += `. ${csvImportErrors.duplicates.length} duplicate(s) skipped`;
+    }
+    if (csvImportErrors.invalidFormats.length > 0) {
+      message += `. ${csvImportErrors.invalidFormats.length} invalid format(s) skipped`;
+    }
+    
+    toast.success('CSV Import Complete', {
+      description: message,
+    });
+    
+    // Reset and close
+    setCsvPreviewData([]);
+    setCsvImportErrors({ duplicates: [], invalidFormats: [] });
+    setCsvImportDrawerOpen(false);
+  };
+
+  const handleRemovePreviewUser = (userId: string) => {
+    setCsvPreviewData(csvPreviewData.filter(u => u.id !== userId));
+  };
+
+  const handleTogglePreviewUserAccess = (userId: string) => {
+    setCsvPreviewData(csvPreviewData.map(u =>
+      u.id === userId ? { ...u, hasAccess: !u.hasAccess } : u
+    ));
+  };
+
+  const handleCancelCsvImport = () => {
+    setCsvPreviewData([]);
+    setCsvImportErrors({ duplicates: [], invalidFormats: [] });
   };
 
   const handleToggleAccess = (userId: string) => {
@@ -1181,72 +1216,192 @@ export default function ShareCartCheckout() {
       </Sheet>
 
       {/* CSV Import Drawer */}
-      <Sheet open={csvImportDrawerOpen} onOpenChange={setCsvImportDrawerOpen}>
-        <SheetContent side="right" className="w-full sm:max-w-lg overflow-y-auto">
+      <Sheet open={csvImportDrawerOpen} onOpenChange={(open) => {
+        setCsvImportDrawerOpen(open);
+        if (!open) {
+          handleCancelCsvImport();
+        }
+      }}>
+        <SheetContent side="right" className="w-full sm:max-w-2xl overflow-y-auto">
           <SheetHeader className="border-b pb-4 mb-6">
             <SheetTitle>Import Users from CSV</SheetTitle>
           </SheetHeader>
 
           <div className="space-y-6">
-            {/* Instructions */}
-            <div className="bg-muted/50 p-4 rounded-lg">
-              <h3 className="font-semibold mb-2">CSV Format Instructions</h3>
-              <p className="text-sm text-muted-foreground mb-3">
-                Your CSV file should have the following columns in order:
-              </p>
-              <div className="bg-background p-3 rounded font-mono text-xs mb-3">
-                name,phone,email,userType
-              </div>
-              <p className="text-sm text-muted-foreground">
-                <span className="font-medium">User Types:</span> Family, Friend, Colleague, or Client
-              </p>
-            </div>
+            {csvPreviewData.length === 0 ? (
+              <>
+                {/* Instructions */}
+                <div className="bg-muted/50 p-4 rounded-lg">
+                  <h3 className="font-semibold mb-2">CSV Format Instructions</h3>
+                  <p className="text-sm text-muted-foreground mb-3">
+                    Your CSV file should have the following columns in order:
+                  </p>
+                  <div className="bg-background p-3 rounded font-mono text-xs mb-3">
+                    name,phone,email,userType
+                  </div>
+                  <p className="text-sm text-muted-foreground">
+                    <span className="font-medium">User Types:</span> Family, Friend, Colleague, or Client
+                  </p>
+                </div>
 
-            {/* Download Template */}
-            <div className="flex flex-col gap-3">
-              <Button
-                variant="outline"
-                onClick={handleDownloadTemplate}
-                className="gap-2"
-              >
-                <Download className="w-4 h-4" />
-                Download CSV Template
-              </Button>
-
-              {/* File Upload */}
-              <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
-                <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
-                <p className="text-sm font-medium mb-2">Upload CSV File</p>
-                <p className="text-xs text-muted-foreground mb-4">
-                  Click to select a CSV file from your computer
-                </p>
-                <label className="cursor-pointer">
-                  <input
-                    type="file"
-                    accept=".csv"
-                    onChange={handleCsvImport}
-                    className="hidden"
-                  />
-                  <Button variant="default" asChild>
-                    <span>
-                      <Upload className="w-4 h-4 mr-2" />
-                      Choose File
-                    </span>
+                {/* Download Template */}
+                <div className="flex flex-col gap-3">
+                  <Button
+                    variant="outline"
+                    onClick={handleDownloadTemplate}
+                    className="gap-2"
+                  >
+                    <Download className="w-4 h-4" />
+                    Download CSV Template
                   </Button>
-                </label>
-              </div>
-            </div>
 
-            {/* Example */}
-            <div className="bg-muted/30 p-4 rounded-lg">
-              <h4 className="text-sm font-semibold mb-2">Example CSV Content:</h4>
-              <pre className="text-xs bg-background p-3 rounded overflow-x-auto">
+                  {/* File Upload */}
+                  <div className="border-2 border-dashed border-border rounded-lg p-8 text-center hover:border-primary/50 transition-colors">
+                    <Upload className="w-12 h-12 mx-auto mb-4 text-muted-foreground" />
+                    <p className="text-sm font-medium mb-2">Upload CSV File</p>
+                    <p className="text-xs text-muted-foreground mb-4">
+                      Click to select a CSV file from your computer
+                    </p>
+                    <label className="cursor-pointer">
+                      <input
+                        type="file"
+                        accept=".csv"
+                        onChange={handleCsvImport}
+                        className="hidden"
+                      />
+                      <Button variant="default" asChild>
+                        <span>
+                          <Upload className="w-4 h-4 mr-2" />
+                          Choose File
+                        </span>
+                      </Button>
+                    </label>
+                  </div>
+                </div>
+
+                {/* Example */}
+                <div className="bg-muted/30 p-4 rounded-lg">
+                  <h4 className="text-sm font-semibold mb-2">Example CSV Content:</h4>
+                  <pre className="text-xs bg-background p-3 rounded overflow-x-auto">
 {`name,phone,email,userType
 John Doe,+91 9876543210,john@example.com,Family
 Jane Smith,+91 9876543211,jane@example.com,Friend
 Bob Johnson,+91 9876543212,bob@example.com,Colleague`}
-              </pre>
-            </div>
+                  </pre>
+                </div>
+              </>
+            ) : (
+              <>
+                {/* Preview Header */}
+                <div className="flex items-center justify-between pb-3 border-b">
+                  <div>
+                    <h3 className="font-semibold text-lg">Preview Imported Users</h3>
+                    <p className="text-sm text-muted-foreground">
+                      Review and modify before confirming import
+                    </p>
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={handleCancelCsvImport}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                </div>
+
+                {/* Error Summary */}
+                {(csvImportErrors.duplicates.length > 0 || csvImportErrors.invalidFormats.length > 0) && (
+                  <div className="bg-yellow-50 dark:bg-yellow-950/20 border border-yellow-200 dark:border-yellow-900 rounded-lg p-4">
+                    <h4 className="font-medium text-sm mb-2 text-yellow-900 dark:text-yellow-100">Import Warnings</h4>
+                    {csvImportErrors.duplicates.length > 0 && (
+                      <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                        • {csvImportErrors.duplicates.length} duplicate(s) skipped
+                      </p>
+                    )}
+                    {csvImportErrors.invalidFormats.length > 0 && (
+                      <p className="text-xs text-yellow-800 dark:text-yellow-200">
+                        • {csvImportErrors.invalidFormats.length} invalid format(s) skipped
+                      </p>
+                    )}
+                  </div>
+                )}
+
+                {/* Stats */}
+                <div className="bg-primary/5 p-4 rounded-lg">
+                  <p className="text-sm font-medium">
+                    <span className="text-primary">{csvPreviewData.length}</span> user(s) ready to import
+                  </p>
+                </div>
+
+                {/* Data Table */}
+                <div className="border rounded-lg overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full">
+                      <thead className="bg-muted/50">
+                        <tr>
+                          <th className="text-left text-xs font-medium p-3">Name</th>
+                          <th className="text-left text-xs font-medium p-3">Phone</th>
+                          <th className="text-left text-xs font-medium p-3">Email</th>
+                          <th className="text-left text-xs font-medium p-3">Type</th>
+                          <th className="text-center text-xs font-medium p-3">Access</th>
+                          <th className="text-center text-xs font-medium p-3">Action</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {csvPreviewData.map((user) => (
+                          <tr key={user.id} className="border-t hover:bg-muted/20">
+                            <td className="p-3 text-sm font-medium">{user.name}</td>
+                            <td className="p-3 text-sm">{user.phone}</td>
+                            <td className="p-3 text-sm text-muted-foreground">{user.email}</td>
+                            <td className="p-3 text-sm">
+                              <span className="inline-flex items-center px-2 py-1 rounded-full text-xs bg-primary/10 text-primary">
+                                {user.userType}
+                              </span>
+                            </td>
+                            <td className="p-3 text-center">
+                              <Switch
+                                checked={user.hasAccess}
+                                onCheckedChange={() => handleTogglePreviewUserAccess(user.id)}
+                              />
+                            </td>
+                            <td className="p-3 text-center">
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 text-destructive hover:text-destructive"
+                                onClick={() => handleRemovePreviewUser(user.id)}
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Action Buttons */}
+                <div className="flex gap-3 pt-4">
+                  <Button
+                    variant="outline"
+                    onClick={handleCancelCsvImport}
+                    className="flex-1"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    onClick={handleConfirmCsvImport}
+                    className="flex-1 gap-2"
+                    disabled={csvPreviewData.length === 0}
+                  >
+                    <Check className="w-4 h-4" />
+                    Confirm Import ({csvPreviewData.length})
+                  </Button>
+                </div>
+              </>
+            )}
           </div>
         </SheetContent>
       </Sheet>
