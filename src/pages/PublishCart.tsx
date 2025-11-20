@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
 import { VideoCard } from '@/components/VideoCard';
+import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -354,16 +355,43 @@ export default function PublishCart() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-background transition-colors duration-300">
         <Header 
           selectedMainCategory={null}
           selectedSubcategory={null}
           onMainCategorySelect={() => {}}
           onSubcategorySelect={() => {}}
         />
-        <div className="flex items-center justify-center h-[calc(100vh-80px)]">
-          <Loader2 className="w-8 h-8 animate-spin text-primary" />
+        
+        {/* Main Content */}
+        <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
+          {/* Page Header */}
+          <div className="flex items-center justify-between mb-2">
+            <div className="flex items-center gap-3">
+              <ShoppingCart className="h-8 w-8 text-primary" />
+              <div>
+                <h1 className="text-3xl font-bold text-foreground">Publish Cart</h1>
+                <p className="text-muted-foreground text-sm mt-1">
+                  Loading your templates...
+                </p>
+              </div>
+            </div>
+          </div>
         </div>
+
+        {/* Loading Skeletons */}
+        <main className="max-w-7xl mx-auto px-4 pb-8">
+          <div 
+            className="gap-5 [column-fill:balance]"
+            style={{ columnCount: 3 }}
+          >
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={`skeleton-${i}`} className="mb-5">
+                <VideoCardSkeleton index={i} />
+              </div>
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
