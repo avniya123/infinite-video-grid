@@ -260,7 +260,26 @@ export default function PublishCart() {
                 <Button 
                   className="w-full mt-6" 
                   size="lg"
-                  onClick={() => toast.success('Checkout feature coming soon!')}
+                  onClick={() => {
+                    if (publishedTemplates.length > 0) {
+                      const template = publishedTemplates[0];
+                      navigate('/share-cart-checkout', {
+                        state: {
+                          template: {
+                            id: template.id,
+                            title: template.video_variations.title,
+                            price: 450,
+                            mrp: 1000,
+                            discount: '55% Off',
+                            duration: template.video_variations.duration,
+                            orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
+                            resolution: 'HD',
+                            thumbnailUrl: template.video_variations.thumbnail_url,
+                          }
+                        }
+                      });
+                    }
+                  }}
                 >
                   Proceed to Checkout
                 </Button>
