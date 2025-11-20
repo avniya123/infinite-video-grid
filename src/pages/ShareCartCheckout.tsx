@@ -937,6 +937,27 @@ export default function ShareCartCheckout() {
             {/* Price Summary */}
             <Card className="p-6">
               <div className="space-y-3 text-sm">
+                {/* Render Process Indicator */}
+                <div className="flex justify-between items-center pb-3 border-b">
+                  <span className="text-muted-foreground font-medium">Render Process</span>
+                  <div className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 ${
+                    shareMethod === 'cart' 
+                      ? 'bg-primary/10 text-primary border border-primary/20' 
+                      : 'bg-secondary/10 text-secondary-foreground border border-secondary/20'
+                  }`}>
+                    {shareMethod === 'cart' ? (
+                      <>
+                        <Users className="w-3.5 h-3.5" />
+                        Share Cart
+                      </>
+                    ) : (
+                      <>
+                        <Edit className="w-3.5 h-3.5" />
+                        Self & Render
+                      </>
+                    )}
+                  </div>
+                </div>
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">MRP</span>
                   <span className="font-medium">$ {pricing.mrp.toFixed(2)}</span>
