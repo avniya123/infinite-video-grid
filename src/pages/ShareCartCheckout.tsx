@@ -776,22 +776,6 @@ export default function ShareCartCheckout() {
                   {isQuickMode ? 'Quick Payment Summary' : 'Order Summary'}
                 </h3>
               </div>
-
-              {/* Template Preview - Quick Mode Only */}
-              {isQuickMode && templates[0] && (
-                <div className="mb-4 p-2.5 bg-background/80 rounded-lg border border-border/40">
-                  <div className="flex items-start gap-2.5">
-                    <img 
-                      src={templates[0].thumbnailUrl || '/placeholder.svg'} 
-                      alt={templates[0].title}
-                      className="w-14 h-14 rounded object-cover flex-shrink-0"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-xs truncate">{templates[0].title}</p>
-                    </div>
-                  </div>
-                </div>
-              )}
               
               <div className="space-y-3 text-sm">
                 {/* Render Process Indicator */}
