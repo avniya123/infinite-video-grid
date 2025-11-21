@@ -80,11 +80,11 @@ const Index = () => {
     handleResetFilters,
   } = useVideoFilters(videos);
 
-  // Preload images for smoother scrolling
-  const imagesToPreload = filteredVideos.slice(0, 12).map(video => video.image);
+  // Preload images for smoother scrolling - optimized
+  const imagesToPreload = filteredVideos.slice(0, 6).map(video => video.image);
   useImagePreloader(imagesToPreload, { 
     enabled: true, 
-    preloadDistance: 8 
+    preloadDistance: 4 
   });
 
   // Load next page of videos

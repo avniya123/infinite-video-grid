@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, Check, List } from 'lucide-react';
+import { Play, List } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -10,10 +10,7 @@ import { Button } from '@/components/ui/button';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
-import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -38,13 +35,10 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const [hasAnimated, setHasAnimated] = useState(false);
   const [variationsOpen, setVariationsOpen] = useState(false);
   const [playerOpen, setPlayerOpen] = useState(false);
-  const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [authDrawerOpen, setAuthDrawerOpen] = useState(false);
   const videoRef = useRef<HTMLVideoElement>(null);
   const cardRef = useRef<HTMLDivElement>(null);
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
-  
-  const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
 
   // Calculate aspect ratio based on orientation
   const getAspectRatio = () => {
@@ -174,7 +168,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               onClick={handleSelectClick}
             >
               <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'bg-white/90 border-white backdrop-blur-sm'}`}>
-                {isSelected && <Check className="w-4 h-4 text-primary-foreground" />}
+                {isSelected && <span className="text-primary-foreground text-xs font-bold">✓</span>}
               </div>
             </div>
           )}
@@ -232,10 +226,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-            01/{String(variationsCount + 1).padStart(2, '0')}
-          </Badge>
+          {/* Variations Count Badge - Removed to optimize performance */}
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
