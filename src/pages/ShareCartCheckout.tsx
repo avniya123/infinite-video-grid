@@ -701,238 +701,221 @@ export default function ShareCartCheckout() {
           {/* Right Column - Summary & Payment */}
           <div className="space-y-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
             {/* Render Process */}
-            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-              <h3 className="font-semibold mb-2 flex items-center gap-2 text-lg">
-                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
-                Generate Video
-              </h3>
-              <p className="text-sm text-muted-foreground mb-5">
+            <Card className="p-5 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-0.5 w-8 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                <h3 className="font-semibold text-base">Generate Video</h3>
+              </div>
+              <p className="text-xs text-muted-foreground mb-4">
                 {isQuickMode ? 'Quick publish mode - Published user access only' : 'Choose how to publish the template'}
               </p>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => {
                     setShareMethod('cart');
                     setEditingUser(null);
-                  setAddUserSheetOpen(true);
-                }}
-                className={`p-5 rounded-xl border-2 transition-all duration-300 group hover:scale-105 ${
-                  shareMethod === 'cart' 
-                    ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
-                    : 'border-border hover:border-primary/50 hover:bg-primary/5'
-                }`}
-              >
-                <Users className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
-                <p className="text-sm font-semibold">Published User</p>
-              </button>
-              
-              <button
-                onClick={() => {
-                  if (!isQuickMode) {
-                    setSelfRenderConfirmDialogOpen(true);
-                  }
-                }}
-                disabled={isQuickMode}
-                className={`p-5 rounded-xl border-2 transition-all duration-300 group relative ${
-                  isQuickMode 
-                    ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
-                    : shareMethod === 'edited' 
-                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg hover:scale-105' 
-                      : 'border-border hover:border-primary/50 hover:bg-primary/5 hover:scale-105'
-                }`}
-              >
-                <Edit className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${
-                  isQuickMode 
-                    ? 'text-muted-foreground/50' 
-                    : shareMethod === 'edited' 
-                      ? 'text-primary' 
-                      : 'text-muted-foreground'
-                }`} />
-                <p className={`text-sm font-semibold ${isQuickMode ? 'text-muted-foreground' : ''}`}>
-                  Changed
-                </p>
-                {isQuickMode && (
-                  <div className="flex items-center justify-center gap-1 mt-2">
-                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Not available</p>
-                  </div>
-                )}
-              </button>
+                    setAddUserSheetOpen(true);
+                  }}
+                  className={`p-4 rounded-lg border-2 transition-all duration-300 group hover:scale-105 ${
+                    shareMethod === 'cart' 
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md' 
+                      : 'border-border hover:border-primary/50 hover:bg-primary/5'
+                  }`}
+                >
+                  <Users className={`w-8 h-8 mx-auto mb-2 transition-transform group-hover:scale-110 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className="text-sm font-semibold">Published User</p>
+                </button>
+                
+                <button
+                  onClick={() => {
+                    if (!isQuickMode) {
+                      setSelfRenderConfirmDialogOpen(true);
+                    }
+                  }}
+                  disabled={isQuickMode}
+                  className={`p-4 rounded-lg border-2 transition-all duration-300 group relative ${
+                    isQuickMode 
+                      ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
+                      : shareMethod === 'edited' 
+                        ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md hover:scale-105' 
+                        : 'border-border hover:border-primary/50 hover:bg-primary/5 hover:scale-105'
+                  }`}
+                >
+                  <Edit className={`w-8 h-8 mx-auto mb-2 transition-transform group-hover:scale-110 ${
+                    isQuickMode 
+                      ? 'text-muted-foreground/50' 
+                      : shareMethod === 'edited' 
+                        ? 'text-primary' 
+                        : 'text-muted-foreground'
+                  }`} />
+                  <p className={`text-sm font-semibold ${isQuickMode ? 'text-muted-foreground' : ''}`}>
+                    Changed
+                  </p>
+                  {isQuickMode && (
+                    <div className="flex items-center justify-center gap-1 mt-1.5">
+                      <Info className="h-3 w-3 text-muted-foreground" />
+                      <p className="text-[10px] text-muted-foreground">Not available</p>
+                    </div>
+                  )}
+                </button>
               </div>
             </Card>
 
-            {/* Price Summary */}
-            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg">
-                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
-                Order Summary
-              </h3>
-              <div className="space-y-4 text-sm">
+            {/* Order Summary */}
+            <Card className={`p-5 shadow-lg border-border/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300 ${
+              isQuickMode ? 'bg-gradient-to-br from-primary/5 via-background to-background border-primary/30' : 'bg-card/50'
+            }`}>
+              <div className="flex items-center gap-2 mb-4">
+                {isQuickMode && (
+                  <div className="p-1.5 bg-primary/20 rounded-lg">
+                    <Zap className="h-4 w-4 text-primary" />
+                  </div>
+                )}
+                <h3 className={`font-semibold text-base flex items-center gap-2 ${isQuickMode ? 'text-primary' : ''}`}>
+                  <div className="h-0.5 w-8 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                  {isQuickMode ? 'Quick Payment Summary' : 'Order Summary'}
+                </h3>
+              </div>
+
+              {/* Template Preview - Quick Mode Only */}
+              {isQuickMode && templates[0] && (
+                <div className="mb-4 p-2.5 bg-background/80 rounded-lg border border-border/40">
+                  <div className="flex items-start gap-2.5">
+                    <img 
+                      src={templates[0].thumbnailUrl || '/placeholder.svg'} 
+                      alt={templates[0].title}
+                      className="w-14 h-14 rounded object-cover flex-shrink-0"
+                    />
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-xs truncate mb-1">{templates[0].title}</p>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{templates[0].duration}</Badge>
+                        <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{templates[0].orientation}</Badge>
+                        <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{templates[0].resolution}</Badge>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              )}
+              
+              <div className="space-y-3 text-sm">
                 {/* Render Process Indicator */}
-                <div className="flex justify-between items-center pb-4 border-b border-border/50">
-                  <span className="text-muted-foreground font-medium">Generate Video</span>
-                  <div className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 shadow-sm ${
+                <div className="flex justify-between items-center pb-3 border-b border-border/50">
+                  <span className="text-muted-foreground text-xs font-medium">Generate Video</span>
+                  <div className={`px-3 py-1.5 rounded-full text-[10px] font-semibold flex items-center gap-1.5 ${
                     shareMethod === 'cart' 
                       ? 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary border border-primary/30' 
                       : 'bg-gradient-to-r from-secondary/20 to-secondary/10 text-secondary-foreground border border-secondary/30'
                   }`}>
                     {shareMethod === 'cart' ? (
                       <>
-                        <Users className="w-4 h-4" />
+                        <Users className="w-3 h-3" />
                         Published User
                       </>
                     ) : (
                       <>
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3 h-3" />
                         Self & Render
                       </>
                     )}
                   </div>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span className="text-muted-foreground">MRP</span>
-                  <span className="font-semibold">₹ {pricing.mrp.toFixed(2)}</span>
+                
+                <div className="flex justify-between py-1.5">
+                  <span className="text-muted-foreground text-xs">MRP</span>
+                  <span className="font-semibold text-sm">₹{pricing.mrp.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span className="text-muted-foreground">No Of Published Users</span>
-                  <Badge variant="secondary" className="font-semibold">X {sharedUsers.length || 1}</Badge>
+                <div className="flex justify-between py-1.5">
+                  <span className="text-muted-foreground text-xs">Published Users</span>
+                  <Badge variant="secondary" className="font-semibold h-5 text-xs">X {sharedUsers.length || 1}</Badge>
                 </div>
-                <div className="flex justify-between py-2">
-                  <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-semibold">₹ {pricing.subtotal.toFixed(2)}</span>
+                <div className="flex justify-between py-1.5">
+                  <span className="text-muted-foreground text-xs">Subtotal</span>
+                  <span className="font-semibold text-sm">₹{pricing.subtotal.toFixed(2)}</span>
                 </div>
                 {discountApplied && (
-                  <div className="flex justify-between py-2 text-green-600">
-                    <span className="font-medium">Reseller Discounts - {discountPercent}%</span>
-                    <span className="font-semibold">₹ -{pricing.discount.toFixed(2)}</span>
+                  <div className="flex justify-between py-1.5 text-green-600">
+                    <span className="font-medium text-xs">Discount ({discountPercent}%)</span>
+                    <span className="font-semibold text-sm">-₹{pricing.discount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between py-2">
-                  <span className="text-muted-foreground">Tax (18%)</span>
-                  <span className="font-semibold">₹ {pricing.tax.toFixed(2)}</span>
+                <div className="flex justify-between py-1.5">
+                  <span className="text-muted-foreground text-xs">Tax (18%)</span>
+                  <span className="font-semibold text-sm">₹{pricing.tax.toFixed(2)}</span>
                 </div>
-                <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent my-3" />
-                <div className="flex justify-between text-lg font-bold py-2 bg-gradient-to-r from-primary/5 to-transparent rounded-lg px-3">
-                  <span>Total Amount</span>
-                  <span className="text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">₹ {pricing.total.toFixed(2)}</span>
+                <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent my-2" />
+                <div className="flex justify-between items-center py-2 bg-gradient-to-r from-primary/5 to-transparent rounded-lg px-2.5">
+                  <span className="font-bold text-sm">Total Amount</span>
+                  <span className="text-primary font-bold text-lg">₹{pricing.total.toFixed(2)}</span>
                 </div>
               </div>
 
               {/* Discount Code */}
-              <div className="mt-6 space-y-3">
+              <div className="mt-4 space-y-2">
                 <div className="flex gap-2">
                   <Input
-                    placeholder="Enter discount code"
+                    placeholder="Discount code"
                     value={discountCode}
                     onChange={(e) => setDiscountCode(e.target.value)}
                     disabled={discountApplied}
-                    className="border-primary/30 focus:border-primary"
+                    className="h-9 text-sm border-primary/30 focus:border-primary"
                   />
                   <Button
                     onClick={handleApplyDiscount}
                     variant="outline"
+                    size="sm"
                     disabled={discountApplied}
-                    className="border-primary/30 hover:bg-primary hover:text-primary-foreground"
+                    className="h-9 border-primary/30 hover:bg-primary hover:text-primary-foreground"
                   >
                     Apply
                   </Button>
                 </div>
               </div>
+
+              {/* Quick Mode Info */}
+              {isQuickMode && (
+                <div className="mt-4 flex items-start gap-2 p-2.5 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
+                  <Info className="h-3.5 w-3.5 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
+                  <p className="text-[10px] text-blue-700 dark:text-blue-300 leading-relaxed">
+                    After payment, manage and add enrolled users instantly
+                  </p>
+                </div>
+              )}
             </Card>
 
             {/* Payment Method */}
-            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-              <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg">
-                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
-                Payment Method
-              </h3>
-              <div className="grid grid-cols-2 gap-4">
+            <Card className="p-5 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <div className="flex items-center gap-2 mb-4">
+                <div className="h-0.5 w-8 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                <h3 className="font-semibold text-base">Payment Method</h3>
+              </div>
+              <div className="grid grid-cols-2 gap-3">
                 <button
                   onClick={() => setPaymentMethod('paytm')}
-                  className={`p-5 rounded-xl border-2 transition-all duration-300 group hover:scale-105 ${
+                  className={`p-4 rounded-lg border-2 transition-all duration-300 group hover:scale-105 ${
                     paymentMethod === 'paytm' 
-                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md' 
                       : 'border-border hover:border-primary/50 hover:bg-primary/5'
                   }`}
                 >
-                  <Wallet className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${paymentMethod === 'paytm' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <Wallet className={`w-8 h-8 mx-auto mb-2 transition-transform group-hover:scale-110 ${paymentMethod === 'paytm' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <p className="text-sm font-semibold">PAYTM</p>
-                  <p className="text-xs text-muted-foreground mt-1">UPI Payment</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">UPI Payment</p>
                 </button>
                 <button
                   onClick={() => setPaymentMethod('credit')}
-                  className={`p-5 rounded-xl border-2 transition-all duration-300 group hover:scale-105 ${
+                  className={`p-4 rounded-lg border-2 transition-all duration-300 group hover:scale-105 ${
                     paymentMethod === 'credit' 
-                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-md' 
                       : 'border-border hover:border-primary/50 hover:bg-primary/5'
                   }`}
                 >
-                  <CreditCard className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${paymentMethod === 'credit' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <CreditCard className={`w-8 h-8 mx-auto mb-2 transition-transform group-hover:scale-110 ${paymentMethod === 'credit' ? 'text-primary' : 'text-muted-foreground'}`} />
                   <p className="text-sm font-semibold">Credit Zone</p>
-                  <p className="text-xs text-muted-foreground mt-1">Trusted Partners</p>
+                  <p className="text-[10px] text-muted-foreground mt-0.5">Trusted Partners</p>
                 </button>
               </div>
             </Card>
-
-            {/* Payment Summary Card - Quick Mode */}
-            {isQuickMode && (
-              <Card className="p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/30 shadow-xl">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-primary/20 rounded-lg">
-                    <Zap className="h-5 w-5 text-primary" />
-                  </div>
-                  <h3 className="font-semibold text-primary text-lg">Quick Payment Summary</h3>
-                </div>
-                <div className="space-y-3">
-                  {/* Template Info */}
-                  <div className="flex items-start gap-3 p-3 bg-background/80 rounded-lg">
-                    <img 
-                      src={templates[0].thumbnailUrl || '/placeholder.svg'} 
-                      alt={templates[0].title}
-                      className="w-16 h-16 rounded-md object-cover"
-                    />
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-sm truncate">{templates[0].title}</p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge variant="secondary" className="text-xs">
-                          {templates[0].duration}
-                        </Badge>
-                        <Badge variant="outline" className="text-xs">
-                          {templates[0].resolution}
-                        </Badge>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  {/* Users Count */}
-                  <div className="flex items-center justify-between p-3 bg-background/80 rounded-lg">
-                    <div className="flex items-center gap-2">
-                      <Users className="h-4 w-4 text-muted-foreground" />
-                      <span className="text-sm font-medium">Published Users</span>
-                    </div>
-                    <Badge variant="default" className="bg-primary">
-                      {sharedUsers.length || 0} {sharedUsers.length === 1 ? 'user' : 'users'}
-                    </Badge>
-                  </div>
-                  
-                  {/* Total Price */}
-                  <div className="flex items-center justify-between p-4 bg-gradient-to-r from-emerald-500/10 to-emerald-600/10 rounded-lg border border-emerald-500/20">
-                    <span className="text-sm font-semibold text-emerald-700 dark:text-emerald-400">Total Amount</span>
-                    <span className="text-2xl font-bold text-emerald-700 dark:text-emerald-400">
-                      ₹ {pricing.total.toFixed(2)}
-                    </span>
-                  </div>
-                  
-                  {/* Quick Info */}
-                  <div className="flex items-start gap-2 p-3 bg-blue-50 dark:bg-blue-950/20 rounded-lg border border-blue-200 dark:border-blue-800">
-                    <Info className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-0.5 shrink-0" />
-                    <p className="text-xs text-blue-700 dark:text-blue-300">
-                      After payment, you can manage and add enrolled users to publish this template with instant access.
-                    </p>
-                  </div>
-                </div>
-              </Card>
-            )}
 
             {/* Proceed Button */}
             <Button
