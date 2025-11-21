@@ -14,6 +14,145 @@ export type Database = {
   }
   public: {
     Tables: {
+      order_shared_users: {
+        Row: {
+          created_at: string
+          has_access: boolean
+          id: string
+          order_id: string
+          user_email: string
+          user_name: string
+          user_phone: string
+          user_type: string
+        }
+        Insert: {
+          created_at?: string
+          has_access?: boolean
+          id?: string
+          order_id: string
+          user_email: string
+          user_name: string
+          user_phone: string
+          user_type: string
+        }
+        Update: {
+          created_at?: string
+          has_access?: boolean
+          id?: string
+          order_id?: string
+          user_email?: string
+          user_name?: string
+          user_phone?: string
+          user_type?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_shared_users_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      order_templates: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          template_duration: string
+          template_id: string
+          template_orientation: string
+          template_price: number
+          template_resolution: string
+          template_thumbnail_url: string | null
+          template_title: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          template_duration: string
+          template_id: string
+          template_orientation: string
+          template_price: number
+          template_resolution: string
+          template_thumbnail_url?: string | null
+          template_title: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          template_duration?: string
+          template_id?: string
+          template_orientation?: string
+          template_price?: number
+          template_resolution?: string
+          template_thumbnail_url?: string | null
+          template_title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_templates_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          completed_at: string | null
+          created_at: string
+          discount: number
+          discount_code: string | null
+          id: string
+          order_number: string
+          payment_method: string
+          payment_status: string
+          share_method: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          created_at?: string
+          discount?: number
+          discount_code?: string | null
+          id?: string
+          order_number: string
+          payment_method: string
+          payment_status?: string
+          share_method: string
+          subtotal: number
+          tax: number
+          total: number
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          created_at?: string
+          discount?: number
+          discount_code?: string | null
+          id?: string
+          order_number?: string
+          payment_method?: string
+          payment_status?: string
+          share_method?: string
+          subtotal?: number
+          tax?: number
+          total?: number
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address: string | null
