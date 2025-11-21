@@ -19,8 +19,18 @@ export default function TemplateEditor() {
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [variationData, setVariationData] = useState<VariationData | null>(null);
+  const [referrer, setReferrer] = useState<string>('/my-templates');
 
   useEffect(() => {
+    // Get the referrer from URL params
+    const params = new URLSearchParams(window.location.search);
+    const from = params.get('from');
+    if (from === 'videos') {
+      setReferrer('/');
+    } else {
+      setReferrer('/my-templates');
+    }
+
     const initializeEditor = async () => {
       // Check authentication
       const { data: { session } } = await supabase.auth.getSession();
@@ -99,5 +109,5 @@ export default function TemplateEditor() {
 
   if (!user || !variationData) return null;
 
-  return <TemplateEditorLayout variationId={variationId} variationData={variationData} />;
+  return <TemplateEditorLayout variationId={variationId} variationData={variationData} referrer={referrer} />;
 }

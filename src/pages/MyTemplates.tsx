@@ -743,7 +743,7 @@ export default function MyTemplates() {
                               className="h-7 w-7 bg-primary hover:bg-primary/90 shadow-md hover:shadow-lg transition-all"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/template-editor/${template.variation_id}`);
+                                navigate(`/template-editor/${template.variation_id}?from=my-templates`);
                               }}
                             >
                               <Edit className="h-3.5 w-3.5" />
@@ -854,7 +854,7 @@ export default function MyTemplates() {
                               className="h-8 w-8 transition-transform hover:scale-110"
                               onClick={(e) => {
                                 e.stopPropagation();
-                                navigate(`/template-editor/${template.variation_id}`);
+                                navigate(`/template-editor/${template.variation_id}?from=my-templates`);
                               }}
                               title="Edit template"
                             >
