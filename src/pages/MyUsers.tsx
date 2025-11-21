@@ -202,10 +202,10 @@ export default function MyUsers() {
               <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold">
+              <h1 className="text-xl font-extrabold tracking-wide leading-tight">
                 My Users {savedUsers.length > 0 && `(${savedUsers.length})`}
               </h1>
-              <p className="text-muted-foreground text-sm mt-0.5">
+              <p className="text-muted-foreground text-sm mt-0.5 tracking-wide">
                 Manage your saved enrolled users
               </p>
             </div>

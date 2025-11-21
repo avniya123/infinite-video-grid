@@ -425,7 +425,7 @@ export default function ShareCartCheckout() {
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                <h1 className="text-2xl font-extrabold tracking-wide bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text leading-tight">
                   {isQuickMode ? `Quick Publish Cart (${templates.length})` : `Publish Cart Checkout (${templates.length})`}
                 </h1>
                 {isQuickMode && (
@@ -435,7 +435,7 @@ export default function ShareCartCheckout() {
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground text-base mt-1 flex items-center gap-2">
+              <p className="text-muted-foreground text-base mt-1 flex items-center gap-2 tracking-wide">
                 <Sparkles className="h-4 w-4 text-primary" />
                 {isQuickMode ? 'Fast checkout with instant template publishing' : 'Complete your purchase and publish templates to users'}
               </p>
@@ -450,7 +450,7 @@ export default function ShareCartCheckout() {
             <Card className="p-4 shadow-sm border-border/40 bg-gradient-to-br from-background/95 to-muted/10 hover:shadow-md transition-all duration-300">
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-0.5 w-8 rounded-full bg-gradient-to-r from-primary to-primary/50" />
-                <h2 className="text-base font-semibold text-foreground/90">Template Details</h2>
+                <h2 className="text-base font-bold text-foreground/90 tracking-wide">Template Details</h2>
               </div>
               <div className="space-y-2">
                 {templates.map((template, index) => (
