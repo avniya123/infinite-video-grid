@@ -618,7 +618,7 @@ export default function ShareCartCheckout() {
           <div className="space-y-8">
             {/* Render Process */}
             <Card className="p-6">
-              <h3 className="font-semibold mb-4">Publishing Method</h3>
+              <h3 className="font-semibold mb-4">Generate Video</h3>
               <p className="text-xs text-muted-foreground mb-4">
                 {isQuickMode ? 'Quick publish mode - Published user access only' : 'Choose how to publish the template'}
               </p>
@@ -679,7 +679,7 @@ export default function ShareCartCheckout() {
               <div className="space-y-3 text-sm">
                 {/* Render Process Indicator */}
                 <div className="flex justify-between items-center pb-3 border-b">
-                  <span className="text-muted-foreground font-medium">Publishing Method</span>
+                  <span className="text-muted-foreground font-medium">Generate Video</span>
                   <div className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 ${
                     shareMethod === 'cart' 
                       ? 'bg-primary/10 text-primary border border-primary/20' 
@@ -917,7 +917,7 @@ export default function ShareCartCheckout() {
 
             {/* Render Process */}
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm text-muted-foreground">Publishing Method</h4>
+              <h4 className="font-semibold text-sm text-muted-foreground">Generate Video</h4>
               <div className="p-4 bg-muted/30 rounded-lg">
                 <div className="flex items-center gap-2">
                   {shareMethod === 'cart' ? (
