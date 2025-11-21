@@ -9,9 +9,10 @@ import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { toast } from 'sonner';
-import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info, Play } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useSharedUsers, type SharedUser } from '@/hooks/useSharedUsers';
 
@@ -25,6 +26,7 @@ interface TemplateData {
   orientation: string;
   resolution: string;
   thumbnailUrl: string;
+  videoUrl?: string;
 }
 
 export default function ShareCartCheckout() {
@@ -67,6 +69,7 @@ export default function ShareCartCheckout() {
   const [searchQuery, setSearchQuery] = useState('');
   const [autoLoadEnrolled, setAutoLoadEnrolled] = useState(false);
   const [paymentConfirmDialogOpen, setPaymentConfirmDialogOpen] = useState(false);
+  const [previewTemplate, setPreviewTemplate] = useState<TemplateData | null>(null);
 
   useEffect(() => {
     const initializePage = async () => {
@@ -108,7 +111,8 @@ export default function ShareCartCheckout() {
               orientation: variation.aspect_ratio.includes('16:9') ? 'Landscape' : 
                           variation.aspect_ratio.includes('9:16') ? 'Portrait' : 'Square',
               resolution: variation.quality || '1920x1080',
-              thumbnailUrl: variation.thumbnail_url || '/placeholder.svg'
+              thumbnailUrl: variation.thumbnail_url || '/placeholder.svg',
+              videoUrl: variation.video_url
             }]);
           }
         } catch (error) {
@@ -396,12 +400,18 @@ export default function ShareCartCheckout() {
               <div className="space-y-5">
                 {templates.map((template, index) => (
                   <div key={template.id} className="flex gap-5 pb-5 border-b last:border-0 last:pb-0">
-                    <div className="relative rounded-xl overflow-hidden shadow-md">
+                    <div className="relative rounded-xl overflow-hidden shadow-md group cursor-pointer"
+                         onClick={() => template.videoUrl && setPreviewTemplate(template)}>
                       <img 
                         src={template.thumbnailUrl || '/placeholder.svg'} 
                         alt={template.title}
                         className="w-28 h-28 object-cover"
                       />
+                      {template.videoUrl && (
+                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                          <Play className="w-8 h-8 text-white" fill="white" />
+                        </div>
+                      )}
                     </div>
                     <div className="flex-1">
                       <h3 className="font-semibold text-xl mb-2">{template.title}</h3>
@@ -410,13 +420,24 @@ export default function ShareCartCheckout() {
                         <span>{template.orientation}</span>
                         <span>{template.resolution}</span>
                       </div>
-                      <div className="flex items-center gap-3">
+                      <div className="flex items-center gap-3 mb-3">
                         <span className="text-2xl font-bold text-green-600">₹{template.price.toFixed(2)}</span>
                         <span className="text-sm text-muted-foreground line-through">₹{template.mrp.toFixed(2)}</span>
                         <span className="px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                           {template.discount} off
                         </span>
                       </div>
+                      {template.videoUrl && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => setPreviewTemplate(template)}
+                          className="gap-2"
+                        >
+                          <Play className="w-3.5 h-3.5" />
+                          Preview Video
+                        </Button>
+                      )}
                     </div>
                     {templates.length > 1 && (
                       <Button
@@ -1169,6 +1190,48 @@ export default function ShareCartCheckout() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Video Preview Dialog */}
+      <Dialog open={!!previewTemplate} onOpenChange={() => setPreviewTemplate(null)}>
+        <DialogContent className="max-w-4xl">
+          <DialogHeader>
+            <DialogTitle>{previewTemplate?.title}</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            {previewTemplate?.videoUrl ? (
+              <div className="relative w-full rounded-lg overflow-hidden bg-black">
+                <video
+                  src={previewTemplate.videoUrl}
+                  poster={previewTemplate.thumbnailUrl}
+                  controls
+                  className="w-full aspect-video"
+                  autoPlay
+                >
+                  Your browser does not support the video tag.
+                </video>
+              </div>
+            ) : (
+              <div className="aspect-video bg-muted rounded-lg flex items-center justify-center">
+                <p className="text-muted-foreground">Video preview not available</p>
+              </div>
+            )}
+            <div className="grid grid-cols-3 gap-4 text-sm p-4 bg-muted/30 rounded-lg">
+              <div>
+                <p className="text-muted-foreground">Duration</p>
+                <p className="font-medium">{previewTemplate?.duration}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Orientation</p>
+                <p className="font-medium">{previewTemplate?.orientation}</p>
+              </div>
+              <div>
+                <p className="text-muted-foreground">Resolution</p>
+                <p className="font-medium">{previewTemplate?.resolution}</p>
+              </div>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
