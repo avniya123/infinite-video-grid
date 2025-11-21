@@ -480,9 +480,11 @@ export default function ShareCartCheckout() {
                             {template.resolution}
                           </Badge>
                         </div>
-                        <div className="flex items-center gap-2 pt-0.5">
-                          <p className="text-base font-bold text-primary">₹{template.price}</p>
-                          <span className="text-[10px] text-muted-foreground">per variation</span>
+                        <div className="flex items-start gap-2 pt-0.5">
+                          <div className="flex flex-col">
+                            <p className="text-base font-bold text-primary leading-tight">₹{template.price}</p>
+                            <span className="text-[10px] text-muted-foreground">per variation</span>
+                          </div>
                           {template.videoUrl && (
                             <Button
                               variant="ghost"
