@@ -403,29 +403,16 @@ export default function ShareCartCheckout() {
       />
 
       <div className="container mx-auto px-4 py-8 max-w-7xl">
-        {/* Back Button */}
-        <div className="mb-6 flex items-center justify-end">
-          <Button 
-            variant="ghost" 
-            size="sm" 
-            onClick={() => navigate('/publish-cart')} 
-            className="gap-2 hover:bg-primary/10 transition-all"
-          >
-            <ArrowLeft className="w-4 h-4" />
-            <span className="font-medium">Back to Publish Cart</span>
-          </Button>
-        </div>
-
-        {/* Header */}
-        <div className="mb-8 animate-fade-in">
-          <div className="flex items-center gap-4 mb-4">
+        {/* Page Header */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-4">
             <div className="relative p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl backdrop-blur-sm border border-primary/20 shadow-lg">
               <ShoppingBag className="h-5.5 w-5.5 text-primary" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse"></div>
             </div>
-            <div className="flex-1">
+            <div>
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-2xl font-extrabold tracking-wide bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text leading-tight">
+                <h1 className="text-xl font-extrabold tracking-wide text-foreground leading-tight">
                   {isQuickMode ? `Quick Publish Cart (${templates.length})` : `Publish Cart Checkout (${templates.length})`}
                 </h1>
                 {isQuickMode && (
@@ -435,12 +422,20 @@ export default function ShareCartCheckout() {
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground text-base mt-1 flex items-center gap-2 tracking-wide">
+              <p className="text-muted-foreground text-sm mt-0.5 flex items-center gap-2 tracking-wide">
                 <Sparkles className="h-4 w-4 text-primary" />
                 {isQuickMode ? 'Fast checkout with instant template publishing' : 'Complete your purchase and publish templates to users'}
               </p>
             </div>
           </div>
+          <Button 
+            variant="ghost"
+            onClick={() => navigate('/publish-cart')} 
+            className="gap-2 hover:bg-primary/10 transition-all"
+          >
+            <ArrowLeft className="w-4 h-4" />
+            Back to Publish Cart
+          </Button>
         </div>
 
         <div className="grid lg:grid-cols-3 gap-8">
