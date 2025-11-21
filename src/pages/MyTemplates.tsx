@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
+import { PageHeader } from '@/components/PageHeader';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 
@@ -394,20 +395,13 @@ export default function MyTemplates() {
         
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-          {/* Page Header */}
-          <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-2.5 bg-primary/10 rounded-xl">
-                <FileVideo className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">My Templates</h1>
-                <p className="text-muted-foreground text-sm mt-0.5">
-                  Loading your templates...
-                </p>
-              </div>
-            </div>
-          </div>
+          <PageHeader
+            icon={FileVideo}
+            title="My Templates"
+            description="Loading your templates..."
+            backLabel="Back to Videos"
+            backPath="/videos"
+          />
         </div>
 
         {/* Loading Skeletons */}
@@ -440,17 +434,16 @@ export default function MyTemplates() {
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        {/* Page Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="p-2.5 bg-primary/10 rounded-xl">
               <FileVideo className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-2xl font-bold text-foreground tracking-wide leading-tight">
                 My Templates {filteredAndSortedTemplates.length > 0 && `(${filteredAndSortedTemplates.length})`}
               </h1>
-              <p className="text-muted-foreground text-sm mt-0.5">
+              <p className="text-muted-foreground text-sm mt-0.5 tracking-wide">
                 Manage your saved video templates
               </p>
             </div>

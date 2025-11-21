@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
+import { PageHeader } from '@/components/PageHeader';
 import { Button } from '@/components/ui/button';
 import { Card } from '@/components/ui/card';
 import { Switch } from '@/components/ui/switch';
@@ -187,30 +188,18 @@ export default function MyUsers() {
       <Header />
       
       <div className="container mx-auto px-4 py-6 max-w-7xl">
-        {/* Back Button */}
-        <div className="mb-6">
-          <Button variant="ghost" size="sm" onClick={() => navigate(-1)}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back
-          </Button>
-        </div>
-
-        {/* Header */}
         <div className="mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-primary/10 rounded-xl">
-              <Users className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold tracking-wide leading-tight">
-                My Users {savedUsers.length > 0 && `(${savedUsers.length})`}
-              </h1>
-              <p className="text-muted-foreground text-sm mt-0.5 tracking-wide">
-                Manage your saved enrolled users
-              </p>
-            </div>
+          <div className="flex-1">
+            <PageHeader
+              icon={Users}
+              title="My Users"
+              count={savedUsers.length}
+              description="Manage your saved enrolled users"
+              backLabel="Back"
+              backPath="/"
+            />
           </div>
-          <Button onClick={() => setUsersDrawerOpen(true)}>
+          <Button onClick={() => setUsersDrawerOpen(true)} className="ml-4">
             <Users className="w-4 h-4 mr-2" />
             Manage Users
           </Button>
