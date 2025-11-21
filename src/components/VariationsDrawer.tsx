@@ -189,8 +189,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
       toast.dismiss(loadingToast);
       toast.success('Template saved! Opening editor...');
       
-      // Navigate to template editor instantly
-      navigate(`/template-editor/${targetVariationId}`);
+      // Navigate to template editor with referrer parameter
+      navigate(`/template-editor/${targetVariationId}?from=videos`);
     } catch (error: any) {
       toast.dismiss(loadingToast);
       toast.error('Failed to save template');

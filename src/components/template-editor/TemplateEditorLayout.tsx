@@ -15,6 +15,7 @@ interface TemplateEditorLayoutProps {
     aspect_ratio: string;
     duration: string;
   };
+  referrer?: string;
 }
 
 export interface Layer {
@@ -35,7 +36,7 @@ export interface Card {
   layers: Layer[];
 }
 
-export const TemplateEditorLayout = ({ variationId, variationData }: TemplateEditorLayoutProps) => {
+export const TemplateEditorLayout = ({ variationId, variationData, referrer = '/my-templates' }: TemplateEditorLayoutProps) => {
   const navigate = useNavigate();
   const [activeCard, setActiveCard] = useState<string>("card-1");
   
@@ -109,7 +110,7 @@ export const TemplateEditorLayout = ({ variationId, variationData }: TemplateEdi
               <Button
                 variant="ghost"
                 size="icon"
-                onClick={() => navigate("/my-templates")}
+                onClick={() => navigate(referrer)}
               >
                 <ArrowLeft className="h-5 w-5" />
               </Button>
