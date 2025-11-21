@@ -409,38 +409,6 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                       <Button
                         variant="ghost"
                         size="icon"
-                        onClick={() => navigate('/my-bills')}
-                        className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                      >
-                        <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>My Bills</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => setProfileDrawerOpen(true)}
-                        className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
-                      >
-                        <User className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Profile</p>
-                    </TooltipContent>
-                  </Tooltip>
-
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="icon"
                         onClick={() => navigate('/publish-cart')}
                         className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
