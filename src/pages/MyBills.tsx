@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
+import { PageHeader } from "@/components/PageHeader";
 import { FileText, Calendar as CalendarIcon, CreditCard, Filter, Download, Search, Info, FileSpreadsheet, Mail, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -268,14 +269,13 @@ const MyBills = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <FileText className="h-5 w-5 text-primary" />
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-wide leading-tight">My Bills</h1>
-            <p className="text-sm text-muted-foreground tracking-wide">View and manage your billing history</p>
-          </div>
-        </div>
+        <PageHeader
+          icon={FileText}
+          title="My Bills"
+          description="View and manage your billing history"
+          backLabel="Back"
+          backPath="/"
+        />
 
         <Separator className="mb-6" />
 

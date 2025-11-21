@@ -11,6 +11,7 @@ import { toast } from 'sonner';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { Header } from '@/components/Header';
+import { PageHeader } from '@/components/PageHeader';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import type { VideoItem } from '@/types/video';
@@ -172,11 +173,14 @@ export default function MyVideos() {
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        {/* Page Title */}
-        <div className="flex items-center gap-3 mb-6">
-          <Video className="h-8 w-8 text-primary" />
-          <h1 className="text-3xl font-bold">My Videos</h1>
-        </div>
+        <PageHeader
+          icon={Video}
+          title="My Videos"
+          count={filteredVideos.length}
+          description="Review and manage your templates"
+          backLabel="Back to Templates"
+          backPath="/my-templates"
+        />
 
         {/* Search and Controls */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">

@@ -2,6 +2,7 @@ import { useState, useEffect, useMemo, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Header } from '@/components/Header';
+import { PageHeader } from '@/components/PageHeader';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 
@@ -371,28 +372,13 @@ export default function PublishCart() {
         
         {/* Main Content */}
         <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-          {/* Page Header */}
-          <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-primary/10 rounded-xl">
-              <ShoppingCart className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-foreground tracking-wide leading-tight">Publish Cart</h1>
-              <p className="text-muted-foreground text-sm mt-0.5 tracking-wide">
-                Loading your templates...
-              </p>
-            </div>
-            </div>
-            <Button
-              variant="ghost"
-              onClick={() => navigate('/my-templates')}
-              className="gap-2"
-            >
-              <ArrowLeft className="h-4 w-4" />
-              Back to Templates
-            </Button>
-          </div>
+          <PageHeader
+            icon={ShoppingCart}
+            title="Publish Cart"
+            description="Loading your templates..."
+            backLabel="Back to Templates"
+            backPath="/my-templates"
+          />
         </div>
 
         {/* Loading Skeletons */}
@@ -425,30 +411,14 @@ export default function PublishCart() {
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        {/* Page Header */}
-        <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
-            <div className="p-2.5 bg-primary/10 rounded-xl">
-              <ShoppingCart className="h-5 w-5 text-primary" />
-            </div>
-            <div>
-              <h1 className="text-xl font-extrabold text-foreground tracking-wide leading-tight">
-                Publish Cart {publishedTemplates.length > 0 && `(${publishedTemplates.length})`}
-              </h1>
-              <p className="text-muted-foreground text-sm mt-0.5 tracking-wide">
-                Review and manage your templates ready for publishing
-              </p>
-            </div>
-          </div>
-          <Button
-            variant="ghost"
-            onClick={() => navigate('/my-templates')}
-            className="gap-2"
-          >
-            <ArrowLeft className="h-4 w-4" />
-            Back to Templates
-          </Button>
-        </div>
+        <PageHeader
+          icon={ShoppingCart}
+          title="Publish Cart"
+          count={publishedTemplates.length}
+          description="Review and manage your templates ready for publishing"
+          backLabel="Back to Templates"
+          backPath="/my-templates"
+        />
 
         {publishedTemplates.length === 0 ? (
           <div className="text-center py-16">
