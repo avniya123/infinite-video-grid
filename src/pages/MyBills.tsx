@@ -136,6 +136,8 @@ const MyBills = () => {
         return "default";
       case "pending":
         return "secondary";
+      case "processing":
+        return "secondary";
       case "failed":
         return "destructive";
       default:
@@ -310,6 +312,7 @@ const MyBills = () => {
               <SelectContent>
                 <SelectItem value="all">All Statuses</SelectItem>
                 <SelectItem value="pending">Pending</SelectItem>
+                <SelectItem value="processing">Processing</SelectItem>
                 <SelectItem value="completed">Completed</SelectItem>
                 <SelectItem value="failed">Failed</SelectItem>
               </SelectContent>
