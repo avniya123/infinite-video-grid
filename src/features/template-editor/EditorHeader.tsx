@@ -27,9 +27,9 @@ export const EditorHeader = ({ title = "Template Editor" }: EditorHeaderProps) =
             size="icon"
             onClick={() => navigate("/videos")}
           >
-            <ArrowLeft className="h-5 w-5" />
+            <ArrowLeft className="h-4 w-4" />
           </Button>
-          <h1 className="text-xl font-semibold">{title}</h1>
+          <h1 className="text-lg font-semibold">{title}</h1>
         </div>
 
         <div className="flex items-center gap-2">

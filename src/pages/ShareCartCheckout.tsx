@@ -420,12 +420,12 @@ export default function ShareCartCheckout() {
         <div className="mb-8 animate-fade-in">
           <div className="flex items-center gap-4 mb-4">
             <div className="relative p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl backdrop-blur-sm border border-primary/20 shadow-lg">
-              <ShoppingBag className="h-7 w-7 text-primary" />
+              <ShoppingBag className="h-5.5 w-5.5 text-primary" />
               <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse"></div>
             </div>
             <div className="flex-1">
               <div className="flex items-center gap-3 flex-wrap">
-                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
+                <h1 className="text-2xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                   {isQuickMode ? `Quick Publish Cart (${templates.length})` : `Publish Cart Checkout (${templates.length})`}
                 </h1>
                 {isQuickMode && (
