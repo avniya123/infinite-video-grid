@@ -30,22 +30,19 @@ export const useImagePreloader = (
     // Add to queue
     preloadQueueRef.current = [...preloadQueueRef.current, ...newImages];
 
-    // Preload images with staggered timing to avoid blocking
+    // Preload images with optimized timing
     const preloadImages = async () => {
       for (let i = 0; i < newImages.length; i++) {
         const imgUrl = newImages[i];
         
-        // Skip if already preloaded
         if (preloadedRef.current.has(imgUrl)) continue;
 
-        // Stagger preloads to avoid bandwidth spikes
-        await new Promise(resolve => setTimeout(resolve, i * 100));
+        // Reduced stagger delay for faster preloading
+        await new Promise(resolve => setTimeout(resolve, i * 50));
 
-        // Create image element to trigger browser cache
         const img = new Image();
         img.src = imgUrl;
         
-        // Mark as preloaded whether it succeeds or fails
         img.onload = () => {
           preloadedRef.current.add(imgUrl);
           preloadQueueRef.current = preloadQueueRef.current.filter(url => url !== imgUrl);
