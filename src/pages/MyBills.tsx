@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { FileText, Calendar, CreditCard, Filter, Download, Search, Info, FileSpreadsheet, Mail, Loader2 } from "lucide-react";
+import { FileText, Calendar as CalendarIcon, CreditCard, Filter, Download, Search, Info, FileSpreadsheet, Mail, Loader2, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -33,12 +33,21 @@ import {
 } from "@/components/ui/dialog";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import { Calendar } from "@/components/ui/calendar";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import { cn } from "@/lib/utils";
 
 const MyBills = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>("all");
-  const [dateRangeFilter, setDateRangeFilter] = useState<string>("all");
+  const [orderTypeFilter, setOrderTypeFilter] = useState<string>("all");
+  const [dateFrom, setDateFrom] = useState<Date | undefined>(undefined);
+  const [dateTo, setDateTo] = useState<Date | undefined>(undefined);
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [dialogSearchQuery, setDialogSearchQuery] = useState("");
@@ -94,19 +103,31 @@ const MyBills = () => {
     const matchesSearch = order.order_number.toLowerCase().includes(searchQuery.toLowerCase());
     const matchesPaymentStatus = paymentStatusFilter === "all" || order.payment_status === paymentStatusFilter;
     const matchesPaymentMethod = paymentMethodFilter === "all" || order.payment_method === paymentMethodFilter;
+    const matchesOrderType = orderTypeFilter === "all" || order.order_type === orderTypeFilter;
     
     let matchesDateRange = true;
-    if (dateRangeFilter !== "all") {
+    if (dateFrom || dateTo) {
       const orderDate = new Date(order.created_at);
-      const now = new Date();
-      const daysDiff = Math.floor((now.getTime() - orderDate.getTime()) / (1000 * 60 * 60 * 24));
+      orderDate.setHours(0, 0, 0, 0);
       
-      if (dateRangeFilter === "7days") matchesDateRange = daysDiff <= 7;
-      else if (dateRangeFilter === "30days") matchesDateRange = daysDiff <= 30;
-      else if (dateRangeFilter === "90days") matchesDateRange = daysDiff <= 90;
+      if (dateFrom && dateTo) {
+        const from = new Date(dateFrom);
+        from.setHours(0, 0, 0, 0);
+        const to = new Date(dateTo);
+        to.setHours(23, 59, 59, 999);
+        matchesDateRange = orderDate >= from && orderDate <= to;
+      } else if (dateFrom) {
+        const from = new Date(dateFrom);
+        from.setHours(0, 0, 0, 0);
+        matchesDateRange = orderDate >= from;
+      } else if (dateTo) {
+        const to = new Date(dateTo);
+        to.setHours(23, 59, 59, 999);
+        matchesDateRange = orderDate <= to;
+      }
     }
     
-    return matchesSearch && matchesPaymentStatus && matchesPaymentMethod && matchesDateRange;
+    return matchesSearch && matchesPaymentStatus && matchesPaymentMethod && matchesOrderType && matchesDateRange;
   });
 
   const getStatusBadgeVariant = (status: string) => {
@@ -271,7 +292,7 @@ const MyBills = () => {
             </Button>
           </div>
           
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-4">
             <div className="relative">
               <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
               <Input
@@ -307,21 +328,72 @@ const MyBills = () => {
               </SelectContent>
             </Select>
 
-            <Select value={dateRangeFilter} onValueChange={setDateRangeFilter}>
+            <Select value={orderTypeFilter} onValueChange={setOrderTypeFilter}>
               <SelectTrigger>
-                <SelectValue placeholder="Date Range" />
+                <SelectValue placeholder="Order Type" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="all">All Time</SelectItem>
-                <SelectItem value="7days">Last 7 Days</SelectItem>
-                <SelectItem value="30days">Last 30 Days</SelectItem>
-                <SelectItem value="90days">Last 90 Days</SelectItem>
+                <SelectItem value="all">All Types</SelectItem>
+                <SelectItem value="self">Self</SelectItem>
+                <SelectItem value="shared">Shared</SelectItem>
               </SelectContent>
             </Select>
+
+            <div className="flex gap-2 col-span-full lg:col-span-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "flex-1 justify-start text-left font-normal",
+                      !dateFrom && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateFrom ? format(dateFrom, "dd MM yyyy") : "From Date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateFrom}
+                    onSelect={setDateFrom}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="flex gap-2 col-span-full lg:col-span-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "flex-1 justify-start text-left font-normal",
+                      !dateTo && "text-muted-foreground"
+                    )}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {dateTo ? format(dateTo, "dd MM yyyy") : "To Date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={dateTo}
+                    onSelect={setDateTo}
+                    initialFocus
+                    className={cn("p-3 pointer-events-auto")}
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
           </div>
 
-          {(searchQuery || paymentStatusFilter !== "all" || paymentMethodFilter !== "all" || dateRangeFilter !== "all") && (
-            <div className="mt-4">
+          {(searchQuery || paymentStatusFilter !== "all" || paymentMethodFilter !== "all" || orderTypeFilter !== "all" || dateFrom || dateTo) && (
+            <div className="mt-4 flex gap-2 flex-wrap">
               <Button
                 variant="outline"
                 size="sm"
@@ -329,11 +401,35 @@ const MyBills = () => {
                   setSearchQuery("");
                   setPaymentStatusFilter("all");
                   setPaymentMethodFilter("all");
-                  setDateRangeFilter("all");
+                  setOrderTypeFilter("all");
+                  setDateFrom(undefined);
+                  setDateTo(undefined);
                 }}
               >
                 Clear All Filters
               </Button>
+              {dateFrom && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDateFrom(undefined)}
+                  className="gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  From: {format(dateFrom, "dd MM yyyy")}
+                </Button>
+              )}
+              {dateTo && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setDateTo(undefined)}
+                  className="gap-1"
+                >
+                  <X className="h-3 w-3" />
+                  To: {format(dateTo, "dd MM yyyy")}
+                </Button>
+              )}
             </div>
           )}
         </Card>
@@ -369,7 +465,7 @@ const MyBills = () => {
                       <TableCell className="font-medium">{order.order_number}</TableCell>
                       <TableCell>
                         <div className="flex items-center gap-2">
-                          <Calendar className="h-3.5 w-3.5 text-muted-foreground" />
+                          <CalendarIcon className="h-3.5 w-3.5 text-muted-foreground" />
                           {format(new Date(order.created_at), "MMM dd, yyyy")}
                         </div>
                       </TableCell>
