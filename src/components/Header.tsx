@@ -150,7 +150,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
             <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild className="md:hidden">
                 <Button variant="ghost" size="icon">
-                  <Menu className="h-5 w-5" />
+                  <Menu className="h-4 w-4" />
                 </Button>
               </SheetTrigger>
               <SheetContent side="left" className="w-[300px] sm:w-[400px]">
@@ -282,7 +282,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-gray-600 dark:from-gray-700 dark:to-gray-500 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                   <span className="text-white font-bold text-lg">V</span>
                 </div>
-                <span className="text-xl font-bold text-gray-900 dark:text-white hidden sm:inline">VideoStudio</span>
+                <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:inline">VideoStudio</span>
               </Link>
 
               {/* Category Navigation */}
@@ -374,7 +374,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         onClick={() => navigate('/my-templates')}
                         className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
-                        <LayoutTemplate className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <LayoutTemplate className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -390,7 +390,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         onClick={() => navigate('/publish-cart')}
                         className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
-                        <ShoppingCart className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <ShoppingCart className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
@@ -406,7 +406,7 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         size="icon"
                         className="relative h-9 w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
                       >
-                        <Bell className="w-5 h-5" />
+                        <Bell className="w-4 h-4" />
                         <Badge className="absolute -top-1 -right-1 h-5 w-5 flex items-center justify-center p-0 text-[10px] bg-destructive text-white rounded-full border-2 border-white dark:border-gray-900">
                           3
                         </Badge>

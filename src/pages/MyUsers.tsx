@@ -199,10 +199,10 @@ export default function MyUsers() {
         <div className="mb-6 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="p-2.5 bg-primary/10 rounded-xl">
-              <Users className="h-6 w-6 text-primary" />
+              <Users className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold">
+              <h1 className="text-xl font-bold">
                 My Users {savedUsers.length > 0 && `(${savedUsers.length})`}
               </h1>
               <p className="text-muted-foreground text-sm mt-0.5">

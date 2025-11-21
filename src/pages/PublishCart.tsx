@@ -373,12 +373,12 @@ export default function PublishCart() {
         <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
           {/* Page Header */}
           <div className="flex items-center justify-between mb-6">
-            <div className="flex items-center gap-4">
-              <div className="p-2.5 bg-primary/10 rounded-xl">
-                <ShoppingCart className="h-6 w-6 text-primary" />
-              </div>
-              <div>
-                <h1 className="text-2xl font-bold text-foreground">Publish Cart</h1>
+          <div className="flex items-center gap-4">
+            <div className="p-2.5 bg-primary/10 rounded-xl">
+              <ShoppingCart className="h-5 w-5 text-primary" />
+            </div>
+            <div>
+              <h1 className="text-xl font-bold text-foreground">Publish Cart</h1>
                 <p className="text-muted-foreground text-sm mt-0.5">
                   Loading your templates...
                 </p>
@@ -429,10 +429,10 @@ export default function PublishCart() {
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center gap-4">
             <div className="p-2.5 bg-primary/10 rounded-xl">
-              <ShoppingCart className="h-6 w-6 text-primary" />
+              <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold text-foreground">
+              <h1 className="text-xl font-bold text-foreground">
                 Publish Cart {publishedTemplates.length > 0 && `(${publishedTemplates.length})`}
               </h1>
               <p className="text-muted-foreground text-sm mt-0.5">
