@@ -12,6 +12,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { TemplateDetailsSkeleton } from '@/components/TemplateCardSkeleton';
+import { CheckoutProgress } from '@/components/CheckoutProgress';
 import { toast } from 'sonner';
 import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info, Play, Sparkles } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -71,6 +72,14 @@ export default function ShareCartCheckout() {
   const [autoLoadEnrolled, setAutoLoadEnrolled] = useState(false);
   const [paymentConfirmDialogOpen, setPaymentConfirmDialogOpen] = useState(false);
   const [previewTemplate, setPreviewTemplate] = useState<TemplateData | null>(null);
+
+  // Calculate current step based on user progress
+  const getCurrentStep = () => {
+    if (paymentConfirmDialogOpen) return 4;
+    if (paymentMethod) return 3;
+    if (sharedUsers.length > 0) return 2;
+    return 1;
+  };
 
   useEffect(() => {
     const initializePage = async () => {
@@ -415,6 +424,9 @@ export default function ShareCartCheckout() {
             <span className="font-medium">Back to Publish Cart</span>
           </Button>
         </div>
+
+        {/* Progress Indicator */}
+        <CheckoutProgress currentStep={getCurrentStep()} />
 
         {/* Header */}
         <div className="mb-8 animate-fade-in">
