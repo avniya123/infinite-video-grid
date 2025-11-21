@@ -787,12 +787,7 @@ export default function ShareCartCheckout() {
                       className="w-14 h-14 rounded object-cover flex-shrink-0"
                     />
                     <div className="flex-1 min-w-0">
-                      <p className="font-medium text-xs truncate mb-1">{templates[0].title}</p>
-                      <div className="flex flex-wrap items-center gap-1">
-                        <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{templates[0].duration}</Badge>
-                        <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{templates[0].orientation}</Badge>
-                        <Badge variant="secondary" className="h-4 px-1.5 text-[10px]">{templates[0].resolution}</Badge>
-                      </div>
+                      <p className="font-medium text-xs truncate">{templates[0].title}</p>
                     </div>
                   </div>
                 </div>
