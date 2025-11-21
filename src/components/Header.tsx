@@ -280,9 +280,9 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
             <div className="flex items-center gap-6">
               <Link to="/" className="flex items-center gap-2 cursor-pointer group">
                 <div className="w-9 h-9 rounded-xl bg-gradient-to-br from-gray-800 to-gray-600 dark:from-gray-700 dark:to-gray-500 flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-                  <span className="text-white font-bold text-lg">V</span>
+                  <span className="text-white font-extrabold text-lg">V</span>
                 </div>
-                <span className="text-lg font-bold text-gray-900 dark:text-white hidden sm:inline">VideoStudio</span>
+                <span className="text-lg font-extrabold text-gray-900 dark:text-white hidden sm:inline tracking-wide">VideoStudio</span>
               </Link>
 
               {/* Category Navigation */}

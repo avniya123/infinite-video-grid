@@ -378,11 +378,11 @@ export default function PublishCart() {
               <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">Publish Cart</h1>
-                <p className="text-muted-foreground text-sm mt-0.5">
-                  Loading your templates...
-                </p>
-              </div>
+              <h1 className="text-xl font-extrabold text-foreground tracking-wide leading-tight">Publish Cart</h1>
+              <p className="text-muted-foreground text-sm mt-0.5 tracking-wide">
+                Loading your templates...
+              </p>
+            </div>
             </div>
             <Button
               variant="ghost"
@@ -432,10 +432,10 @@ export default function PublishCart() {
               <ShoppingCart className="h-5 w-5 text-primary" />
             </div>
             <div>
-              <h1 className="text-xl font-bold text-foreground">
+              <h1 className="text-xl font-extrabold text-foreground tracking-wide leading-tight">
                 Publish Cart {publishedTemplates.length > 0 && `(${publishedTemplates.length})`}
               </h1>
-              <p className="text-muted-foreground text-sm mt-0.5">
+              <p className="text-muted-foreground text-sm mt-0.5 tracking-wide">
                 Review and manage your templates ready for publishing
               </p>
             </div>
