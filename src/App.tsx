@@ -13,6 +13,7 @@ import MyUsers from "./pages/MyUsers";
 import PublishCart from "./pages/PublishCart";
 import ShareCartCheckout from "./pages/ShareCartCheckout";
 import MyBills from "./pages/MyBills";
+import MyVideos from "./pages/MyVideos";
 
 const queryClient = new QueryClient();
 
@@ -27,6 +28,7 @@ const App = () => (
           <Route path="/" element={<Landing />} />
           <Route path="/videos" element={<Index />} />
           <Route path="/my-templates" element={<MyTemplates />} />
+          <Route path="/my-videos" element={<MyVideos />} />
           <Route path="/my-users" element={<MyUsers />} />
           <Route path="/my-bills" element={<MyBills />} />
           <Route path="/publish-cart" element={<PublishCart />} />
