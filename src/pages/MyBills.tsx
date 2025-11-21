@@ -1,6 +1,6 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Header } from "@/components/Header";
-import { FileText, Calendar, CreditCard, Filter, Download, Search, Info, FileSpreadsheet, Mail, Loader2 } from "lucide-react";
+import { FileText, Calendar, CreditCard, Filter, Download, Search, Info, FileSpreadsheet, Mail, Loader2, User, LogOut, Settings } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -24,6 +24,7 @@ import { Separator } from "@/components/ui/separator";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { format } from "date-fns";
+import { useNavigate } from "react-router-dom";
 import {
   Dialog,
   DialogContent,
@@ -31,10 +32,21 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { toast } from "sonner";
+import type { User as SupabaseUser } from '@supabase/supabase-js';
 
 const MyBills = () => {
+  const navigate = useNavigate();
   const [searchQuery, setSearchQuery] = useState("");
   const [paymentStatusFilter, setPaymentStatusFilter] = useState<string>("all");
   const [paymentMethodFilter, setPaymentMethodFilter] = useState<string>("all");
@@ -45,6 +57,53 @@ const MyBills = () => {
   const [emailDialogOpen, setEmailDialogOpen] = useState(false);
   const [emailRecipient, setEmailRecipient] = useState("");
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
+  const [user, setUser] = useState<SupabaseUser | null>(null);
+  const [profileData, setProfileData] = useState<any>(null);
+
+  useEffect(() => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      }
+    });
+
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null);
+      if (session?.user) {
+        fetchProfile(session.user.id);
+      } else {
+        setProfileData(null);
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const fetchProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setProfileData(data);
+    } catch (error) {
+      console.error('Error fetching profile:', error);
+    }
+  };
+
+  const handleLogout = async () => {
+    try {
+      await supabase.auth.signOut();
+      toast.success('Logged out successfully');
+      navigate('/');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to log out');
+    }
+  };
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["user-orders"],
@@ -245,13 +304,60 @@ const MyBills = () => {
       <Header />
       
       <main className="container mx-auto px-4 py-8">
-        {/* Page Header */}
-        <div className="flex items-center gap-3 mb-6">
-          <FileText className="h-5 w-5 text-primary" />
-          <div>
-            <h1 className="text-2xl font-extrabold tracking-wide leading-tight">My Bills</h1>
-            <p className="text-sm text-muted-foreground tracking-wide">View and manage your billing history</p>
+        {/* Page Header with Profile */}
+        <div className="flex items-center justify-between mb-6">
+          <div className="flex items-center gap-3">
+            <FileText className="h-5 w-5 text-primary" />
+            <div>
+              <h1 className="text-2xl font-extrabold tracking-wide leading-tight">My Bills</h1>
+              <p className="text-sm text-muted-foreground tracking-wide">View and manage your billing history</p>
+            </div>
           </div>
+
+          {/* Profile Dropdown */}
+          {user && (
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="ghost" className="gap-2 hover:bg-primary/10">
+                  <Avatar className="h-8 w-8">
+                    <AvatarImage src={profileData?.avatar_url || ''} />
+                    <AvatarFallback className="bg-primary/10 text-primary font-semibold">
+                      {profileData?.full_name?.charAt(0) || user.email?.charAt(0).toUpperCase()}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div className="hidden sm:flex flex-col items-start">
+                    <span className="text-sm font-medium">{profileData?.full_name || 'User'}</span>
+                    <span className="text-xs text-muted-foreground">{user.email}</span>
+                  </div>
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>My Account</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={() => navigate('/my-templates')}>
+                  <FileText className="mr-2 h-4 w-4" />
+                  <span>My Templates</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/my-users')}>
+                  <User className="mr-2 h-4 w-4" />
+                  <span>My Users</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => navigate('/publish-cart')}>
+                  <CreditCard className="mr-2 h-4 w-4" />
+                  <span>Publish Cart</span>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem>
+                  <Settings className="mr-2 h-4 w-4" />
+                  <span>Settings</span>
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={handleLogout} className="text-destructive">
+                  <LogOut className="mr-2 h-4 w-4" />
+                  <span>Logout</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+          )}
         </div>
 
         <Separator className="mb-6" />
