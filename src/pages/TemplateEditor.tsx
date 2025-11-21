@@ -26,7 +26,7 @@ export default function TemplateEditor() {
     const params = new URLSearchParams(window.location.search);
     const from = params.get('from');
     if (from === 'videos') {
-      setReferrer('/');
+      setReferrer('/videos');
     } else {
       setReferrer('/my-templates');
     }
