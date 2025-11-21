@@ -11,8 +11,9 @@ import { Badge } from '@/components/ui/badge';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
+import { TemplateDetailsSkeleton } from '@/components/TemplateCardSkeleton';
 import { toast } from 'sonner';
-import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info, Play } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info, Play, Sparkles } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useSharedUsers, type SharedUser } from '@/hooks/useSharedUsers';
 
@@ -329,7 +330,7 @@ export default function ShareCartCheckout() {
   // Show loading state while fetching template data
   if (isLoadingTemplate || templates.length === 0) {
     return (
-      <div className="min-h-screen bg-background">
+      <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
         <Header 
           selectedMainCategory={null}
           selectedSubcategory={null}
@@ -337,10 +338,54 @@ export default function ShareCartCheckout() {
           onSubcategorySelect={() => {}}
         />
         <div className="container mx-auto px-4 py-8 max-w-7xl">
-          <div className="flex items-center justify-center h-96">
-            <div className="text-center">
-              <div className="w-16 h-16 border-4 border-primary border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-              <p className="text-muted-foreground">Loading template details...</p>
+          {/* Header Skeleton */}
+          <div className="mb-8">
+            <div className="flex items-center gap-4">
+              <div className="p-3 bg-primary/10 rounded-2xl backdrop-blur-sm border border-primary/20">
+                <ShoppingBag className="h-7 w-7 text-primary animate-pulse" />
+              </div>
+              <div className="flex-1 space-y-2">
+                <div className="h-8 w-64 bg-muted/50 rounded-lg animate-pulse"></div>
+                <div className="h-4 w-96 bg-muted/30 rounded-lg animate-pulse"></div>
+              </div>
+            </div>
+          </div>
+
+          <div className="grid lg:grid-cols-3 gap-8">
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-2 space-y-8">
+              <TemplateDetailsSkeleton />
+              
+              {/* Users Section Skeleton */}
+              <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm">
+                <div className="h-6 w-48 bg-muted/50 rounded-lg animate-pulse mb-4"></div>
+                <div className="space-y-3">
+                  <div className="h-12 bg-muted/30 rounded-lg animate-pulse"></div>
+                  <div className="h-12 bg-muted/30 rounded-lg animate-pulse"></div>
+                </div>
+              </Card>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="space-y-8">
+              <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm">
+                <div className="h-6 w-40 bg-muted/50 rounded-lg animate-pulse mb-4"></div>
+                <div className="space-y-3">
+                  <div className="h-20 bg-muted/30 rounded-lg animate-pulse"></div>
+                  <div className="h-20 bg-muted/30 rounded-lg animate-pulse"></div>
+                </div>
+              </Card>
+              
+              <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm">
+                <div className="space-y-3">
+                  {[...Array(5)].map((_, i) => (
+                    <div key={i} className="flex justify-between">
+                      <div className="h-4 w-32 bg-muted/30 rounded animate-pulse"></div>
+                      <div className="h-4 w-20 bg-muted/30 rounded animate-pulse"></div>
+                    </div>
+                  ))}
+                </div>
+              </Card>
             </div>
           </div>
         </div>
@@ -349,7 +394,7 @@ export default function ShareCartCheckout() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="min-h-screen bg-gradient-to-br from-background via-background to-muted/20">
       <Header 
         selectedMainCategory={null}
         selectedSubcategory={null}
@@ -360,31 +405,38 @@ export default function ShareCartCheckout() {
       <div className="container mx-auto px-4 py-8 max-w-7xl">
         {/* Back Button */}
         <div className="mb-6 flex items-center justify-end">
-          <Button variant="ghost" size="sm" onClick={() => navigate('/publish-cart')} className="gap-2">
+          <Button 
+            variant="ghost" 
+            size="sm" 
+            onClick={() => navigate('/publish-cart')} 
+            className="gap-2 hover:bg-primary/10 transition-all"
+          >
             <ArrowLeft className="w-4 h-4" />
             <span className="font-medium">Back to Publish Cart</span>
           </Button>
         </div>
 
         {/* Header */}
-        <div className="mb-6">
-          <div className="flex items-center gap-4 mb-3">
-            <div className="p-2.5 bg-primary/10 rounded-xl">
-              <ShoppingBag className="h-6 w-6 text-primary" />
+        <div className="mb-8 animate-fade-in">
+          <div className="flex items-center gap-4 mb-4">
+            <div className="relative p-3 bg-gradient-to-br from-primary/20 to-primary/10 rounded-2xl backdrop-blur-sm border border-primary/20 shadow-lg">
+              <ShoppingBag className="h-7 w-7 text-primary" />
+              <div className="absolute -top-1 -right-1 w-3 h-3 bg-primary rounded-full animate-pulse"></div>
             </div>
             <div className="flex-1">
-              <div className="flex items-center gap-3">
-                <h1 className="text-2xl font-bold tracking-tight">
+              <div className="flex items-center gap-3 flex-wrap">
+                <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">
                   {isQuickMode ? `Quick Publish Cart (${templates.length})` : `Publish Cart Checkout (${templates.length})`}
                 </h1>
                 {isQuickMode && (
-                  <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 gap-1.5 px-3 py-1">
-                    <Zap className="h-3.5 w-3.5" />
+                  <Badge className="bg-gradient-to-r from-emerald-500 to-emerald-600 text-white border-0 gap-1.5 px-3 py-1.5 shadow-lg">
+                    <Zap className="h-4 w-4" />
                     Quick Mode
                   </Badge>
                 )}
               </div>
-              <p className="text-muted-foreground text-sm mt-0.5">
+              <p className="text-muted-foreground text-base mt-1 flex items-center gap-2">
+                <Sparkles className="h-4 w-4 text-primary" />
                 {isQuickMode ? 'Fast checkout with instant template publishing' : 'Complete your purchase and publish templates to users'}
               </p>
             </div>
@@ -393,56 +445,60 @@ export default function ShareCartCheckout() {
 
         <div className="grid lg:grid-cols-3 gap-8">
           {/* Left Column - Template & Users */}
-          <div className="lg:col-span-2 space-y-8">
+          <div className="lg:col-span-2 space-y-8 animate-fade-in">
             {/* Template Info */}
-            <Card className="p-5 shadow-sm border-border/50 bg-gradient-to-br from-background to-muted/20">
-              <h2 className="text-base font-semibold mb-3 flex items-center gap-2">
-                <div className="h-1 w-8 bg-primary rounded-full"></div>
+            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
                 Template Details
               </h2>
               <div className="space-y-3">
                 {templates.map((template, index) => (
-                  <div key={template.id} className="group relative p-3 rounded-xl border border-border/50 bg-background/50 backdrop-blur-sm hover:shadow-md transition-all duration-300">
-                    <div className="flex gap-3 items-start">
-                      <div className="relative rounded-lg overflow-hidden shadow-sm group-hover:shadow-md transition-shadow cursor-pointer flex-shrink-0"
+                  <div key={template.id} className="group relative p-4 rounded-xl border border-border/50 bg-gradient-to-br from-background/80 to-muted/30 backdrop-blur-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-scale-in" style={{ animationDelay: `${index * 100}ms` }}>
+                    <div className="flex gap-4 items-start">
+                      <div className="relative rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all cursor-pointer flex-shrink-0 ring-2 ring-border/20 group-hover:ring-primary/50"
                            onClick={() => template.videoUrl && setPreviewTemplate(template)}>
                         <img 
                           src={template.thumbnailUrl || '/placeholder.svg'} 
                           alt={template.title}
-                          className="w-20 h-20 object-cover group-hover:scale-105 transition-transform duration-300"
+                          className="w-24 h-24 object-cover group-hover:scale-110 transition-transform duration-500"
                         />
                         {template.videoUrl && (
-                          <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <Play className="w-6 h-6 text-white drop-shadow-lg" fill="white" />
+                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                            <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
+                              <Play className="w-6 h-6 text-white drop-shadow-lg" fill="white" />
+                            </div>
                           </div>
                         )}
                       </div>
                       
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-base mb-1.5 truncate">{template.title}</h3>
-                        <div className="flex flex-wrap items-center gap-2 mb-2">
-                          <Badge variant="secondary" className="text-xs py-0 h-5">{template.duration}</Badge>
-                          <Badge variant="secondary" className="text-xs py-0 h-5">{template.orientation}</Badge>
-                          <Badge variant="secondary" className="text-xs py-0 h-5">{template.resolution}</Badge>
+                        <h3 className="font-semibold text-lg mb-2 truncate group-hover:text-primary transition-colors">{template.title}</h3>
+                        <div className="flex flex-wrap items-center gap-2 mb-3">
+                          <Badge variant="secondary" className="text-xs py-0.5 h-6 bg-primary/10 text-primary border-primary/20">{template.duration}</Badge>
+                          <Badge variant="secondary" className="text-xs py-0.5 h-6 bg-primary/10 text-primary border-primary/20">{template.orientation}</Badge>
+                          <Badge variant="secondary" className="text-xs py-0.5 h-6 bg-primary/10 text-primary border-primary/20">{template.resolution}</Badge>
                         </div>
                         
-                        <div className="flex items-center gap-2 flex-wrap">
-                          <span className="text-lg font-bold text-primary">₹{template.price.toFixed(2)}</span>
-                          <span className="text-xs text-muted-foreground line-through">₹{template.mrp.toFixed(2)}</span>
-                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs py-0 h-5">
+                        <div className="flex items-center gap-3 flex-wrap mb-3">
+                          <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
+                            ₹{template.price.toFixed(2)}
+                          </span>
+                          <span className="text-sm text-muted-foreground line-through">₹{template.mrp.toFixed(2)}</span>
+                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs py-0.5 h-6 shadow-md">
                             {template.discount} off
                           </Badge>
                         </div>
                         
                         {template.videoUrl && (
                           <Button
-                            variant="ghost"
+                            variant="outline"
                             size="sm"
                             onClick={() => setPreviewTemplate(template)}
-                            className="gap-1.5 h-7 px-2 mt-2 text-xs hover:bg-primary/10"
+                            className="gap-2 h-8 px-3 text-xs hover:bg-primary hover:text-primary-foreground transition-all border-primary/30"
                           >
-                            <Play className="w-3 h-3" />
-                            Preview
+                            <Play className="w-3.5 h-3.5" />
+                            Preview Video
                           </Button>
                         )}
                       </div>
@@ -452,9 +508,9 @@ export default function ShareCartCheckout() {
                           variant="ghost"
                           size="sm"
                           onClick={() => handleRemoveTemplate(template.id)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/10 h-7 w-7 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="text-destructive hover:text-destructive hover:bg-destructive/20 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
                         >
-                          <X className="h-3.5 w-3.5" />
+                          <X className="h-4 w-4" />
                         </Button>
                       )}
                     </div>
@@ -464,11 +520,14 @@ export default function ShareCartCheckout() {
             </Card>
 
             {/* Published Users Management */}
-            <Card className="p-6 shadow-sm border-border/50">
+            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
               <div className="flex items-center justify-between mb-6">
                 <div>
-                  <h2 className="text-lg font-semibold">Published Users</h2>
-                  <p className="text-sm text-muted-foreground mt-1">
+                  <h2 className="text-lg font-semibold flex items-center gap-2">
+                    <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                    Published Users
+                  </h2>
+                  <p className="text-sm text-muted-foreground mt-2">
                     Manage users who will receive this published template
                   </p>
                 </div>
@@ -477,7 +536,7 @@ export default function ShareCartCheckout() {
                     setEditingUser(null);
                     setAddUserSheetOpen(true);
                   }}
-                  className="gap-2"
+                  className="gap-2 shadow-md hover:shadow-lg transition-all bg-gradient-to-r from-primary to-primary/90"
                 >
                   <Users className="w-4 h-4" />
                   Add Users
@@ -623,21 +682,28 @@ export default function ShareCartCheckout() {
                   </div>
                 </div>
               ) : (
-                <div className="text-center py-12">
-                  <Users className="w-16 h-16 mx-auto mb-4 text-muted-foreground/30" />
-                  <h3 className="text-lg font-semibold mb-2">No Users Added</h3>
-                  <p className="text-muted-foreground mb-6">
-                    Add users to share this template with them
+                <div className="text-center py-16 px-4">
+                  <div className="relative mb-6">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-32 h-32 bg-primary/5 rounded-full animate-pulse"></div>
+                    </div>
+                    <Users className="w-20 h-20 mx-auto relative text-muted-foreground/40" />
+                  </div>
+                  <h3 className="text-xl font-bold mb-2 bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text">No Users Added Yet</h3>
+                  <p className="text-muted-foreground mb-8 max-w-sm mx-auto">
+                    Start by adding users to share this amazing template with them
                   </p>
                   <Button
                     onClick={() => {
                       setEditingUser(null);
                       setAddUserSheetOpen(true);
                     }}
-                    className="gap-2"
+                    className="gap-2 shadow-lg hover:shadow-xl transition-all bg-gradient-to-r from-primary to-primary/90"
+                    size="lg"
                   >
-                    <Users className="w-4 h-4" />
-                    Add First User
+                    <Users className="w-5 h-5" />
+                    Add Your First User
+                    <Sparkles className="w-4 h-4" />
                   </Button>
                 </div>
               )}
@@ -645,28 +711,31 @@ export default function ShareCartCheckout() {
           </div>
 
           {/* Right Column - Summary & Payment */}
-          <div className="space-y-8">
+          <div className="space-y-8 animate-fade-in" style={{ animationDelay: '200ms' }}>
             {/* Render Process */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Generate Video</h3>
-              <p className="text-xs text-muted-foreground mb-4">
+            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <h3 className="font-semibold mb-2 flex items-center gap-2 text-lg">
+                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                Generate Video
+              </h3>
+              <p className="text-sm text-muted-foreground mb-5">
                 {isQuickMode ? 'Quick publish mode - Published user access only' : 'Choose how to publish the template'}
               </p>
-              <div className="grid grid-cols-2 gap-3">
+              <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => {
                     setShareMethod('cart');
                     setEditingUser(null);
                   setAddUserSheetOpen(true);
                 }}
-                className={`p-4 rounded-lg border-2 transition-all ${
+                className={`p-5 rounded-xl border-2 transition-all duration-300 group hover:scale-105 ${
                   shareMethod === 'cart' 
-                    ? 'border-primary bg-primary/5' 
-                    : 'border-border hover:border-primary/50'
+                    ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
+                    : 'border-border hover:border-primary/50 hover:bg-primary/5'
                 }`}
               >
-                <Users className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
-                <p className="text-sm font-medium">Published User</p>
+                <Users className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
+                <p className="text-sm font-semibold">Published User</p>
               </button>
               
               <button
@@ -676,28 +745,28 @@ export default function ShareCartCheckout() {
                   }
                 }}
                 disabled={isQuickMode}
-                className={`p-4 rounded-lg border-2 transition-all relative ${
+                className={`p-5 rounded-xl border-2 transition-all duration-300 group relative ${
                   isQuickMode 
                     ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
                     : shareMethod === 'edited' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg hover:scale-105' 
+                      : 'border-border hover:border-primary/50 hover:bg-primary/5 hover:scale-105'
                 }`}
               >
-                <Edit className={`w-8 h-8 mx-auto mb-2 ${
+                <Edit className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${
                   isQuickMode 
                     ? 'text-muted-foreground/50' 
                     : shareMethod === 'edited' 
                       ? 'text-primary' 
                       : 'text-muted-foreground'
                 }`} />
-                <p className={`text-sm font-medium ${isQuickMode ? 'text-muted-foreground' : ''}`}>
+                <p className={`text-sm font-semibold ${isQuickMode ? 'text-muted-foreground' : ''}`}>
                   Changed
                 </p>
                 {isQuickMode && (
-                  <div className="flex items-center justify-center gap-1 mt-1">
-                    <Info className="h-3 w-3 text-muted-foreground" />
-                    <p className="text-xs text-muted-foreground">Not available in Quick Mode</p>
+                  <div className="flex items-center justify-center gap-1 mt-2">
+                    <Info className="h-3.5 w-3.5 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">Not available</p>
                   </div>
                 )}
               </button>
@@ -705,55 +774,59 @@ export default function ShareCartCheckout() {
             </Card>
 
             {/* Price Summary */}
-            <Card className="p-6">
-              <div className="space-y-3 text-sm">
+            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg">
+                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                Order Summary
+              </h3>
+              <div className="space-y-4 text-sm">
                 {/* Render Process Indicator */}
-                <div className="flex justify-between items-center pb-3 border-b">
+                <div className="flex justify-between items-center pb-4 border-b border-border/50">
                   <span className="text-muted-foreground font-medium">Generate Video</span>
-                  <div className={`px-3 py-1.5 rounded-full text-xs font-semibold flex items-center gap-2 ${
+                  <div className={`px-4 py-2 rounded-full text-xs font-semibold flex items-center gap-2 shadow-sm ${
                     shareMethod === 'cart' 
-                      ? 'bg-primary/10 text-primary border border-primary/20' 
-                      : 'bg-secondary/10 text-secondary-foreground border border-secondary/20'
+                      ? 'bg-gradient-to-r from-primary/20 to-primary/10 text-primary border border-primary/30' 
+                      : 'bg-gradient-to-r from-secondary/20 to-secondary/10 text-secondary-foreground border border-secondary/30'
                   }`}>
                     {shareMethod === 'cart' ? (
                       <>
-                        <Users className="w-3.5 h-3.5" />
+                        <Users className="w-4 h-4" />
                         Published User
                       </>
                     ) : (
                       <>
-                        <Edit className="w-3.5 h-3.5" />
+                        <Edit className="w-4 h-4" />
                         Self & Render
                       </>
                     )}
                   </div>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between py-2">
                   <span className="text-muted-foreground">MRP</span>
-                  <span className="font-medium">₹ {pricing.mrp.toFixed(2)}</span>
+                  <span className="font-semibold">₹ {pricing.mrp.toFixed(2)}</span>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between py-2">
                   <span className="text-muted-foreground">No Of Published Users</span>
-                  <span className="font-medium">X {sharedUsers.length || 1}</span>
+                  <Badge variant="secondary" className="font-semibold">X {sharedUsers.length || 1}</Badge>
                 </div>
-                <div className="flex justify-between">
+                <div className="flex justify-between py-2">
                   <span className="text-muted-foreground">Subtotal</span>
-                  <span className="font-medium">₹ {pricing.subtotal.toFixed(2)}</span>
+                  <span className="font-semibold">₹ {pricing.subtotal.toFixed(2)}</span>
                 </div>
                 {discountApplied && (
-                  <div className="flex justify-between text-green-600">
-                    <span>Reseller Discounts - {discountPercent}%</span>
-                    <span>₹ -{pricing.discount.toFixed(2)}</span>
+                  <div className="flex justify-between py-2 text-green-600">
+                    <span className="font-medium">Reseller Discounts - {discountPercent}%</span>
+                    <span className="font-semibold">₹ -{pricing.discount.toFixed(2)}</span>
                   </div>
                 )}
-                <div className="flex justify-between">
+                <div className="flex justify-between py-2">
                   <span className="text-muted-foreground">Tax (18%)</span>
-                  <span className="font-medium">₹ {pricing.tax.toFixed(2)}</span>
+                  <span className="font-semibold">₹ {pricing.tax.toFixed(2)}</span>
                 </div>
-                <div className="h-px bg-border my-2" />
-                <div className="flex justify-between text-lg font-bold">
-                  <span>Total</span>
-                  <span className="text-primary">₹ {pricing.total.toFixed(2)}</span>
+                <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent my-3" />
+                <div className="flex justify-between text-lg font-bold py-2 bg-gradient-to-r from-primary/5 to-transparent rounded-lg px-3">
+                  <span>Total Amount</span>
+                  <span className="text-primary bg-gradient-to-r from-primary to-primary/80 bg-clip-text text-transparent">₹ {pricing.total.toFixed(2)}</span>
                 </div>
               </div>
 
@@ -765,11 +838,13 @@ export default function ShareCartCheckout() {
                     value={discountCode}
                     onChange={(e) => setDiscountCode(e.target.value)}
                     disabled={discountApplied}
+                    className="border-primary/30 focus:border-primary"
                   />
                   <Button
                     onClick={handleApplyDiscount}
                     variant="outline"
                     disabled={discountApplied}
+                    className="border-primary/30 hover:bg-primary hover:text-primary-foreground"
                   >
                     Apply
                   </Button>
@@ -778,42 +853,47 @@ export default function ShareCartCheckout() {
             </Card>
 
             {/* Payment Method */}
-            <Card className="p-6">
-              <h3 className="font-semibold mb-4">Payment Method</h3>
-              <div className="grid grid-cols-2 gap-3">
+            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
+              <h3 className="font-semibold mb-4 flex items-center gap-2 text-lg">
+                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
+                Payment Method
+              </h3>
+              <div className="grid grid-cols-2 gap-4">
                 <button
                   onClick={() => setPaymentMethod('paytm')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`p-5 rounded-xl border-2 transition-all duration-300 group hover:scale-105 ${
                     paymentMethod === 'paytm' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
+                      : 'border-border hover:border-primary/50 hover:bg-primary/5'
                   }`}
                 >
-                  <Wallet className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <p className="text-sm font-medium">PAYTM</p>
-                  <p className="text-xs text-muted-foreground">UPI Payment</p>
+                  <Wallet className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${paymentMethod === 'paytm' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className="text-sm font-semibold">PAYTM</p>
+                  <p className="text-xs text-muted-foreground mt-1">UPI Payment</p>
                 </button>
                 <button
                   onClick={() => setPaymentMethod('credit')}
-                  className={`p-4 rounded-lg border-2 transition-all ${
+                  className={`p-5 rounded-xl border-2 transition-all duration-300 group hover:scale-105 ${
                     paymentMethod === 'credit' 
-                      ? 'border-primary bg-primary/5' 
-                      : 'border-border hover:border-primary/50'
+                      ? 'border-primary bg-gradient-to-br from-primary/10 to-primary/5 shadow-lg' 
+                      : 'border-border hover:border-primary/50 hover:bg-primary/5'
                   }`}
                 >
-                  <CreditCard className="w-8 h-8 mx-auto mb-2 text-primary" />
-                  <p className="text-sm font-medium">Credit Zone</p>
-                  <p className="text-xs text-muted-foreground">Trusted Partners</p>
+                  <CreditCard className={`w-10 h-10 mx-auto mb-3 transition-transform group-hover:scale-110 ${paymentMethod === 'credit' ? 'text-primary' : 'text-muted-foreground'}`} />
+                  <p className="text-sm font-semibold">Credit Zone</p>
+                  <p className="text-xs text-muted-foreground mt-1">Trusted Partners</p>
                 </button>
               </div>
             </Card>
 
             {/* Payment Summary Card - Quick Mode */}
             {isQuickMode && (
-              <Card className="p-6 bg-gradient-to-br from-primary/5 to-primary/10 border-primary/20">
-                <div className="flex items-center gap-2 mb-4">
-                  <Zap className="h-5 w-5 text-primary" />
-                  <h3 className="font-semibold text-primary">Quick Payment Summary</h3>
+              <Card className="p-6 bg-gradient-to-br from-primary/10 via-primary/5 to-transparent border-primary/30 shadow-xl">
+                <div className="flex items-center gap-3 mb-4">
+                  <div className="p-2 bg-primary/20 rounded-lg">
+                    <Zap className="h-5 w-5 text-primary" />
+                  </div>
+                  <h3 className="font-semibold text-primary text-lg">Quick Payment Summary</h3>
                 </div>
                 <div className="space-y-3">
                   {/* Template Info */}
@@ -869,17 +949,20 @@ export default function ShareCartCheckout() {
             {/* Proceed Button */}
             <Button
               onClick={handleProceedToPayment}
-              className="w-full h-14 text-base font-semibold shadow-lg"
+              className="w-full h-16 text-lg font-bold shadow-2xl hover:shadow-3xl transition-all duration-300 bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary group relative overflow-hidden"
               size="lg"
               disabled={sharedUsers.length === 0}
             >
-              <CreditCard className="w-5 h-5 mr-2" />
-              Proceed to Payment
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <CreditCard className="w-6 h-6 mr-3 group-hover:scale-110 transition-transform" />
+              <span className="relative">Proceed to Payment</span>
+              <Sparkles className="w-5 h-5 ml-3 group-hover:rotate-12 transition-transform" />
             </Button>
             {sharedUsers.length === 0 && (
-              <div className="text-center p-4 bg-muted/30 rounded-lg">
-                <p className="text-sm text-muted-foreground">
-                  Add at least one user to proceed
+              <div className="text-center p-4 bg-gradient-to-r from-muted/30 to-muted/10 rounded-lg border border-border/50">
+                <Info className="w-5 h-5 mx-auto mb-2 text-muted-foreground" />
+                <p className="text-sm text-muted-foreground font-medium">
+                  Add at least one user to proceed with payment
                 </p>
               </div>
             )}
