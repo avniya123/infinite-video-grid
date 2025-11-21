@@ -10,7 +10,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { toast } from 'sonner';
 import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info } from 'lucide-react';
@@ -892,20 +891,20 @@ export default function ShareCartCheckout() {
         defaultTab={autoLoadEnrolled ? 'enrolled' : undefined}
       />
 
-      {/* Payment Confirmation Drawer */}
-      <Drawer open={paymentConfirmDialogOpen} onOpenChange={setPaymentConfirmDialogOpen}>
-        <DrawerContent className="max-h-[90vh]">
-          <DrawerHeader>
-            <DrawerTitle className="text-2xl flex items-center gap-2">
+      {/* Payment Confirmation Dialog */}
+      <AlertDialog open={paymentConfirmDialogOpen} onOpenChange={setPaymentConfirmDialogOpen}>
+        <AlertDialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+          <AlertDialogHeader>
+            <AlertDialogTitle className="text-2xl flex items-center gap-2">
               <CreditCard className="h-6 w-6 text-primary" />
               Confirm Payment
-            </DrawerTitle>
-            <DrawerDescription className="text-base">
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-base">
               Please review your order details before proceeding with the payment.
-            </DrawerDescription>
-          </DrawerHeader>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
           
-          <div className="space-y-4 px-4 pb-4 overflow-y-auto">
+          <div className="space-y-4 py-4">
             {/* Template Details */}
             <div className="space-y-2">
               <h4 className="font-semibold text-sm text-muted-foreground">Template Details ({templates.length})</h4>
@@ -1091,20 +1090,18 @@ export default function ShareCartCheckout() {
             </div>
           </div>
 
-          <DrawerFooter className="flex-row gap-2">
-            <DrawerClose asChild>
-              <Button variant="outline" className="flex-1">Cancel</Button>
-            </DrawerClose>
-            <Button
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
               onClick={confirmPayment}
-              className="bg-primary hover:bg-primary/90 gap-2 flex-1"
+              className="bg-primary hover:bg-primary/90 gap-2"
             >
               <CreditCard className="h-4 w-4" />
               Confirm & Pay ₹ {pricing.total.toFixed(2)}
-            </Button>
-          </DrawerFooter>
-        </DrawerContent>
-      </Drawer>
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
