@@ -8,7 +8,6 @@ import { Switch } from '@/components/ui/switch';
 import { Card } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { toast } from 'sonner';
@@ -628,63 +627,50 @@ export default function ShareCartCheckout() {
                   onClick={() => {
                     setShareMethod('cart');
                     setEditingUser(null);
-                    setAddUserSheetOpen(true);
-                  }}
-                  className={`p-4 rounded-lg border-2 transition-all ${
-                    shareMethod === 'cart' 
+                  setAddUserSheetOpen(true);
+                }}
+                className={`p-4 rounded-lg border-2 transition-all ${
+                  shareMethod === 'cart' 
+                    ? 'border-primary bg-primary/5' 
+                    : 'border-border hover:border-primary/50'
+                }`}
+              >
+                <Users className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
+                <p className="text-sm font-medium">Published User</p>
+              </button>
+              
+              <button
+                onClick={() => {
+                  if (!isQuickMode) {
+                    setSelfRenderConfirmDialogOpen(true);
+                  }
+                }}
+                disabled={isQuickMode}
+                className={`p-4 rounded-lg border-2 transition-all relative ${
+                  isQuickMode 
+                    ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
+                    : shareMethod === 'edited' 
                       ? 'border-primary bg-primary/5' 
                       : 'border-border hover:border-primary/50'
-                  }`}
-                >
-                  <Users className={`w-8 h-8 mx-auto mb-2 ${shareMethod === 'cart' ? 'text-primary' : 'text-muted-foreground'}`} />
-                  <p className="text-sm font-medium">Published User</p>
-                </button>
-                
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <button
-                        onClick={() => {
-                          if (!isQuickMode) {
-                            setSelfRenderConfirmDialogOpen(true);
-                          }
-                        }}
-                        disabled={isQuickMode}
-                        className={`p-4 rounded-lg border-2 transition-all relative ${
-                          isQuickMode 
-                            ? 'opacity-50 cursor-not-allowed bg-muted/20 border-muted' 
-                            : shareMethod === 'edited' 
-                              ? 'border-primary bg-primary/5' 
-                              : 'border-border hover:border-primary/50'
-                        }`}
-                      >
-                        <Edit className={`w-8 h-8 mx-auto mb-2 ${
-                          isQuickMode 
-                            ? 'text-muted-foreground/50' 
-                            : shareMethod === 'edited' 
-                              ? 'text-primary' 
-                              : 'text-muted-foreground'
-                        }`} />
-                        <p className={`text-sm font-medium ${isQuickMode ? 'text-muted-foreground' : ''}`}>
-                          Self & Render
-                        </p>
-                        {isQuickMode && (
-                          <div className="flex items-center justify-center gap-1 mt-1">
-                            <Info className="h-3 w-3 text-muted-foreground" />
-                            <p className="text-xs text-muted-foreground">Disabled</p>
-                          </div>
-                        )}
-                      </button>
-                    </TooltipTrigger>
-                    {isQuickMode && (
-                      <TooltipContent side="bottom" className="max-w-xs">
-                        <p className="text-sm">
-                          Self & Render is not available in Quick Mode. Quick Mode is designed for fast checkout with shared user access only.
-                        </p>
-                      </TooltipContent>
-                    )}
-                  </Tooltip>
-                </TooltipProvider>
+                }`}
+              >
+                <Edit className={`w-8 h-8 mx-auto mb-2 ${
+                  isQuickMode 
+                    ? 'text-muted-foreground/50' 
+                    : shareMethod === 'edited' 
+                      ? 'text-primary' 
+                      : 'text-muted-foreground'
+                }`} />
+                <p className={`text-sm font-medium ${isQuickMode ? 'text-muted-foreground' : ''}`}>
+                  Self & Render
+                </p>
+                {isQuickMode && (
+                  <div className="flex items-center justify-center gap-1 mt-1">
+                    <Info className="h-3 w-3 text-muted-foreground" />
+                    <p className="text-xs text-muted-foreground">Not available in Quick Mode</p>
+                  </div>
+                )}
+              </button>
               </div>
             </Card>
 
