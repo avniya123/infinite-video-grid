@@ -10,6 +10,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { Drawer, DrawerContent, DrawerHeader, DrawerTitle, DrawerDescription, DrawerFooter, DrawerClose } from '@/components/ui/drawer';
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { toast } from 'sonner';
 import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info } from 'lucide-react';
@@ -226,6 +227,15 @@ export default function ShareCartCheckout() {
     toggleUserAccess(userId);
   };
 
+  const handleRemoveTemplate = (templateId: string) => {
+    if (templates.length === 1) {
+      toast.error('Cannot remove the last template');
+      return;
+    }
+    setTemplates(prev => prev.filter(t => t.id !== templateId));
+    toast.success('Template removed from checkout');
+  };
+
   const handleApplyDiscount = () => {
     if (discountCode.toLowerCase() === 'discount10') {
       setDiscountApplied(true);
@@ -410,6 +420,16 @@ export default function ShareCartCheckout() {
                         </span>
                       </div>
                     </div>
+                    {templates.length > 1 && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleRemoveTemplate(template.id)}
+                        className="text-destructive hover:text-destructive hover:bg-destructive/10"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    )}
                   </div>
                 ))}
               </div>
@@ -872,20 +892,20 @@ export default function ShareCartCheckout() {
         defaultTab={autoLoadEnrolled ? 'enrolled' : undefined}
       />
 
-      {/* Payment Confirmation Dialog */}
-      <AlertDialog open={paymentConfirmDialogOpen} onOpenChange={setPaymentConfirmDialogOpen}>
-        <AlertDialogContent className="max-w-2xl">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="text-2xl flex items-center gap-2">
+      {/* Payment Confirmation Drawer */}
+      <Drawer open={paymentConfirmDialogOpen} onOpenChange={setPaymentConfirmDialogOpen}>
+        <DrawerContent className="max-h-[90vh]">
+          <DrawerHeader>
+            <DrawerTitle className="text-2xl flex items-center gap-2">
               <CreditCard className="h-6 w-6 text-primary" />
               Confirm Payment
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-base">
+            </DrawerTitle>
+            <DrawerDescription className="text-base">
               Please review your order details before proceeding with the payment.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
+            </DrawerDescription>
+          </DrawerHeader>
           
-          <div className="space-y-4 py-4">
+          <div className="space-y-4 px-4 pb-4 overflow-y-auto">
             {/* Template Details */}
             <div className="space-y-2">
               <h4 className="font-semibold text-sm text-muted-foreground">Template Details ({templates.length})</h4>
@@ -1071,18 +1091,20 @@ export default function ShareCartCheckout() {
             </div>
           </div>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
+          <DrawerFooter className="flex-row gap-2">
+            <DrawerClose asChild>
+              <Button variant="outline" className="flex-1">Cancel</Button>
+            </DrawerClose>
+            <Button
               onClick={confirmPayment}
-              className="bg-primary hover:bg-primary/90 gap-2"
+              className="bg-primary hover:bg-primary/90 gap-2 flex-1"
             >
               <CreditCard className="h-4 w-4" />
               Confirm & Pay ₹ {pricing.total.toFixed(2)}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+            </Button>
+          </DrawerFooter>
+        </DrawerContent>
+      </Drawer>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
