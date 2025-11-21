@@ -447,72 +447,60 @@ export default function ShareCartCheckout() {
           {/* Left Column - Template & Users */}
           <div className="lg:col-span-2 space-y-8 animate-fade-in">
             {/* Template Info */}
-            <Card className="p-6 shadow-lg border-border/50 bg-card/50 backdrop-blur-sm hover:shadow-xl transition-all duration-300">
-              <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
-                <div className="h-1 w-10 bg-gradient-to-r from-primary to-primary/50 rounded-full"></div>
-                Template Details
-              </h2>
-              <div className="space-y-3">
+            <Card className="p-4 shadow-sm border-border/40 bg-gradient-to-br from-background/95 to-muted/10 hover:shadow-md transition-all duration-300">
+              <div className="flex items-center gap-2 mb-3">
+                <div className="h-0.5 w-8 rounded-full bg-gradient-to-r from-primary to-primary/50" />
+                <h2 className="text-base font-semibold text-foreground/90">Template Details</h2>
+              </div>
+              <div className="space-y-2">
                 {templates.map((template, index) => (
-                  <div key={template.id} className="group relative p-4 rounded-xl border border-border/50 bg-gradient-to-br from-background/80 to-muted/30 backdrop-blur-sm hover:shadow-lg hover:border-primary/30 transition-all duration-300 animate-scale-in" style={{ animationDelay: `${index * 100}ms` }}>
-                    <div className="flex gap-4 items-start">
-                      <div className="relative rounded-xl overflow-hidden shadow-md group-hover:shadow-xl transition-all cursor-pointer flex-shrink-0 ring-2 ring-border/20 group-hover:ring-primary/50"
+                  <div key={template.id} className="group relative p-2.5 rounded-lg border border-border/40 bg-background/60 backdrop-blur-sm hover:shadow-sm hover:border-primary/20 transition-all duration-300">
+                    <div className="flex gap-2.5 items-start">
+                      <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 cursor-pointer group/preview"
                            onClick={() => template.videoUrl && setPreviewTemplate(template)}>
                         <img 
                           src={template.thumbnailUrl || '/placeholder.svg'} 
                           alt={template.title}
-                          className="w-24 h-24 object-cover group-hover:scale-110 transition-transform duration-500"
+                          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                         {template.videoUrl && (
-                          <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-black/30 to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                            <div className="p-2 bg-white/20 rounded-full backdrop-blur-sm">
-                              <Play className="w-6 h-6 text-white drop-shadow-lg" fill="white" />
-                            </div>
+                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity duration-200">
+                            <Play className="w-5 h-5 text-white" />
                           </div>
                         )}
                       </div>
                       
-                      <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-lg mb-2 truncate group-hover:text-primary transition-colors">{template.title}</h3>
-                        <div className="flex flex-wrap items-center gap-2 mb-3">
-                          <Badge variant="secondary" className="text-xs py-0.5 h-6 bg-primary/10 text-primary border-primary/20">{template.duration}</Badge>
-                          <Badge variant="secondary" className="text-xs py-0.5 h-6 bg-primary/10 text-primary border-primary/20">{template.orientation}</Badge>
-                          <Badge variant="secondary" className="text-xs py-0.5 h-6 bg-primary/10 text-primary border-primary/20">{template.resolution}</Badge>
-                        </div>
-                        
-                        <div className="flex items-center gap-3 flex-wrap mb-3">
-                          <span className="text-xl font-bold bg-gradient-to-r from-green-600 to-emerald-600 bg-clip-text text-transparent">
-                            ₹{template.price.toFixed(2)}
-                          </span>
-                          <span className="text-sm text-muted-foreground line-through">₹{template.mrp.toFixed(2)}</span>
-                          <Badge className="bg-gradient-to-r from-green-500 to-emerald-500 text-white border-0 text-xs py-0.5 h-6 shadow-md">
-                            {template.discount} off
+                      <div className="flex-1 min-w-0 space-y-1.5">
+                        <h3 className="font-medium text-sm line-clamp-1 group-hover:text-primary transition-colors">
+                          {template.title}
+                        </h3>
+                        <div className="flex flex-wrap items-center gap-1.5">
+                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+                            {template.duration}
+                          </Badge>
+                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+                            {template.orientation}
+                          </Badge>
+                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+                            {template.resolution}
                           </Badge>
                         </div>
-                        
-                        {template.videoUrl && (
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => setPreviewTemplate(template)}
-                            className="gap-2 h-8 px-3 text-xs hover:bg-primary hover:text-primary-foreground transition-all border-primary/30"
-                          >
-                            <Play className="w-3.5 h-3.5" />
-                            Preview Video
-                          </Button>
-                        )}
+                        <div className="flex items-center gap-2 pt-0.5">
+                          <p className="text-base font-bold text-primary">₹{template.price}</p>
+                          <span className="text-[10px] text-muted-foreground">per variation</span>
+                          {template.videoUrl && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => setPreviewTemplate(template)}
+                              className="ml-auto h-6 px-2 text-[10px] hover:bg-primary/10"
+                            >
+                              <Play className="w-3 h-3 mr-0.5" />
+                              Preview
+                            </Button>
+                          )}
+                        </div>
                       </div>
-                      
-                      {templates.length > 1 && (
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => handleRemoveTemplate(template.id)}
-                          className="text-destructive hover:text-destructive hover:bg-destructive/20 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-all rounded-lg"
-                        >
-                          <X className="h-4 w-4" />
-                        </Button>
-                      )}
                     </div>
                   </div>
                 ))}
@@ -1010,22 +998,22 @@ export default function ShareCartCheckout() {
                 <div className="h-0.5 w-6 bg-primary rounded-full"></div>
                 Template Details
               </h4>
-              <div className="space-y-2 max-h-60 overflow-y-auto pr-1">
+              <div className="space-y-1.5 max-h-60 overflow-y-auto pr-1">
                 {templates.map((template) => (
-                  <div key={template.id} className="group flex items-start gap-3 p-3 bg-gradient-to-br from-muted/30 to-muted/10 rounded-lg border border-border/30 hover:border-primary/20 transition-all">
-                    <div className="relative rounded-md overflow-hidden shadow-sm flex-shrink-0">
+                  <div key={template.id} className="group flex items-start gap-2 p-2 bg-gradient-to-br from-muted/20 to-muted/5 rounded-md border border-border/30 hover:border-primary/20 transition-all">
+                    <div className="relative rounded overflow-hidden shadow-sm flex-shrink-0">
                       <img 
                         src={template.thumbnailUrl || '/placeholder.svg'} 
                         alt={template.title}
-                        className="w-16 h-16 object-cover group-hover:scale-105 transition-transform duration-300"
+                        className="w-12 h-12 object-cover group-hover:scale-105 transition-transform duration-300"
                       />
                     </div>
                     <div className="flex-1 min-w-0">
-                      <p className="font-semibold text-sm truncate mb-1.5">{template.title}</p>
-                      <div className="flex flex-wrap items-center gap-1.5">
-                        <Badge variant="secondary" className="text-xs py-0 h-5">{template.duration}</Badge>
-                        <Badge variant="secondary" className="text-xs py-0 h-5">{template.orientation}</Badge>
-                        <Badge variant="secondary" className="text-xs py-0 h-5">{template.resolution}</Badge>
+                      <p className="font-medium text-xs truncate mb-1">{template.title}</p>
+                      <div className="flex flex-wrap items-center gap-1">
+                        <Badge variant="secondary" className="text-[10px] py-0 h-4 px-1.5">{template.duration}</Badge>
+                        <Badge variant="secondary" className="text-[10px] py-0 h-4 px-1.5">{template.orientation}</Badge>
+                        <Badge variant="secondary" className="text-[10px] py-0 h-4 px-1.5">{template.resolution}</Badge>
                       </div>
                     </div>
                   </div>
