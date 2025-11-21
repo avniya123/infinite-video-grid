@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Header } from "@/components/Header";
-import { FileText, Calendar, CreditCard, Filter, Download, Search, Info, FileSpreadsheet } from "lucide-react";
+import { FileText, Calendar, CreditCard, Filter, Download, Search, Info, FileSpreadsheet, Mail, Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import {
@@ -42,6 +42,9 @@ const MyBills = () => {
   const [selectedOrder, setSelectedOrder] = useState<any>(null);
   const [infoDialogOpen, setInfoDialogOpen] = useState(false);
   const [dialogSearchQuery, setDialogSearchQuery] = useState("");
+  const [emailDialogOpen, setEmailDialogOpen] = useState(false);
+  const [emailRecipient, setEmailRecipient] = useState("");
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
   const { data: orders, isLoading } = useQuery({
     queryKey: ["user-orders"],
@@ -173,6 +176,66 @@ const MyBills = () => {
     setDialogSearchQuery("");
   };
 
+  const handleDownloadInvoice = async (order: any) => {
+    setLoadingAction(`download-${order.id}`);
+    try {
+      const { data, error } = await supabase.functions.invoke("generate-invoice", {
+        body: { orderId: order.id, action: "download" },
+      });
+
+      if (error) throw error;
+
+      // Create a blob from the HTML and convert to PDF using print
+      const blob = new Blob([data], { type: "text/html" });
+      const url = window.URL.createObjectURL(blob);
+      const printWindow = window.open(url, "_blank");
+      
+      if (printWindow) {
+        printWindow.onload = () => {
+          printWindow.print();
+        };
+      }
+
+      toast.success("Invoice opened in new window");
+    } catch (error: any) {
+      console.error("Error generating invoice:", error);
+      toast.error("Failed to generate invoice");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
+  const handleEmailInvoice = async (order: any) => {
+    setSelectedOrder(order);
+    setEmailRecipient("");
+    setEmailDialogOpen(true);
+  };
+
+  const sendInvoiceEmail = async () => {
+    if (!selectedOrder) return;
+    
+    setLoadingAction(`email-${selectedOrder.id}`);
+    try {
+      const { error } = await supabase.functions.invoke("generate-invoice", {
+        body: { 
+          orderId: selectedOrder.id, 
+          action: "email",
+          recipientEmail: emailRecipient || undefined
+        },
+      });
+
+      if (error) throw error;
+
+      toast.success("Invoice sent successfully");
+      setEmailDialogOpen(false);
+    } catch (error: any) {
+      console.error("Error sending invoice:", error);
+      toast.error("Failed to send invoice");
+    } finally {
+      setLoadingAction(null);
+    }
+  };
+
   const filteredTemplates = orderTemplates?.filter((template) =>
     template.template_title.toLowerCase().includes(dialogSearchQuery.toLowerCase())
   );
@@ -194,15 +257,17 @@ const MyBills = () => {
         <Separator className="mb-6" />
 
         {/* Filters Section */}
-        <Card className="p-6 mb-6">
+        <Card className="p-6 mb-6 border-border/50 shadow-sm">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-2">
-              <Filter className="h-4 w-4 text-muted-foreground" />
-              <h2 className="text-lg font-bold tracking-wide">Filters</h2>
+              <div className="p-2 rounded-lg bg-primary/10">
+                <Filter className="h-4 w-4 text-primary" />
+              </div>
+              <h2 className="text-lg font-bold tracking-wide">Filters & Export</h2>
             </div>
-            <Button onClick={handleExportCSV} variant="outline" size="sm">
-              <FileSpreadsheet className="h-4 w-4 mr-2" />
-              Export to CSV
+            <Button onClick={handleExportCSV} variant="outline" size="sm" className="gap-2">
+              <FileSpreadsheet className="h-4 w-4" />
+              <span className="hidden sm:inline">Export to CSV</span>
             </Button>
           </div>
           
@@ -274,8 +339,8 @@ const MyBills = () => {
         </Card>
 
         {/* Table */}
-        <Card className="p-6">
-          <div className="rounded-md border">
+        <Card className="p-6 border-border/50 shadow-sm">
+          <div className="rounded-lg border border-border/50 overflow-hidden">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -329,12 +394,40 @@ const MyBills = () => {
                       <TableCell className="text-right">₹{Number(order.discount).toFixed(2)}</TableCell>
                       <TableCell className="text-right font-bold">₹{Number(order.total).toFixed(2)}</TableCell>
                       <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button variant="ghost" size="sm" onClick={() => handleOpenInfo(order)}>
+                        <div className="flex items-center justify-end gap-1">
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleOpenInfo(order)}
+                            className="hover:bg-primary/10"
+                          >
                             <Info className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="sm">
-                            <Download className="h-4 w-4" />
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleDownloadInvoice(order)}
+                            disabled={loadingAction === `download-${order.id}`}
+                            className="hover:bg-primary/10"
+                          >
+                            {loadingAction === `download-${order.id}` ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Download className="h-4 w-4" />
+                            )}
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="sm" 
+                            onClick={() => handleEmailInvoice(order)}
+                            disabled={loadingAction === `email-${order.id}`}
+                            className="hover:bg-primary/10"
+                          >
+                            {loadingAction === `email-${order.id}` ? (
+                              <Loader2 className="h-4 w-4 animate-spin" />
+                            ) : (
+                              <Mail className="h-4 w-4" />
+                            )}
                           </Button>
                         </div>
                       </TableCell>
@@ -354,9 +447,12 @@ const MyBills = () => {
 
         {/* Order Info Dialog */}
         <Dialog open={infoDialogOpen} onOpenChange={setInfoDialogOpen}>
-          <DialogContent className="max-w-4xl max-h-[80vh]">
+          <DialogContent className="max-w-4xl max-h-[80vh] border-border/50">
             <DialogHeader>
-              <DialogTitle className="text-xl font-extrabold tracking-wide">
+              <DialogTitle className="text-xl font-extrabold tracking-wide flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <FileText className="h-5 w-5 text-primary" />
+                </div>
                 Order Details - {selectedOrder?.order_number}
               </DialogTitle>
               <DialogDescription>
@@ -484,6 +580,62 @@ const MyBills = () => {
                 </div>
               </div>
             </ScrollArea>
+          </DialogContent>
+        </Dialog>
+
+        {/* Email Invoice Dialog */}
+        <Dialog open={emailDialogOpen} onOpenChange={setEmailDialogOpen}>
+          <DialogContent className="sm:max-w-md border-border/50">
+            <DialogHeader>
+              <DialogTitle className="text-xl font-extrabold tracking-wide flex items-center gap-2">
+                <div className="p-2 rounded-lg bg-primary/10">
+                  <Mail className="h-5 w-5 text-primary" />
+                </div>
+                Send Invoice via Email
+              </DialogTitle>
+              <DialogDescription>
+                Send invoice {selectedOrder?.order_number} to a recipient
+              </DialogDescription>
+            </DialogHeader>
+            
+            <div className="space-y-4 py-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Recipient Email</label>
+                <Input
+                  type="email"
+                  placeholder="recipient@example.com (leave empty for account email)"
+                  value={emailRecipient}
+                  onChange={(e) => setEmailRecipient(e.target.value)}
+                  className="border-border/50"
+                />
+                <p className="text-xs text-muted-foreground">
+                  Leave empty to send to your account email
+                </p>
+              </div>
+            </div>
+
+            <div className="flex justify-end gap-2">
+              <Button variant="outline" onClick={() => setEmailDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={sendInvoiceEmail} 
+                disabled={loadingAction === `email-${selectedOrder?.id}`}
+                className="gap-2"
+              >
+                {loadingAction === `email-${selectedOrder?.id}` ? (
+                  <>
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                    Sending...
+                  </>
+                ) : (
+                  <>
+                    <Mail className="h-4 w-4" />
+                    Send Invoice
+                  </>
+                )}
+              </Button>
+            </div>
           </DialogContent>
         </Dialog>
       </main>
