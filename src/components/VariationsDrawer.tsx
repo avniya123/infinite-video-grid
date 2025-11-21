@@ -189,10 +189,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
       toast.dismiss(loadingToast);
       toast.success('Template saved! Opening editor...');
       
-      // Navigate to template editor
-      setTimeout(() => {
-        window.location.href = `/template-editor/${targetVariationId}`;
-      }, 500);
+      // Navigate to template editor instantly
+      navigate(`/template-editor/${targetVariationId}`);
     } catch (error: any) {
       toast.dismiss(loadingToast);
       toast.error('Failed to save template');
