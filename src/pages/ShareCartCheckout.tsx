@@ -392,7 +392,7 @@ export default function ShareCartCheckout() {
           <div className="lg:col-span-2 space-y-8">
             {/* Template Info */}
             <Card className="p-6 shadow-sm border-border/50">
-              <h2 className="text-lg font-semibold mb-4">Template Details ({templates.length})</h2>
+              <h2 className="text-lg font-semibold mb-4">Template Details</h2>
               <div className="space-y-5">
                 {templates.map((template, index) => (
                   <div key={template.id} className="flex gap-5 pb-5 border-b last:border-0 last:pb-0">
@@ -662,7 +662,7 @@ export default function ShareCartCheckout() {
                       : 'text-muted-foreground'
                 }`} />
                 <p className={`text-sm font-medium ${isQuickMode ? 'text-muted-foreground' : ''}`}>
-                  Self & Render
+                  Changed
                 </p>
                 {isQuickMode && (
                   <div className="flex items-center justify-center gap-1 mt-1">
@@ -893,7 +893,7 @@ export default function ShareCartCheckout() {
           <div className="space-y-4 py-4">
             {/* Template Details */}
             <div className="space-y-2">
-              <h4 className="font-semibold text-sm text-muted-foreground">Template Details ({templates.length})</h4>
+              <h4 className="font-semibold text-sm text-muted-foreground">Template Details</h4>
               <div className="space-y-3 max-h-60 overflow-y-auto">
                 {templates.map((template) => (
                   <div key={template.id} className="flex items-start gap-4 p-4 bg-muted/30 rounded-lg">
@@ -928,7 +928,7 @@ export default function ShareCartCheckout() {
                   ) : (
                     <>
                       <Edit className="h-5 w-5 text-primary" />
-                      <span className="font-medium">Self & Render</span>
+                      <span className="font-medium">Changed</span>
                     </>
                   )}
                 </div>
