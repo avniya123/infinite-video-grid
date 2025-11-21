@@ -13,6 +13,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { UsersManagementDrawer } from '@/components/UsersManagementDrawer';
 import { TemplateDetailsSkeleton } from '@/components/TemplateCardSkeleton';
 import { toast } from 'sonner';
+import { fireSuccessConfetti } from '@/utils/confetti';
 import { ArrowLeft, Trash2, Edit, Users, Wallet, CreditCard, Search, X, Download, ShoppingBag, Zap, Info, Play, Sparkles } from 'lucide-react';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import { useSharedUsers, type SharedUser } from '@/hooks/useSharedUsers';
@@ -279,8 +280,11 @@ export default function ShareCartCheckout() {
   const confirmPayment = async () => {
     setPaymentConfirmDialogOpen(false);
     
+    // Fire confetti animation
+    fireSuccessConfetti();
+    
     if (isQuickMode) {
-      toast.success('Payment successful! Loading enrolled users...', {
+      toast.success('🎉 Payment successful! Loading enrolled users...', {
         duration: 2000
       });
       
@@ -296,7 +300,10 @@ export default function ShareCartCheckout() {
         });
       }, 1500);
     } else {
-      toast.success('Processing payment...');
+      toast.success('🎉 Payment successful! Processing your order...', {
+        description: 'Your templates will be published shortly',
+        duration: 3000
+      });
     }
   };
 
@@ -1194,14 +1201,16 @@ export default function ShareCartCheckout() {
             </div>
           </div>
 
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
+          <AlertDialogFooter className="gap-2">
+            <AlertDialogCancel className="hover:bg-muted">Cancel</AlertDialogCancel>
             <AlertDialogAction
               onClick={confirmPayment}
-              className="bg-primary hover:bg-primary/90 gap-2"
+              className="bg-gradient-to-r from-primary via-primary to-primary/90 hover:from-primary/90 hover:via-primary hover:to-primary gap-2 shadow-lg hover:shadow-xl transition-all group relative overflow-hidden"
             >
-              <CreditCard className="h-4 w-4" />
-              Confirm & Pay ₹ {pricing.total.toFixed(2)}
+              <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/10 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700"></div>
+              <CreditCard className="h-5 w-5 group-hover:scale-110 transition-transform" />
+              <span className="relative font-semibold">Confirm & Pay ₹ {pricing.total.toFixed(2)}</span>
+              <Sparkles className="h-4 w-4 group-hover:rotate-12 transition-transform" />
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
