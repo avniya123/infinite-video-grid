@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate, Link, useLocation } from 'react-router-dom';
-import { LayoutTemplate, ShoppingCart, User, Bell, LogOut, ChevronDown, Check, Menu, X, Share } from 'lucide-react';
+import { LayoutTemplate, ShoppingCart, User, Bell, LogOut, ChevronDown, Check, Menu, X, Share, FileText } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { Badge } from '@/components/ui/badge';
@@ -211,6 +211,28 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                         variant="ghost" 
                         className="w-full justify-start"
                         onClick={() => {
+                          navigate('/my-users');
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <User className="mr-2 h-4 w-4" />
+                        My Users
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={() => {
+                          navigate('/my-bills');
+                          setMobileMenuOpen(false);
+                        }}
+                      >
+                        <FileText className="mr-2 h-4 w-4" />
+                        My Bills
+                      </Button>
+                      <Button 
+                        variant="ghost" 
+                        className="w-full justify-start"
+                        onClick={() => {
                           navigate('/publish-cart');
                           setMobileMenuOpen(false);
                         }}
@@ -379,6 +401,22 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                     </TooltipTrigger>
                     <TooltipContent>
                       <p>My Templates</p>
+                    </TooltipContent>
+                  </Tooltip>
+
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => navigate('/my-bills')}
+                        className="flex h-8 w-8 sm:h-9 sm:w-9 rounded-lg text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-all"
+                      >
+                        <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>My Bills</p>
                     </TooltipContent>
                   </Tooltip>
 

@@ -11,6 +11,7 @@ import MyTemplates from "./pages/MyTemplates";
 import MyUsers from "./pages/MyUsers";
 import PublishCart from "./pages/PublishCart";
 import ShareCartCheckout from "./pages/ShareCartCheckout";
+import MyBills from "./pages/MyBills";
 
 const queryClient = new QueryClient();
 
@@ -25,6 +26,7 @@ const App = () => (
           <Route path="/videos" element={<Index />} />
           <Route path="/my-templates" element={<MyTemplates />} />
           <Route path="/my-users" element={<MyUsers />} />
+          <Route path="/my-bills" element={<MyBills />} />
           <Route path="/publish-cart" element={<PublishCart />} />
           <Route path="/share-cart-checkout" element={<ShareCartCheckout />} />
           <Route path="/template-editor/:variationId" element={<TemplateEditor />} />
