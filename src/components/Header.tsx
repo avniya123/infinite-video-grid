@@ -483,6 +483,10 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
                       <User className="mr-2 h-4 w-4" />
                       <span>My Users</span>
                     </DropdownMenuItem>
+                    <DropdownMenuItem onClick={() => navigate('/my-bills')} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
+                      <FileText className="mr-2 h-4 w-4" />
+                      <span>My Billing</span>
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => navigate('/publish-cart')} className="text-gray-700 dark:text-gray-200 hover:bg-gray-100 dark:hover:bg-gray-800">
                       <ShoppingCart className="mr-2 h-4 w-4" />
                       <span>Publish Cart</span>
