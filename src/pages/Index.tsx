@@ -1,15 +1,16 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { VideoCard } from '@/components/VideoCard';
 import { VideoCardSkeleton } from '@/components/VideoCardSkeleton';
 import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
-import { Header } from '@/components/Header';
 import { ThemeToggle } from '@/components/ThemeToggle';
 import { FilterChips } from '@/components/FilterChips';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { VariationsDrawer } from '@/components/VariationsDrawer';
 import { AuthDrawer } from '@/components/AuthDrawer';
-import { ArrowUpDown, ChevronDown, List, Columns3, Search, X } from 'lucide-react';
+import { ArrowUpDown, ChevronDown, List, Columns3, Search, X, ArrowLeft, LayoutTemplate, Video, User, FileText, ShoppingCart } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuLabel, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Badge } from '@/components/ui/badge';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { ShareButton } from '@/components/ShareButton';
 import { VideoItem, VideoCategory } from '@/types/video';
@@ -32,8 +33,11 @@ const sortOptions: { value: string; label: string }[] = [
 ];
 
 type ViewMode = 'masonry' | 'list';
+type VideoStatus = 'all' | 'completed' | 'generating' | 'pending' | 'failed';
 
 const Index = () => {
+  const navigate = useNavigate();
+  
   // State
   const [videos, setVideos] = useState<VideoItem[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
@@ -47,6 +51,7 @@ const Index = () => {
   const [columnCount, setColumnCount] = useState(3);
   const [listVariationsOpen, setListVariationsOpen] = useState<string | null>(null);
   const [listAuthDrawerOpen, setListAuthDrawerOpen] = useState(false);
+  const [statusFilter, setStatusFilter] = useState<VideoStatus>('all');
   const sentinelRef = useRef<HTMLDivElement>(null);
 
   // Use custom filter hook
@@ -191,35 +196,146 @@ const Index = () => {
     enabled: true,
   });
 
+  // Get status counts (mock for now since we don't have status in data)
+  const getStatusCount = (status: VideoStatus) => {
+    if (status === 'all') return filteredVideos.length;
+    // Mock counts - in real app, derive from video data
+    return 0;
+  };
+
   return (
     <div className="min-h-screen bg-background transition-colors duration-300">
-      {/* Header */}
-      <Header 
-        selectedSubcategory={selectedSubcategory}
-        selectedMainCategory={selectedMainCategory}
-        onSubcategorySelect={handleSubcategorySelect}
-        onMainCategorySelect={handleMainCategorySelect}
-      />
+      {/* Header with My Account Navigation */}
+      <header className="sticky top-0 z-50 w-full border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-gray-900 shadow-sm">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex h-16 items-center justify-between gap-4">
+            {/* Back Button & Search */}
+            <div className="flex items-center gap-3 flex-1">
+              <Button
+                variant="ghost"
+                size="icon"
+                onClick={() => navigate(-1)}
+                className="flex-shrink-0"
+              >
+                <ArrowLeft className="h-4 w-4" />
+              </Button>
+              
+              {/* Search Bar */}
+              <div className="relative flex-1 max-w-md">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+                <Input
+                  type="text"
+                  placeholder="Search videos..."
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
+                  className="pl-10 pr-10 h-9 w-full"
+                />
+                {searchQuery && (
+                  <button
+                    onClick={() => setSearchQuery('')}
+                    className="absolute right-3 top-1/2 transform -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* My Account Navigation */}
+            <nav className="hidden md:flex items-center gap-1">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/my-templates')}
+                className="h-9 px-3"
+              >
+                <LayoutTemplate className="w-4 h-4 mr-2" />
+                My Templates
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/my-videos')}
+                className="h-9 px-3"
+              >
+                <Video className="w-4 h-4 mr-2" />
+                My Videos
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/my-users')}
+                className="h-9 px-3"
+              >
+                <User className="w-4 h-4 mr-2" />
+                My Users
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/my-bills')}
+                className="h-9 px-3"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                My Bills
+              </Button>
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/publish-cart')}
+                className="h-9 px-3"
+              >
+                <ShoppingCart className="w-4 h-4 mr-2" />
+                Cart
+              </Button>
+            </nav>
+
+            {/* Theme Toggle */}
+            <ThemeToggle />
+          </div>
+        </div>
+      </header>
       
       {/* Main Content */}
       <div className="max-w-7xl mx-auto px-4 py-6 space-y-4">
-        {/* Search and Controls */}
+        {/* Controls Row */}
         <div className="flex flex-col sm:flex-row items-start sm:items-center gap-4">
-          {/* Search Bar */}
-          <div className="relative flex-1 sm:w-96">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              type="text"
-              placeholder="Search videos by title..."
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value.slice(0, 100))}
-              className="pl-10 pr-4 h-10 w-full transition-all duration-200 focus:ring-2"
-            />
-
-          </div>
+          {/* Status Filter Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" className="h-10 border-2 hover:bg-accent transition-all duration-200 min-w-[160px]">
+                <span className="flex items-center gap-2">
+                  {statusFilter === 'all' && 'All'}
+                  {statusFilter === 'completed' && 'Completed'}
+                  {statusFilter === 'generating' && 'Generating'}
+                  {statusFilter === 'pending' && 'Pending'}
+                  {statusFilter === 'failed' && 'Failed'}
+                  <Badge variant="secondary" className="h-5 min-w-[20px] px-1.5">
+                    {getStatusCount(statusFilter)}
+                  </Badge>
+                </span>
+                <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="start" className="w-56 bg-background/95 backdrop-blur-sm border-2">
+              <DropdownMenuLabel className="font-semibold">Filter by Status</DropdownMenuLabel>
+              <DropdownMenuSeparator />
+              {(['all', 'completed', 'generating', 'pending', 'failed'] as VideoStatus[]).map((status) => (
+                <DropdownMenuItem
+                  key={status}
+                  onClick={() => setStatusFilter(status)}
+                  className={`cursor-pointer transition-colors flex items-center justify-between ${statusFilter === status ? 'bg-accent' : ''}`}
+                >
+                  <span className="capitalize">{status}</span>
+                  <Badge variant="secondary" className="h-5 min-w-[20px] px-1.5">
+                    {getStatusCount(status)}
+                  </Badge>
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuContent>
+          </DropdownMenu>
           
-          {/* Controls */}
-          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+          <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap flex-1">
             {/* Reset Filters Button */}
             {hasActiveFilters && (
               <Button
