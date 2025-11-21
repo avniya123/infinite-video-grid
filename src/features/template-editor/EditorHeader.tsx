@@ -5,9 +5,10 @@ import { toast } from "sonner";
 
 interface EditorHeaderProps {
   title?: string;
+  referrer?: string;
 }
 
-export const EditorHeader = ({ title = "Template Editor" }: EditorHeaderProps) => {
+export const EditorHeader = ({ title = "Template Editor", referrer = "/my-templates" }: EditorHeaderProps) => {
   const navigate = useNavigate();
 
   const handlePreview = () => {
@@ -25,7 +26,7 @@ export const EditorHeader = ({ title = "Template Editor" }: EditorHeaderProps) =
           <Button
             variant="ghost"
             size="icon"
-            onClick={() => navigate("/videos")}
+            onClick={() => navigate(referrer)}
           >
             <ArrowLeft className="h-4 w-4" />
           </Button>

@@ -27,7 +27,10 @@ export default function TemplateEditor() {
     const from = params.get('from');
     if (from === 'videos') {
       setReferrer('/videos');
+    } else if (from === 'my-templates') {
+      setReferrer('/my-templates');
     } else {
+      // Default to my-templates if no parameter provided
       setReferrer('/my-templates');
     }
 
