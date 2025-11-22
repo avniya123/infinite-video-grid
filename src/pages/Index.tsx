@@ -363,7 +363,6 @@ const Index = () => {
                   hideVariationsCartButton={true}
                   hideVariationsPublishCartButton={true}
                   hideVariationsDeleteButton={true}
-                  hideVariationsEditButton={true}
                 />
               </div>
             ))}
@@ -447,7 +446,7 @@ const Index = () => {
             hideCartButton={true}
             hidePublishCartButton={true}
             hideDeleteButton={true}
-            hideEditButton={true}
+            hideVariationEditButton={true}
           />
         )}
 
