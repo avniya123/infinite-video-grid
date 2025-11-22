@@ -151,16 +151,30 @@ export const VariationCard = ({
         )}
       </div>
 
-      {/* Share Button - Always visible in list items when hideShareButtons is false */}
-      {!hideShareButtons && (
-        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+      {/* Action Buttons - Share and Edit */}
+      <div className="flex-shrink-0 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
+        {!hideShareButtons && (
           <SocialShareButtons
             title={`${videoTitle} - ${variation.title}`}
             description={`Check out this video variation: ${variation.title}`}
             url={window.location.href}
           />
-        </div>
-      )}
+        )}
+        {onEdit && (
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(variation.id);
+            }}
+            className="gap-1.5 h-8 px-3"
+          >
+            <EditIcon className="h-3.5 w-3.5" />
+            <span className="text-xs">Edit</span>
+          </Button>
+        )}
+      </div>
     </div>
   );
 };
