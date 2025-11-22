@@ -343,7 +343,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
         onOpenChange={setVariationsOpen}
         onRequestAuth={() => setAuthDrawerOpen(true)}
         hideShareButton={hideVariationsShareButton}
-        hideEditButton={hideVariationsEditButton}
+        hideEditButton={hideVariationsEditButton || hideVariationsCartButton}
         hideCartButton={hideVariationsCartButton}
         hidePublishCartButton={hideVariationsPublishCartButton}
         hideDeleteButton={hideVariationsDeleteButton}
