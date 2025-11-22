@@ -467,9 +467,16 @@ export const VariationsDrawer = ({
                   <h3 className="text-lg font-bold text-foreground leading-tight">
                     {selectedVariation.title}
                   </h3>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    Stock Video #{video.id}
-                  </p>
+                  <div className="space-y-0.5 mt-1">
+                    <p className="text-xs text-muted-foreground">
+                      Stock Video #{video.id}
+                    </p>
+                    {(video.mainCategory || video.subcategory) && (
+                      <p className="text-xs text-muted-foreground">
+                        {video.mainCategory}{video.subcategory && ` • ${video.subcategory}`}
+                      </p>
+                    )}
+                  </div>
                 </div>
                 
                 {/* Price Section */}
