@@ -30,15 +30,15 @@ export const VariationCard = ({
 }: VariationCardProps) => {
   return (
     <div
-      className={`group flex items-start gap-4 p-4 rounded-lg border transition-all duration-300 cursor-pointer ${
+      className={`group flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
         isCurrentlyPlaying 
-          ? 'bg-primary/5 border-primary shadow-sm' 
-          : 'bg-card hover:bg-accent/30 hover:shadow-sm hover:border-accent'
+          ? 'bg-primary/5 border-primary/50 shadow-sm' 
+          : 'bg-card hover:bg-accent/20 hover:border-border'
       }`}
       onClick={() => onPlay(variation)}
     >
       {/* Thumbnail */}
-      <div className="w-24 h-24 rounded-md overflow-hidden bg-muted/30 flex-shrink-0 relative">
+      <div className="w-[120px] h-[90px] rounded-md overflow-hidden bg-muted/30 flex-shrink-0 relative">
         <ProgressiveImage
           src={variation.thumbnail_url || videoImage}
           alt={variation.title}
@@ -80,33 +80,20 @@ export const VariationCard = ({
         </div>
       </div>
 
-      <div className="flex-1 min-w-0 space-y-3">
-        <div className="space-y-1.5">
-          <div className="flex items-start justify-between gap-2">
-            <h5 className="font-bold text-sm text-foreground leading-tight line-clamp-2 flex-1">
-              {variation.title}
-            </h5>
-            {isCurrentlyPlaying && (
-              <Badge variant="default" className="text-xs flex-shrink-0">
-                <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse mr-1.5" />
-                Playing
-              </Badge>
-            )}
-          </div>
+      <div className="flex-1 min-w-0 space-y-2">
+        <div className="space-y-1">
+          <h5 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
+            {variation.title}
+          </h5>
           
           {/* Metadata Pills */}
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="inline-flex items-center px-2 py-0.5 bg-muted/50 text-muted-foreground rounded-full text-xs font-medium">
+          <div className="flex items-center gap-1.5 flex-wrap">
+            <Badge variant="secondary" className="text-[10px] bg-muted/50 text-muted-foreground font-medium px-1.5 py-0">
               {variation.duration}
-            </span>
+            </Badge>
             {variation.aspect_ratio && (
-              <span className="inline-flex items-center px-2 py-0.5 bg-muted/50 text-muted-foreground rounded-full text-xs font-medium">
+              <Badge variant="secondary" className="text-[10px] bg-muted/50 text-muted-foreground font-medium px-1.5 py-0">
                 {variation.aspect_ratio}
-              </span>
-            )}
-            {variation.quality && (
-              <Badge variant="secondary" className="text-xs px-2 py-0.5 bg-muted/50 text-muted-foreground font-medium">
-                {variation.quality}
               </Badge>
             )}
           </div>
@@ -114,14 +101,14 @@ export const VariationCard = ({
         
         {/* Platforms */}
         {variation.platforms && variation.platforms.length > 0 && (
-          <div className="flex items-center gap-2 flex-wrap">
-            <span className="text-xs text-muted-foreground/70 font-medium">Platforms:</span>
-            <div className="flex gap-1.5 flex-wrap">
+          <div className="space-y-1">
+            <span className="text-[10px] text-muted-foreground/70 font-medium">Platforms:</span>
+            <div className="flex gap-1 flex-wrap">
               {variation.platforms.map((platform) => (
                 <Badge
                   key={platform}
                   variant="outline"
-                  className="text-xs px-2 py-0.5 text-muted-foreground/80 border-muted font-medium"
+                  className="text-[10px] px-1.5 py-0 text-muted-foreground/80 border-muted/50 font-medium"
                 >
                   {platform}
                 </Badge>
@@ -129,40 +116,10 @@ export const VariationCard = ({
             </div>
           </div>
         )}
-
-        {/* Status indicators */}
-        <div className="flex items-center gap-3 text-xs">
-          {variation.video_url && (
-            <span className="flex items-center gap-1.5 text-muted-foreground/70 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-green-500/60 animate-pulse" />
-              Ready
-            </span>
-          )}
-          {variation.thumbnail_url && (
-            <span className="flex items-center gap-1.5 text-muted-foreground/70 font-medium">
-              <span className="w-1.5 h-1.5 rounded-full bg-blue-500/60" />
-              Thumbnail
-            </span>
-          )}
-        </div>
       </div>
 
       {/* Action Buttons */}
-      <div className="flex flex-col gap-2 flex-shrink-0">
-        {onEdit && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(variation.id);
-            }}
-            className="gap-2"
-          >
-            <EditIcon className="h-3.5 w-3.5" />
-            Edit
-          </Button>
-        )}
+      <div className="flex items-center gap-2 flex-shrink-0">
         {!hideShareButtons && (
           <div onClick={(e) => e.stopPropagation()}>
             <SocialShareButtons
@@ -171,6 +128,20 @@ export const VariationCard = ({
               url={window.location.href}
             />
           </div>
+        )}
+        {onEdit && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onEdit(variation.id);
+            }}
+            className="gap-1.5 h-8"
+          >
+            <EditIcon className="h-3.5 w-3.5" />
+            Edit
+          </Button>
         )}
       </div>
     </div>
