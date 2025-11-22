@@ -320,7 +320,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
               {/* Right: View Button */}
               <Button
                 size="sm"
-                className="flex-shrink-0 gap-1.5 bg-gray-900/95 hover:bg-gray-800 dark:bg-white/95 dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg backdrop-blur-sm h-7 text-[10px] px-2"
+                variant="default"
+                className="flex-shrink-0 gap-1.5 h-7 text-[10px] px-3 shadow-lg"
                 onClick={(e) => {
                   e.stopPropagation();
                   setVariationsOpen(true);
