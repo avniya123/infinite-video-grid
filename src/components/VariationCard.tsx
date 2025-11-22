@@ -1,9 +1,10 @@
-import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { VideoVariation } from "@/hooks/useVideoVariations";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 
 // Platform icon mapping
 const getPlatformIcon = (platform: string) => {
@@ -22,6 +23,7 @@ interface VariationCardProps {
   isCurrentlyPlaying: boolean;
   onPlay: (variation: VideoVariation) => void;
   onEdit?: (variationId: string) => void;
+  onAddToPublish?: (variation: VideoVariation) => void;
   hideShareButtons?: boolean;
   price?: number;
   mrp?: number;
@@ -29,6 +31,10 @@ interface VariationCardProps {
   isSaved?: boolean;
   videoId?: number;
   hidePrice?: boolean;
+  showCheckbox?: boolean;
+  isSelected?: boolean;
+  onSelectionChange?: (variationId: string, selected: boolean) => void;
+  showActions?: boolean;
 }
 
 export const VariationCard = ({
@@ -38,6 +44,7 @@ export const VariationCard = ({
   isCurrentlyPlaying,
   onPlay,
   onEdit,
+  onAddToPublish,
   hideShareButtons = false,
   price,
   mrp,
@@ -45,18 +52,36 @@ export const VariationCard = ({
   isSaved = false,
   videoId,
   hidePrice = false,
+  showCheckbox = false,
+  isSelected = false,
+  onSelectionChange,
+  showActions = false,
 }: VariationCardProps) => {
   return (
     <div
-      className={`group flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 cursor-pointer ${
+      className={`group flex items-start gap-3 p-3 rounded-lg border transition-all duration-200 ${
+        isSelected ? 'bg-primary/10 border-primary' : 
         isCurrentlyPlaying 
           ? 'bg-primary/5 border-primary/50 shadow-sm' 
           : 'bg-card hover:bg-accent/20 hover:border-border'
       }`}
-      onClick={() => onPlay(variation)}
     >
+      {/* Checkbox for selection */}
+      {showCheckbox && onSelectionChange && (
+        <div className="flex-shrink-0 pt-1" onClick={(e) => e.stopPropagation()}>
+          <Checkbox
+            checked={isSelected}
+            onCheckedChange={(checked) => onSelectionChange(variation.id, checked as boolean)}
+            className="h-5 w-5"
+          />
+        </div>
+      )}
+
       {/* Thumbnail */}
-      <div className="w-[120px] h-[90px] rounded-md overflow-hidden bg-muted/30 flex-shrink-0 relative">
+      <div 
+        className="w-[120px] h-[90px] rounded-md overflow-hidden bg-muted/30 flex-shrink-0 relative cursor-pointer"
+        onClick={() => onPlay(variation)}
+      >
         <ProgressiveImage
           src={variation.thumbnail_url || videoImage}
           alt={variation.title}
@@ -94,7 +119,10 @@ export const VariationCard = ({
       <div className="flex-1 min-w-0 space-y-2.5">
         {/* Title and Price */}
         <div className="flex items-start justify-between gap-3">
-          <div className="flex-1 min-w-0">
+          <div 
+            className="flex-1 min-w-0 cursor-pointer"
+            onClick={() => onPlay(variation)}
+          >
             <h5 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
               {variation.title}
             </h5>
@@ -147,6 +175,39 @@ export const VariationCard = ({
                 </div>
               );
             })}
+          </div>
+        )}
+
+        {/* Action Buttons */}
+        {showActions && (
+          <div className="flex items-center gap-2 pt-1">
+            {onEdit && (
+              <Button
+                size="sm"
+                variant="outline"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onEdit(variation.id);
+                }}
+                className="h-7 text-xs gap-1.5"
+              >
+                <EditIcon className="h-3 w-3" />
+                Edit
+              </Button>
+            )}
+            {onAddToPublish && (
+              <Button
+                size="sm"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onAddToPublish(variation);
+                }}
+                className="h-7 text-xs gap-1.5"
+              >
+                <ShoppingCart className="h-3 w-3" />
+                Add to Publish
+              </Button>
+            )}
           </div>
         )}
       </div>
