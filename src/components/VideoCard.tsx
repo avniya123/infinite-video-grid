@@ -53,23 +53,37 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   // Parse aspect ratio to get numeric value for AspectRatio component
   const parseAspectRatio = (ar: string): number => {
-    if (ar.includes(':')) {
+    // Handle ratio format like "16:9", "9:16", "1:1"
+    if (ar && ar.includes(':')) {
       const [w, h] = ar.split(':').map(Number);
-      return w / h;
+      if (w && h) return w / h;
     }
-    // Fallback based on orientation
-    if (ar === '16:9' || ar.toLowerCase().includes('landscape')) return 16/9;
-    if (ar === '9:16' || ar.toLowerCase().includes('portrait')) return 9/16;
-    if (ar === '1:1' || ar.toLowerCase().includes('square')) return 1;
-    return 16/9; // Default
+    
+    // Handle orientation strings
+    const arLower = ar?.toLowerCase() || '';
+    if (arLower.includes('landscape') || ar === '16:9') return 16/9;
+    if (arLower.includes('portrait') || ar === '9:16') return 9/16;
+    if (arLower.includes('square') || ar === '1:1') return 1;
+    
+    // Fallback to video.aspectRatio if available
+    if (video.aspectRatio) return video.aspectRatio;
+    
+    return 16/9; // Default landscape
   };
 
   const aspectRatio = parseAspectRatio(displayAspectRatio);
   
   // Create aspect ratio label for display
-  const aspectRatioLabel = displayAspectRatio.includes(':') ? displayAspectRatio : 
-    (displayAspectRatio === 'Landscape' ? '16:9' : 
-     displayAspectRatio === 'Portrait' ? '9:16' : '1:1');
+  const getAspectRatioLabel = (ar: string): string => {
+    if (ar && ar.includes(':')) return ar;
+    const arLower = ar?.toLowerCase() || '';
+    if (arLower.includes('landscape')) return '16:9';
+    if (arLower.includes('portrait')) return '9:16';
+    if (arLower.includes('square')) return '1:1';
+    return '16:9';
+  };
+  
+  const aspectRatioLabel = getAspectRatioLabel(displayAspectRatio);
 
   // Lazy loading with Intersection Observer
   useEffect(() => {
