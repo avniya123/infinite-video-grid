@@ -75,6 +75,8 @@ export const VariationsDrawer = ({
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
   const [savedVariationIds, setSavedVariationIds] = useState<Set<string>>(new Set());
   const [filterText, setFilterText] = useState("");
+  const [editingVariationId, setEditingVariationId] = useState<string | null>(null);
+  const [editedTitle, setEditedTitle] = useState("");
   
   const {
     videoRef,
@@ -251,6 +253,23 @@ export const VariationsDrawer = ({
   };
 
   const handleEdit = async (variationId?: string) => {
+    if (pageContext === 'videos') {
+      // For videos page, enable inline title editing
+      const targetVariationId = variationId || (variations && variations.length > 0 ? variations[0].id : null);
+      if (!targetVariationId) {
+        toast.error('No variation available to edit');
+        return;
+      }
+      
+      const variation = variations?.find(v => v.id === targetVariationId);
+      if (variation) {
+        setEditingVariationId(targetVariationId);
+        setEditedTitle(variation.title);
+      }
+      return;
+    }
+
+    // For other pages, proceed with the existing "save to templates" flow
     if (!user) {
       toast.error('Please sign in to edit videos');
       onRequestAuth?.();
@@ -304,6 +323,43 @@ export const VariationsDrawer = ({
       toast.error('Failed to save template');
       console.error('Error saving template:', error);
     }
+  };
+
+  const handleSaveTitle = async () => {
+    if (!editingVariationId || !editedTitle.trim()) return;
+    
+    const loadingToast = toast.loading('Updating title...');
+    
+    try {
+      const { error } = await supabase
+        .from('video_variations')
+        .update({ title: editedTitle.trim() })
+        .eq('id', editingVariationId);
+      
+      if (error) throw error;
+      
+      // Refetch variations to show updated title
+      await refetch();
+      
+      // Update selected variation if it's the one being edited
+      if (selectedVariation?.id === editingVariationId) {
+        setSelectedVariation({ ...selectedVariation, title: editedTitle.trim() });
+      }
+      
+      toast.dismiss(loadingToast);
+      toast.success('Title updated successfully');
+      setEditingVariationId(null);
+      setEditedTitle('');
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to update title');
+      console.error('Error updating title:', error);
+    }
+  };
+
+  const handleCancelEdit = () => {
+    setEditingVariationId(null);
+    setEditedTitle('');
   };
 
   const handleDeleteVariation = async (variationId: string) => {
@@ -592,7 +648,7 @@ export const VariationsDrawer = ({
                    return filteredVariations.map((variation) => {
                   const pricing = calculateVariationPrice(variation.duration);
                   const isSaved = savedVariationIds.has(variation.id);
-                  return (
+                   return (
                     <VariationCard
                       key={variation.id}
                       variation={variation}
@@ -611,6 +667,11 @@ export const VariationsDrawer = ({
                       videoId={video.id}
                       hidePrice={true}
                       pageContext={pageContext}
+                      isEditing={editingVariationId === variation.id}
+                      editedTitle={editingVariationId === variation.id ? editedTitle : undefined}
+                      onTitleChange={setEditedTitle}
+                      onSaveTitle={handleSaveTitle}
+                      onCancelEdit={handleCancelEdit}
                     />
                   );
                 })})()}

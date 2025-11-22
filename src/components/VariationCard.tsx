@@ -1,9 +1,10 @@
-import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check, Trash2, ShoppingCart } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check, Trash2, ShoppingCart, X, Save } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { VideoVariation } from "@/hooks/useVideoVariations";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 
 // Platform icon mapping
 const getPlatformIcon = (platform: string) => {
@@ -32,6 +33,11 @@ interface VariationCardProps {
   videoId?: number;
   hidePrice?: boolean;
   pageContext?: 'videos' | 'my-templates' | 'publish-cart';
+  isEditing?: boolean;
+  editedTitle?: string;
+  onTitleChange?: (title: string) => void;
+  onSaveTitle?: () => void;
+  onCancelEdit?: () => void;
 }
 
 export const VariationCard = ({
@@ -51,6 +57,11 @@ export const VariationCard = ({
   videoId,
   hidePrice = false,
   pageContext = 'videos',
+  isEditing = false,
+  editedTitle,
+  onTitleChange,
+  onSaveTitle,
+  onCancelEdit,
 }: VariationCardProps) => {
   return (
     <div
@@ -101,13 +112,44 @@ export const VariationCard = ({
         {/* Title and Price */}
         <div className="flex items-start justify-between gap-3">
           <div className="flex-1 min-w-0">
-            <h5 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
-              {variation.title}
-            </h5>
-            {videoId && (
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Stock Video #{videoId}
-              </p>
+            {isEditing ? (
+              <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                <Input
+                  value={editedTitle}
+                  onChange={(e) => onTitleChange?.(e.target.value)}
+                  className="h-8 text-sm"
+                  placeholder="Enter variation title"
+                  autoFocus
+                />
+                <Button
+                  size="sm"
+                  onClick={onSaveTitle}
+                  className="h-8 gap-1 bg-emerald-500 hover:bg-emerald-600"
+                >
+                  <Save className="h-3.5 w-3.5" />
+                  Save
+                </Button>
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={onCancelEdit}
+                  className="h-8 gap-1"
+                >
+                  <X className="h-3.5 w-3.5" />
+                  Cancel
+                </Button>
+              </div>
+            ) : (
+              <>
+                <h5 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
+                  {variation.title}
+                </h5>
+                {videoId && (
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Stock Video #{videoId}
+                  </p>
+                )}
+              </>
             )}
           </div>
           
