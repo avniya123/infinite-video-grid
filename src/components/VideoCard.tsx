@@ -12,6 +12,7 @@ import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
 import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { getVideoAspectRatio, formatAspectRatio } from '@/utils/aspectRatios';
 
 interface VideoCardProps {
   video: VideoItem;
@@ -43,34 +44,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   
   const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
 
-  // Calculate aspect ratio based on orientation or explicit aspect ratio
-  const getAspectRatio = () => {
-    // If explicit aspect ratio is provided, use it
-    if (video.aspectRatio) return video.aspectRatio;
-    
-    // Parse aspect ratio from video metadata if available
-    // Common formats: "9:16", "16:9", "1:1", "9:21", "3:4"
-    const aspectRatioMatch = video.title.match(/(\d+):(\d+)/);
-    if (aspectRatioMatch) {
-      const width = parseInt(aspectRatioMatch[1]);
-      const height = parseInt(aspectRatioMatch[2]);
-      return width / height;
-    }
-    
-    // Fallback to orientation-based aspect ratios
-    switch (video.orientation) {
-      case 'Landscape':
-        return 16 / 9;
-      case 'Portrait':
-        return 9 / 16;
-      case 'Square':
-        return 1;
-      default:
-        return 16 / 9;
-    }
-  };
-
-  const aspectRatio = getAspectRatio();
+  // Get aspect ratio information using the utility system
+  const aspectRatioInfo = getVideoAspectRatio(video);
+  const aspectRatio = aspectRatioInfo.ratio;
 
   // Lazy loading with Intersection Observer
   useEffect(() => {
@@ -335,7 +311,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </TooltipProvider>
             {/* Caption with Aspect Ratio */}
             <p className="text-[9px] text-gray-400 font-medium">
-              Stock Video #{video.id} • {video.orientation} [{Math.round(aspectRatio * 16)}:{Math.round(16)}]
+              Stock Video #{video.id} • {aspectRatioInfo.label}
             </p>
           </div>
 
