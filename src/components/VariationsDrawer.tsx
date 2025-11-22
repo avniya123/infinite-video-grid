@@ -4,7 +4,7 @@ import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
-import { ShoppingCart, Edit, Play, Bookmark } from "lucide-react";
+import { ShoppingCart, Edit, Play, Bookmark, Search } from "lucide-react";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -14,6 +14,7 @@ import { VariationCard } from "@/components/VariationCard";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
+import { Input } from "@/components/ui/input";
 
 // Price calculation based on duration (seconds)
 const calculateVariationPrice = (duration: string, basePricePerSecond: number = 10) => {
@@ -62,6 +63,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
   const [savedVariationIds, setSavedVariationIds] = useState<Set<string>>(new Set());
+  const [filterText, setFilterText] = useState("");
   
   const {
     videoRef,
@@ -421,10 +423,34 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
               </>
             ) : variations && variations.length > 0 ? (
               <>
+                {/* Search/Filter Bar */}
+                <div className="mb-4">
+                  <div className="relative">
+                    <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                    <Input
+                      placeholder="Search by platform, aspect ratio, or title..."
+                      value={filterText}
+                      onChange={(e) => setFilterText(e.target.value)}
+                      className="pl-9 h-9 bg-background border-border"
+                    />
+                  </div>
+                </div>
+
                 {/* Variations Header */}
                 <div className="flex items-center justify-between py-2">
                   <p className="text-sm font-semibold text-muted-foreground">
-                    {variations.length} {variations.length === 1 ? 'variation' : 'variations'} available
+                    {(() => {
+                      const filtered = variations.filter((variation) => {
+                        if (!filterText) return true;
+                        const searchLower = filterText.toLowerCase();
+                        return (
+                          variation.title.toLowerCase().includes(searchLower) ||
+                          variation.aspect_ratio.toLowerCase().includes(searchLower) ||
+                          variation.platforms?.some((p) => p.toLowerCase().includes(searchLower))
+                        );
+                      });
+                      return `${filtered.length} ${filtered.length === 1 ? 'variation' : 'variations'} ${filterText ? 'found' : 'available'}`;
+                    })()}
                   </p>
                   <div className="flex items-center gap-2">
                     {savedVariationIds.size > 0 && (
@@ -441,7 +467,32 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
                 {/* Variations */}
                 <div className="space-y-2">
-                {variations.map((variation) => {
+                {(() => {
+                  const filteredVariations = variations.filter((variation) => {
+                    if (!filterText) return true;
+                    const searchLower = filterText.toLowerCase();
+                    return (
+                      variation.title.toLowerCase().includes(searchLower) ||
+                      variation.aspect_ratio.toLowerCase().includes(searchLower) ||
+                      variation.platforms?.some((p) => p.toLowerCase().includes(searchLower))
+                    );
+                  });
+
+                  if (filteredVariations.length === 0) {
+                    return (
+                      <div className="text-center py-12 px-4">
+                        <div className="w-14 h-14 mx-auto mb-3 rounded-full bg-muted/50 flex items-center justify-center">
+                          <Search className="h-6 w-6 text-muted-foreground" />
+                        </div>
+                        <h5 className="font-semibold text-sm mb-1">No matches found</h5>
+                        <p className="text-xs text-muted-foreground max-w-xs mx-auto">
+                          Try adjusting your search terms or filters
+                        </p>
+                      </div>
+                    );
+                  }
+
+                  return filteredVariations.map((variation) => {
                   const pricing = calculateVariationPrice(variation.duration);
                   return (
                     <VariationCard
@@ -461,7 +512,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       hidePrice={true}
                     />
                   );
-                })}
+                })})()}
                 </div>
               </>
             ) : (
