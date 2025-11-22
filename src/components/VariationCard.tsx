@@ -1,4 +1,4 @@
-import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2 } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
@@ -26,6 +26,7 @@ interface VariationCardProps {
   price?: number;
   mrp?: number;
   discount?: string;
+  isSaved?: boolean;
 }
 
 export const VariationCard = ({
@@ -39,6 +40,7 @@ export const VariationCard = ({
   price,
   mrp,
   discount,
+  isSaved = false,
 }: VariationCardProps) => {
   return (
     <div
@@ -57,6 +59,16 @@ export const VariationCard = ({
           className="w-full h-full"
           lazy={true}
         />
+        
+        {/* Saved Badge */}
+        {isSaved && (
+          <div className="absolute top-2 right-2 z-10">
+            <Badge className="bg-emerald-500 hover:bg-emerald-600 text-white text-[10px] px-1.5 py-0.5 gap-1 shadow-lg">
+              <Bookmark className="h-2.5 w-2.5 fill-white" />
+              Saved
+            </Badge>
+          </div>
+        )}
         
         {/* Play overlay */}
         <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${

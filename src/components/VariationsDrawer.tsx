@@ -61,6 +61,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
   const [user, setUser] = useState<any>(null);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
+  const [savedVariationIds, setSavedVariationIds] = useState<Set<string>>(new Set());
   
   const {
     videoRef,
@@ -87,6 +88,26 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
     return () => subscription.unsubscribe();
   }, []);
+
+  // Fetch saved variations when user is available and drawer is open
+  useEffect(() => {
+    const fetchSavedVariations = async () => {
+      if (!user || !open || !variations) return;
+
+      const variationIds = variations.map(v => v.id);
+      const { data } = await supabase
+        .from('user_templates')
+        .select('variation_id')
+        .eq('user_id', user.id)
+        .in('variation_id', variationIds);
+
+      if (data) {
+        setSavedVariationIds(new Set(data.map(t => t.variation_id)));
+      }
+    };
+
+    fetchSavedVariations();
+  }, [user, open, variations]);
 
   // Set first variation as default when drawer opens
   useEffect(() => {
@@ -373,6 +394,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       onPlay={handlePlayVariation}
                       onEdit={hideEditButton ? undefined : handleEdit}
                       hideShareButtons={hideShareButton}
+                      isSaved={savedVariationIds.has(variation.id)}
                     />
                   ))}
                 </div>
