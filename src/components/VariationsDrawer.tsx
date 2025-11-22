@@ -326,7 +326,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                 {/* Variations Header */}
                 <div className="flex items-center justify-between py-2">
                   <p className="text-sm font-semibold text-muted-foreground">
-                    {variations.length} {variations.length === 1 ? 'variation' : 'variations'} available
+                    {String(variations.length).padStart(2, '0')}/{String(variations.length).padStart(2, '0')} variations available
                   </p>
                   <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground font-medium">
                     {variations.filter(v => v.thumbnail_url).length} / {variations.length} thumbnails
