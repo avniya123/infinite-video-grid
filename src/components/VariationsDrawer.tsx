@@ -45,8 +45,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     setCurrentVideo,
   } = useVideoPlayer();
 
-  if (!video) return null;
-
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       setUser(session?.user ?? null);
@@ -187,6 +185,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
       console.error('Error saving template:', error);
     }
   };
+
+  // Don't render if no video
+  if (!video) return null;
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
