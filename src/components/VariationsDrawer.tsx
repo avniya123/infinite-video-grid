@@ -64,7 +64,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
   const [savedVariationIds, setSavedVariationIds] = useState<Set<string>>(new Set());
   const [filterText, setFilterText] = useState("");
-  const [selectedFilters, setSelectedFilters] = useState<string[]>([]);
   
   const {
     videoRef,
@@ -296,19 +295,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     }
   };
 
-  const toggleFilter = (filter: string) => {
-    setSelectedFilters(prev => 
-      prev.includes(filter) 
-        ? prev.filter(f => f !== filter)
-        : [...prev, filter]
-    );
-  };
-
-  const clearAllFilters = () => {
-    setFilterText("");
-    setSelectedFilters([]);
-  };
-
   // Don't render if no video
   if (!video) return null;
 
@@ -438,7 +424,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
             ) : variations && variations.length > 0 ? (
               <>
                 {/* Search/Filter Bar */}
-                <div className="mb-4 space-y-3">
+                <div className="mb-4">
                   <div className="relative">
                     <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                     <Input
@@ -448,35 +434,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       className="pl-9 h-9 bg-background border-border"
                     />
                   </div>
-                  
-                  {/* Filter Chips */}
-                  <div className="flex items-center gap-2 flex-wrap">
-                    <span className="text-xs font-medium text-muted-foreground">Quick Filters:</span>
-                    {['16:9', '1:1', '9:16', 'Instagram', 'YouTube', 'Facebook'].map((filter) => (
-                      <Badge
-                        key={filter}
-                        variant={selectedFilters.includes(filter) ? "default" : "outline"}
-                        className={`cursor-pointer text-xs transition-all ${
-                          selectedFilters.includes(filter) 
-                            ? 'bg-primary text-primary-foreground hover:bg-primary/90' 
-                            : 'hover:bg-muted/50'
-                        }`}
-                        onClick={() => toggleFilter(filter)}
-                      >
-                        {filter}
-                      </Badge>
-                    ))}
-                    {(filterText || selectedFilters.length > 0) && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={clearAllFilters}
-                        className="h-6 px-2 text-xs text-muted-foreground hover:text-foreground"
-                      >
-                        Clear all
-                      </Button>
-                    )}
-                  </div>
                 </div>
 
                 {/* Variations Header */}
@@ -484,28 +441,15 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                   <p className="text-sm font-semibold text-muted-foreground">
                     {(() => {
                       const filtered = variations.filter((variation) => {
-                        // Text search
-                        if (filterText) {
-                          const searchLower = filterText.toLowerCase();
-                          const matchesSearch = 
-                            variation.title.toLowerCase().includes(searchLower) ||
-                            variation.aspect_ratio.toLowerCase().includes(searchLower) ||
-                            variation.platforms?.some((p) => p.toLowerCase().includes(searchLower));
-                          if (!matchesSearch) return false;
-                        }
-                        
-                        // Chip filters
-                        if (selectedFilters.length > 0) {
-                          const matchesFilter = selectedFilters.some(filter => 
-                            variation.aspect_ratio.includes(filter) ||
-                            variation.platforms?.some((p) => p.toLowerCase().includes(filter.toLowerCase()))
-                          );
-                          if (!matchesFilter) return false;
-                        }
-                        
-                        return true;
+                        if (!filterText) return true;
+                        const searchLower = filterText.toLowerCase();
+                        return (
+                          variation.title.toLowerCase().includes(searchLower) ||
+                          variation.aspect_ratio.toLowerCase().includes(searchLower) ||
+                          variation.platforms?.some((p) => p.toLowerCase().includes(searchLower))
+                        );
                       });
-                      return `${filtered.length} ${filtered.length === 1 ? 'variation' : 'variations'} ${filterText || selectedFilters.length > 0 ? 'found' : 'available'}`;
+                      return `${filtered.length} ${filtered.length === 1 ? 'variation' : 'variations'} ${filterText ? 'found' : 'available'}`;
                     })()}
                   </p>
                   <div className="flex items-center gap-2">
@@ -525,26 +469,13 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                 <div className="space-y-2">
                 {(() => {
                   const filteredVariations = variations.filter((variation) => {
-                    // Text search
-                    if (filterText) {
-                      const searchLower = filterText.toLowerCase();
-                      const matchesSearch = 
-                        variation.title.toLowerCase().includes(searchLower) ||
-                        variation.aspect_ratio.toLowerCase().includes(searchLower) ||
-                        variation.platforms?.some((p) => p.toLowerCase().includes(searchLower));
-                      if (!matchesSearch) return false;
-                    }
-                    
-                    // Chip filters
-                    if (selectedFilters.length > 0) {
-                      const matchesFilter = selectedFilters.some(filter => 
-                        variation.aspect_ratio.includes(filter) ||
-                        variation.platforms?.some((p) => p.toLowerCase().includes(filter.toLowerCase()))
-                      );
-                      if (!matchesFilter) return false;
-                    }
-                    
-                    return true;
+                    if (!filterText) return true;
+                    const searchLower = filterText.toLowerCase();
+                    return (
+                      variation.title.toLowerCase().includes(searchLower) ||
+                      variation.aspect_ratio.toLowerCase().includes(searchLower) ||
+                      variation.platforms?.some((p) => p.toLowerCase().includes(searchLower))
+                    );
                   });
 
                   if (filteredVariations.length === 0) {
