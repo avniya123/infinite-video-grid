@@ -8,7 +8,9 @@ export const useVideoVariationsCount = (videoId: number) => {
       const { count, error } = await supabase
         .from('video_variations')
         .select('*', { count: 'exact', head: true })
-        .eq('video_id', videoId);
+        .eq('video_id', videoId)
+        .not('video_url', 'is', null)
+        .neq('video_url', '');
 
       if (error) {
         console.error('Error fetching variations count:', error);
