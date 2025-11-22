@@ -25,6 +25,7 @@ interface VariationsDrawerProps {
   hideCartButton?: boolean;
   hidePublishCartButton?: boolean;
   hideDeleteButton?: boolean;
+  hideVariationEditButton?: boolean;
 }
 
 export const VariationsDrawer = ({ 
@@ -37,6 +38,7 @@ export const VariationsDrawer = ({
   hideCartButton = false,
   hidePublishCartButton = false,
   hideDeleteButton = false,
+  hideVariationEditButton = false,
 }: VariationsDrawerProps) => {
   const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
@@ -413,7 +415,7 @@ export const VariationsDrawer = ({
                       onPlay={handlePlayVariation}
                       onCart={hideCartButton ? undefined : handleQuickCart}
                       onPublishCart={hidePublishCartButton ? undefined : handlePublishCart}
-                      onEdit={hideEditButton ? undefined : handleEdit}
+                      onEdit={hideVariationEditButton ? undefined : handleEdit}
                       onDelete={hideDeleteButton ? undefined : (variationId) => {
                         // TODO: Implement delete variation
                         toast.info('Delete variation functionality coming soon');
