@@ -15,6 +15,37 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 
+// Price calculation based on duration (seconds)
+const calculateVariationPrice = (duration: string, basePricePerSecond: number = 10) => {
+  // Parse duration string (formats: "00:30", "30s", "1:30", etc.)
+  const parseSeconds = (dur: string): number => {
+    // Remove 's' suffix if present
+    const cleaned = dur.replace(/s$/i, '').trim();
+    
+    // Check if it's in MM:SS or HH:MM:SS format
+    if (cleaned.includes(':')) {
+      const parts = cleaned.split(':').map(p => parseInt(p) || 0);
+      if (parts.length === 2) {
+        // MM:SS
+        return parts[0] * 60 + parts[1];
+      } else if (parts.length === 3) {
+        // HH:MM:SS
+        return parts[0] * 3600 + parts[1] * 60 + parts[2];
+      }
+    }
+    
+    // Otherwise assume it's just seconds
+    return parseInt(cleaned) || 0;
+  };
+  
+  const seconds = parseSeconds(duration);
+  const mrp = Math.round(seconds * basePricePerSecond);
+  const discount = 30; // 30% discount
+  const price = Math.round(mrp * (1 - discount / 100));
+  
+  return { price, mrp, discount: `${discount}%` };
+};
+
 interface VariationsDrawerProps {
   video: VideoItem | null;
   open: boolean;
@@ -335,18 +366,24 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
                 {/* Variations */}
                 <div className="space-y-2">
-                  {variations.map((variation) => (
-                    <VariationCard
-                      key={variation.id}
-                      variation={variation}
-                      videoTitle={video.title}
-                      videoImage={video.image}
-                      isCurrentlyPlaying={currentVideo?.id === variation.id}
-                      onPlay={handlePlayVariation}
-                      onEdit={hideEditButton ? undefined : handleEdit}
-                      hideShareButtons={hideShareButton}
-                    />
-                  ))}
+                  {variations.map((variation) => {
+                    const variationPricing = calculateVariationPrice(variation.duration);
+                    return (
+                      <VariationCard
+                        key={variation.id}
+                        variation={variation}
+                        videoTitle={video.title}
+                        videoImage={video.image}
+                        isCurrentlyPlaying={currentVideo?.id === variation.id}
+                        onPlay={handlePlayVariation}
+                        onEdit={hideEditButton ? undefined : handleEdit}
+                        hideShareButtons={hideShareButton}
+                        price={variationPricing.price}
+                        mrp={variationPricing.mrp}
+                        discount={variationPricing.discount}
+                      />
+                    );
+                  })}
                 </div>
               </>
             ) : (
