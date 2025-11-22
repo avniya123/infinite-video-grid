@@ -4,7 +4,7 @@ import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
-import { ShoppingCart, Edit, Play } from "lucide-react";
+import { ShoppingCart, Edit, Play, Bookmark } from "lucide-react";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -423,9 +423,17 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                   <p className="text-sm font-semibold text-muted-foreground">
                     {String(variations.length).padStart(2, '0')}/{String(variations.length).padStart(2, '0')} variations available
                   </p>
-                  <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground font-medium">
-                    {variations.filter(v => v.thumbnail_url).length} / {variations.length} thumbnails
-                  </Badge>
+                  <div className="flex items-center gap-2">
+                    {savedVariationIds.size > 0 && (
+                      <Badge className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-medium gap-1">
+                        <Bookmark className="h-3 w-3 fill-white" />
+                        {savedVariationIds.size} Saved
+                      </Badge>
+                    )}
+                    <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground font-medium">
+                      {variations.filter(v => v.thumbnail_url).length} / {variations.length} thumbnails
+                    </Badge>
+                  </div>
                 </div>
 
                 {/* Variations */}
