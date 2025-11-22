@@ -114,23 +114,23 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     });
   };
 
-  const handleQuickCart = () => {
+  const handleQuickCart = (variationId?: string) => {
     if (!user) {
       toast.error('Please sign in to proceed');
       onRequestAuth?.();
       return;
     }
     
-    // Get the first variation or selected variation
-    const variationId = selectedVariation?.id || (variations && variations.length > 0 ? variations[0].id : null);
+    // Use the provided variation ID or the first/selected variation
+    const targetVariationId = variationId || selectedVariation?.id || (variations && variations.length > 0 ? variations[0].id : null);
     
-    if (!variationId) {
+    if (!targetVariationId) {
       toast.error('No variation available');
       return;
     }
     
     // Navigate to Quick Cart payment page with variation data
-    navigate(`/share-cart-checkout?mode=quick&variationId=${variationId}`);
+    navigate(`/share-cart-checkout?mode=quick&variationId=${targetVariationId}`);
   };
 
   const handleEdit = async (variationId?: string) => {
@@ -264,7 +264,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
             {/* Action Buttons */}
             <div className="flex gap-2 pt-1">
               {!hideShareButton && (
-                <Button size="sm" onClick={handleQuickCart} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 flex-1">
+                <Button size="sm" onClick={() => handleQuickCart()} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 flex-1">
                   <ShoppingCart className="h-3.5 w-3.5" />
                   Quick Cart
                 </Button>
@@ -337,7 +337,12 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       videoImage={video.image}
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
+                      onCart={hideShareButton ? undefined : handleQuickCart}
                       onEdit={hideEditButton ? undefined : handleEdit}
+                      onDelete={hideEditButton ? undefined : (variationId) => {
+                        // TODO: Implement delete variation
+                        toast.info('Delete variation functionality coming soon');
+                      }}
                       hideShareButtons={hideShareButton}
                     />
                   ))}
