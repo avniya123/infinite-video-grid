@@ -665,8 +665,6 @@ export default function PublishCart() {
                         video={video}
                         showShareButton={false}
                         showPrice={true}
-                        hideVariationsShareButton={true}
-                        hideVariationsEditButton={true}
                         isSelected={selectedTemplateIds.has(template.id)}
                         onSelect={() => handleSelectTemplate(template.id)}
                       />

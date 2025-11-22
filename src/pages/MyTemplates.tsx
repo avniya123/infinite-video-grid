@@ -692,7 +692,6 @@ export default function MyTemplates() {
                       <VideoCard
                         video={video}
                         showShareButton={false}
-                        hideVariationsShareButton={true}
                       />
                       
                       {/* Publish Card Badge - Top Center */}

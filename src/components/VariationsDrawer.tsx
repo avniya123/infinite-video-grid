@@ -47,16 +47,27 @@ const calculateVariationPrice = (duration: string, basePricePerSecond: number = 
   return { price, mrp, discount: `${discount}%` };
 };
 
+type PageContext = 'videos' | 'my-templates' | 'publish-cart';
+
 interface VariationsDrawerProps {
   video: VideoItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onRequestAuth?: () => void;
-  hideShareButton?: boolean;
-  hideEditButton?: boolean;
+  pageContext?: PageContext;
+  onVariationDeleted?: (variationId: string) => void;
+  onVariationAddedToCart?: (variationId: string) => void;
 }
 
-export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false }: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ 
+  video, 
+  open, 
+  onOpenChange, 
+  onRequestAuth, 
+  pageContext = 'videos',
+  onVariationDeleted,
+  onVariationAddedToCart 
+}: VariationsDrawerProps) => {
   const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [user, setUser] = useState<any>(null);
@@ -287,11 +298,83 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
       toast.success('Template saved! Opening editor...');
       
       // Navigate to template editor with referrer parameter
-      navigate(`/template-editor/${targetVariationId}?from=videos`);
+      navigate(`/template-editor/${targetVariationId}?from=${pageContext}`);
     } catch (error: any) {
       toast.dismiss(loadingToast);
       toast.error('Failed to save template');
       console.error('Error saving template:', error);
+    }
+  };
+
+  const handleDeleteVariation = async (variationId: string) => {
+    if (!user) {
+      toast.error('Please sign in to delete');
+      onRequestAuth?.();
+      return;
+    }
+
+    const loadingToast = toast.loading('Deleting variation...');
+
+    try {
+      const { error } = await supabase
+        .from('user_templates')
+        .delete()
+        .eq('user_id', user.id)
+        .eq('variation_id', variationId);
+
+      if (error) throw error;
+
+      // Update saved variations list
+      setSavedVariationIds(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(variationId);
+        return newSet;
+      });
+
+      toast.dismiss(loadingToast);
+      toast.success('Variation removed from templates');
+      onVariationDeleted?.(variationId);
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to delete variation');
+      console.error('Error deleting variation:', error);
+    }
+  };
+
+  const handleAddToCart = async (variationId: string) => {
+    if (!user) {
+      toast.error('Please sign in to add to cart');
+      onRequestAuth?.();
+      return;
+    }
+
+    const loadingToast = toast.loading('Adding to publish cart...');
+
+    try {
+      const { error } = await supabase
+        .from('user_templates')
+        .update({ 
+          published: true,
+          published_at: new Date().toISOString()
+        })
+        .eq('user_id', user.id)
+        .eq('variation_id', variationId);
+
+      if (error) throw error;
+
+      toast.dismiss(loadingToast);
+      toast.success('Added to publish cart', {
+        duration: 4000,
+        action: {
+          label: 'View Cart',
+          onClick: () => navigate('/publish-cart')
+        }
+      });
+      onVariationAddedToCart?.(variationId);
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to add to cart');
+      console.error('Error adding to cart:', error);
     }
   };
 
@@ -379,18 +462,32 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                 )}
               </div>
               
-              {/* Action Buttons */}
+              {/* Action Buttons - Context Aware */}
               <div className="flex gap-2 pt-1">
-                {!hideShareButton && (
-                  <Button size="sm" onClick={handleQuickCart} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 flex-1">
-                    <ShoppingCart className="h-3.5 w-3.5" />
-                    Quick Cart
-                  </Button>
-                )}
-                {!hideEditButton && (
-                  <Button size="sm" onClick={() => handleEdit()} variant="outline" className="gap-2 flex-1">
+                {pageContext === 'videos' && (
+                  <Button size="sm" onClick={() => handleEdit()} variant="default" className="gap-2 flex-1">
                     <Edit className="h-3.5 w-3.5" />
                     Edit
+                  </Button>
+                )}
+                
+                {pageContext === 'my-templates' && (
+                  <>
+                    <Button size="sm" onClick={() => handleEdit()} variant="outline" className="gap-2 flex-1">
+                      <Edit className="h-3.5 w-3.5" />
+                      Edit
+                    </Button>
+                    <Button size="sm" onClick={() => handleAddToCart(selectedVariation.id)} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 flex-1">
+                      <ShoppingCart className="h-3.5 w-3.5" />
+                      Add to Cart
+                    </Button>
+                  </>
+                )}
+                
+                {pageContext === 'publish-cart' && (
+                  <Button size="sm" onClick={handleQuickCart} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 flex-1">
+                    <ShoppingCart className="h-3.5 w-3.5" />
+                    Proceed to Checkout
                   </Button>
                 )}
               </div>
@@ -492,8 +589,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                     );
                   }
 
-                  return filteredVariations.map((variation) => {
+                   return filteredVariations.map((variation) => {
                   const pricing = calculateVariationPrice(variation.duration);
+                  const isSaved = savedVariationIds.has(variation.id);
                   return (
                     <VariationCard
                       key={variation.id}
@@ -502,14 +600,17 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       videoImage={video.image}
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
-                      onEdit={hideEditButton ? undefined : handleEdit}
-                      hideShareButtons={hideShareButton}
-                      isSaved={savedVariationIds.has(variation.id)}
+                      onEdit={pageContext === 'videos' || pageContext === 'my-templates' ? handleEdit : undefined}
+                      onDelete={pageContext === 'my-templates' ? handleDeleteVariation : undefined}
+                      onAddToCart={pageContext === 'my-templates' ? handleAddToCart : undefined}
+                      hideShareButtons={true}
+                      isSaved={isSaved}
                       price={pricing.price}
                       mrp={pricing.mrp}
                       discount={pricing.discount}
                       videoId={video.id}
                       hidePrice={true}
+                      pageContext={pageContext}
                     />
                   );
                 })})()}

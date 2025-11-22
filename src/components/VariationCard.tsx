@@ -1,4 +1,4 @@
-import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check, Trash2, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
@@ -22,6 +22,8 @@ interface VariationCardProps {
   isCurrentlyPlaying: boolean;
   onPlay: (variation: VideoVariation) => void;
   onEdit?: (variationId: string) => void;
+  onDelete?: (variationId: string) => void;
+  onAddToCart?: (variationId: string) => void;
   hideShareButtons?: boolean;
   price?: number;
   mrp?: number;
@@ -29,6 +31,7 @@ interface VariationCardProps {
   isSaved?: boolean;
   videoId?: number;
   hidePrice?: boolean;
+  pageContext?: 'videos' | 'my-templates' | 'publish-cart';
 }
 
 export const VariationCard = ({
@@ -38,6 +41,8 @@ export const VariationCard = ({
   isCurrentlyPlaying,
   onPlay,
   onEdit,
+  onDelete,
+  onAddToCart,
   hideShareButtons = false,
   price,
   mrp,
@@ -45,6 +50,7 @@ export const VariationCard = ({
   isSaved = false,
   videoId,
   hidePrice = false,
+  pageContext = 'videos',
 }: VariationCardProps) => {
   return (
     <div
@@ -151,8 +157,63 @@ export const VariationCard = ({
         )}
       </div>
 
-      {/* Share Button - Always visible in list items when hideShareButtons is false */}
-      {!hideShareButtons && (
+      {/* Context-Aware Action Buttons */}
+      {!hideShareButtons && pageContext === 'videos' && onEdit && (
+        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={() => onEdit(variation.id)}
+            className="gap-1.5 h-8"
+          >
+            <EditIcon className="h-3.5 w-3.5" />
+            Edit
+          </Button>
+        </div>
+      )}
+
+      {pageContext === 'my-templates' && (
+        <div className="flex-shrink-0 flex gap-2" onClick={(e) => e.stopPropagation()}>
+          {onEdit && (
+            <Button
+              size="sm"
+              variant="outline"
+              onClick={() => onEdit(variation.id)}
+              className="gap-1.5 h-8"
+            >
+              <EditIcon className="h-3.5 w-3.5" />
+              Edit
+            </Button>
+          )}
+          {onAddToCart && (
+            <Button
+              size="sm"
+              onClick={() => onAddToCart(variation.id)}
+              className="gap-1.5 h-8 bg-emerald-500 hover:bg-emerald-600 text-white"
+            >
+              <ShoppingCart className="h-3.5 w-3.5" />
+              Add to Cart
+            </Button>
+          )}
+          {onDelete && (
+            <Button
+              size="sm"
+              variant="destructive"
+              onClick={() => {
+                if (window.confirm('Are you sure you want to delete this variation?')) {
+                  onDelete(variation.id);
+                }
+              }}
+              className="gap-1.5 h-8"
+            >
+              <Trash2 className="h-3.5 w-3.5" />
+              Delete
+            </Button>
+          )}
+        </div>
+      )}
+
+      {!hideShareButtons && pageContext !== 'videos' && pageContext !== 'my-templates' && (
         <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <SocialShareButtons
             title={`${videoTitle} - ${variation.title}`}
