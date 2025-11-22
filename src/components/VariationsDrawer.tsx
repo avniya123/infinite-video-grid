@@ -186,6 +186,67 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     }
   };
 
+  const handlePublishCart = async (variationId: string) => {
+    if (!user) {
+      toast.error('Please sign in to add to publish cart');
+      onRequestAuth?.();
+      return;
+    }
+
+    const loadingToast = toast.loading('Adding to publish cart...');
+
+    try {
+      // Check if template already exists
+      const { data: existingTemplate } = await supabase
+        .from('user_templates')
+        .select('id, published')
+        .eq('user_id', user.id)
+        .eq('variation_id', variationId)
+        .single();
+
+      if (existingTemplate) {
+        // If template exists, update it to published
+        if (existingTemplate.published) {
+          toast.dismiss(loadingToast);
+          toast.info('Already in publish cart');
+          return;
+        }
+
+        const { error } = await supabase
+          .from('user_templates')
+          .update({
+            published: true,
+            published_at: new Date().toISOString()
+          })
+          .eq('id', existingTemplate.id);
+
+        if (error) throw error;
+      } else {
+        // Create new template and mark as published
+        const { error } = await supabase
+          .from('user_templates')
+          .insert({
+            user_id: user.id,
+            variation_id: variationId,
+            published: true,
+            published_at: new Date().toISOString()
+          });
+
+        if (error) throw error;
+      }
+
+      toast.dismiss(loadingToast);
+      toast.success('Added to publish cart!');
+      
+      // Refetch variations to update UI if needed
+      await refetch();
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to add to publish cart');
+      console.error('Error adding to publish cart:', error);
+    }
+  };
+
   // Don't render if no video
   if (!video) return null;
 
@@ -338,6 +399,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
                       onCart={hideShareButton ? undefined : handleQuickCart}
+                      onPublishCart={hideEditButton ? undefined : handlePublishCart}
                       onEdit={hideEditButton ? undefined : handleEdit}
                       onDelete={hideEditButton ? undefined : (variationId) => {
                         // TODO: Implement delete variation

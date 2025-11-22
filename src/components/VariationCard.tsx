@@ -1,4 +1,4 @@
-import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, ShoppingCart, Trash2 } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, ShoppingCart, Trash2, Package } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
@@ -23,6 +23,7 @@ interface VariationCardProps {
   onPlay: (variation: VideoVariation) => void;
   onEdit?: (variationId: string) => void;
   onCart?: (variationId: string) => void;
+  onPublishCart?: (variationId: string) => void;
   onDelete?: (variationId: string) => void;
   hideShareButtons?: boolean;
 }
@@ -35,6 +36,7 @@ export const VariationCard = ({
   onPlay,
   onEdit,
   onCart,
+  onPublishCart,
   onDelete,
   hideShareButtons = false,
 }: VariationCardProps) => {
@@ -129,6 +131,20 @@ export const VariationCard = ({
           >
             <ShoppingCart className="h-3.5 w-3.5" />
             Cart
+          </Button>
+        )}
+        {onPublishCart && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={(e) => {
+              e.stopPropagation();
+              onPublishCart(variation.id);
+            }}
+            className="flex-1 gap-1.5 h-9 bg-green-500/10 hover:bg-green-500/20 text-green-600 dark:text-green-400 border-green-500/20"
+          >
+            <Package className="h-3.5 w-3.5" />
+            Publish Cart
           </Button>
         )}
         {onEdit && (
