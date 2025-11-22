@@ -26,6 +26,11 @@ export const useVideoVariations = (videoId: number) => {
         .order('created_at', { ascending: true });
 
       if (error) {
+        // Handle JWT expired error gracefully
+        if (error.code === 'PGRST303' || error.message?.includes('JWT expired')) {
+          console.error('Session expired, please refresh the page');
+          return [];
+        }
         console.error('Error fetching variations:', error);
         throw error;
       }
@@ -33,5 +38,6 @@ export const useVideoVariations = (videoId: number) => {
       return data as VideoVariation[];
     },
     enabled: !!videoId,
+    retry: false, // Don't retry on JWT errors
   });
 };

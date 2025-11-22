@@ -88,7 +88,15 @@ export const Header = ({ selectedSubcategory, selectedMainCategory, onSubcategor
         .eq('id', userId)
         .single();
 
-      if (error) throw error;
+      if (error) {
+        // Handle JWT expired error
+        if (error.code === 'PGRST303' || error.message?.includes('JWT expired')) {
+          await supabase.auth.signOut();
+          toast.error('Session expired. Please sign in again.');
+          return;
+        }
+        throw error;
+      }
       setProfileData(data);
     } catch (error) {
       console.error('Error fetching profile:', error);
