@@ -460,6 +460,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       mrp={pricing.mrp}
                       discount={pricing.discount}
                       videoId={video.id}
+                      hidePrice={true}
                     />
                   );
                 })}
