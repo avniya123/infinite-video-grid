@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, Eye } from 'lucide-react';
+import { Play, ArrowRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -327,8 +327,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                   setVariationsOpen(true);
                 }}
               >
-                <Eye className="h-3 w-3" />
                 View
+                <ArrowRight className="h-3 w-3" />
               </Button>
             </div>
           </div>
