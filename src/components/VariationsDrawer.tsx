@@ -22,24 +22,9 @@ interface VariationsDrawerProps {
   onRequestAuth?: () => void;
   hideShareButton?: boolean;
   hideEditButton?: boolean;
-  hideCartButton?: boolean;
-  hidePublishCartButton?: boolean;
-  hideDeleteButton?: boolean;
-  hideVariationEditButton?: boolean;
 }
 
-export const VariationsDrawer = ({ 
-  video, 
-  open, 
-  onOpenChange, 
-  onRequestAuth, 
-  hideShareButton = false, 
-  hideEditButton = false,
-  hideCartButton = false,
-  hidePublishCartButton = false,
-  hideDeleteButton = false,
-  hideVariationEditButton = false,
-}: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false }: VariationsDrawerProps) => {
   const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [user, setUser] = useState<any>(null);
@@ -129,23 +114,23 @@ export const VariationsDrawer = ({
     });
   };
 
-  const handleQuickCart = (variationId?: string) => {
+  const handleQuickCart = () => {
     if (!user) {
       toast.error('Please sign in to proceed');
       onRequestAuth?.();
       return;
     }
     
-    // Use the provided variation ID or the first/selected variation
-    const targetVariationId = variationId || selectedVariation?.id || (variations && variations.length > 0 ? variations[0].id : null);
+    // Get the first variation or selected variation
+    const variationId = selectedVariation?.id || (variations && variations.length > 0 ? variations[0].id : null);
     
-    if (!targetVariationId) {
+    if (!variationId) {
       toast.error('No variation available');
       return;
     }
     
     // Navigate to Quick Cart payment page with variation data
-    navigate(`/share-cart-checkout?mode=quick&variationId=${targetVariationId}`);
+    navigate(`/share-cart-checkout?mode=quick&variationId=${variationId}`);
   };
 
   const handleEdit = async (variationId?: string) => {
@@ -198,67 +183,6 @@ export const VariationsDrawer = ({
       toast.dismiss(loadingToast);
       toast.error('Failed to save template');
       console.error('Error saving template:', error);
-    }
-  };
-
-  const handlePublishCart = async (variationId: string) => {
-    if (!user) {
-      toast.error('Please sign in to add to publish cart');
-      onRequestAuth?.();
-      return;
-    }
-
-    const loadingToast = toast.loading('Adding to publish cart...');
-
-    try {
-      // Check if template already exists
-      const { data: existingTemplate } = await supabase
-        .from('user_templates')
-        .select('id, published')
-        .eq('user_id', user.id)
-        .eq('variation_id', variationId)
-        .single();
-
-      if (existingTemplate) {
-        // If template exists, update it to published
-        if (existingTemplate.published) {
-          toast.dismiss(loadingToast);
-          toast.info('Already in publish cart');
-          return;
-        }
-
-        const { error } = await supabase
-          .from('user_templates')
-          .update({
-            published: true,
-            published_at: new Date().toISOString()
-          })
-          .eq('id', existingTemplate.id);
-
-        if (error) throw error;
-      } else {
-        // Create new template and mark as published
-        const { error } = await supabase
-          .from('user_templates')
-          .insert({
-            user_id: user.id,
-            variation_id: variationId,
-            published: true,
-            published_at: new Date().toISOString()
-          });
-
-        if (error) throw error;
-      }
-
-      toast.dismiss(loadingToast);
-      toast.success('Added to publish cart!');
-      
-      // Refetch variations to update UI if needed
-      await refetch();
-    } catch (error: any) {
-      toast.dismiss(loadingToast);
-      toast.error('Failed to add to publish cart');
-      console.error('Error adding to publish cart:', error);
     }
   };
 
@@ -340,7 +264,7 @@ export const VariationsDrawer = ({
             {/* Action Buttons */}
             <div className="flex gap-2 pt-1">
               {!hideShareButton && (
-                <Button size="sm" onClick={() => handleQuickCart()} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 flex-1">
+                <Button size="sm" onClick={handleQuickCart} className="bg-emerald-500 hover:bg-emerald-600 text-white gap-2 flex-1">
                   <ShoppingCart className="h-3.5 w-3.5" />
                   Quick Cart
                 </Button>
@@ -413,17 +337,8 @@ export const VariationsDrawer = ({
                       videoImage={video.image}
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
-                      onCart={hideCartButton ? undefined : handleQuickCart}
-                      onPublishCart={hidePublishCartButton ? undefined : handlePublishCart}
-                      onEdit={hideVariationEditButton ? undefined : handleEdit}
-                      onDelete={hideDeleteButton ? undefined : (variationId) => {
-                        // TODO: Implement delete variation
-                        toast.info('Delete variation functionality coming soon');
-                      }}
+                      onEdit={hideEditButton ? undefined : handleEdit}
                       hideShareButtons={hideShareButton}
-                      hideCartButton={hideCartButton}
-                      hidePublishCartButton={hidePublishCartButton}
-                      hideDeleteButton={hideDeleteButton}
                     />
                   ))}
                 </div>
