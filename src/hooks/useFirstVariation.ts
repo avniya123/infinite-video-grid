@@ -16,6 +16,10 @@ export const useFirstVariation = (videoId: number) => {
         .single();
 
       if (error) {
+        // Handle JWT expired error gracefully
+        if (error.code === 'PGRST303' || error.message?.includes('JWT expired')) {
+          return null;
+        }
         console.error('Error fetching first variation:', error);
         return null;
       }
@@ -24,5 +28,6 @@ export const useFirstVariation = (videoId: number) => {
     },
     enabled: !!videoId,
     staleTime: 1000 * 60 * 5, // 5 minutes
+    retry: false, // Don't retry on JWT errors
   });
 };

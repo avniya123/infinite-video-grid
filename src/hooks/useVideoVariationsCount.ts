@@ -13,6 +13,10 @@ export const useVideoVariationsCount = (videoId: number) => {
         .neq('video_url', '');
 
       if (error) {
+        // Handle JWT expired error gracefully
+        if (error.code === 'PGRST303' || error.message?.includes('JWT expired')) {
+          return 0;
+        }
         console.error('Error fetching variations count:', error);
         return 0;
       }
@@ -21,5 +25,6 @@ export const useVideoVariationsCount = (videoId: number) => {
     },
     enabled: !!videoId,
     staleTime: 5 * 60 * 1000, // Cache for 5 minutes
+    retry: false, // Don't retry on JWT errors
   });
 };
