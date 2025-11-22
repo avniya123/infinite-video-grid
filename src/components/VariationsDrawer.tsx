@@ -190,7 +190,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
   return (
     <Sheet open={open} onOpenChange={onOpenChange}>
-      <SheetContent side="right" className={DRAWER_PRESETS.content}>
+      <SheetContent side="right" className={`${DRAWER_PRESETS.content} flex flex-col`}>
         <SheetHeader className={getDrawerHeaderClassName('compact')}>
           <div className="flex items-center justify-between">
             <div className="space-y-1">
@@ -203,7 +203,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
           </div>
         </SheetHeader>
 
-        <div className="px-6 py-5 space-y-5 overflow-y-auto">
+        {/* Fixed Top Section */}
+        <div className="px-6 py-5 space-y-5 flex-shrink-0 border-b border-border/50">
           {/* Video Player */}
           {currentVideo && (
             <VideoPlayer
@@ -288,8 +289,10 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
               </div>
             )}
           </div>
+        </div>
 
-          {/* Variations List */}
+        {/* Scrollable Variations List */}
+        <div className="flex-1 overflow-y-auto px-6 py-5">
           <div className="space-y-3">
             {isLoading || isCreatingDefault ? (
               <>
