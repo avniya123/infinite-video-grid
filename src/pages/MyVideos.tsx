@@ -427,7 +427,7 @@ export default function MyVideos() {
         )}
       </main>
 
-      {/* Video Player Drawer */}
+      {/* Video Player Drawer - Using videos context */}
       <VideoPlayerDrawer
         open={drawerOpen}
         onOpenChange={setDrawerOpen}
