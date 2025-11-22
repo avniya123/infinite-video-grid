@@ -10,7 +10,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Slider } from '@/components/ui/slider';
 import { toast } from 'sonner';
-import { Loader2, ArrowLeft, ShoppingCart, Trash2, X, Search, Columns3, List } from 'lucide-react';
+import { Loader2, ArrowLeft, ShoppingCart, Trash2, X, Search, Columns3, List, CheckSquare, Square } from 'lucide-react';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { FilterChips } from '@/components/FilterChips';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
@@ -64,6 +64,9 @@ export default function PublishCart() {
   const [user, setUser] = useState<SupabaseUser | null>(null);
   const [loading, setLoading] = useState(true);
   const [publishedTemplates, setPublishedTemplates] = useState<PublishedTemplate[]>([]);
+  
+  // Selection state for checkout
+  const [selectedTemplateIds, setSelectedTemplateIds] = useState<Set<string>>(new Set());
   
   // View controls state
   const [searchQuery, setSearchQuery] = useState('');
@@ -360,6 +363,40 @@ export default function PublishCart() {
     }, 0);
   };
 
+  const calculateSelectedTotal = () => {
+    return filteredAndSortedTemplates
+      .filter(template => selectedTemplateIds.has(template.id))
+      .reduce((total, template) => {
+        const pricing = calculateTemplatePrice(template, 1);
+        return total + pricing.price;
+      }, 0);
+  };
+
+  const handleSelectTemplate = (templateId: string) => {
+    setSelectedTemplateIds(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(templateId)) {
+        newSet.delete(templateId);
+      } else {
+        newSet.add(templateId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleSelectAll = () => {
+    if (selectedTemplateIds.size === filteredAndSortedTemplates.length) {
+      // Deselect all
+      setSelectedTemplateIds(new Set());
+      toast.success('All items deselected');
+    } else {
+      // Select all
+      const allIds = new Set(filteredAndSortedTemplates.map(t => t.id));
+      setSelectedTemplateIds(allIds);
+      toast.success(`${allIds.size} items selected`);
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background transition-colors duration-300">
@@ -453,6 +490,25 @@ export default function PublishCart() {
               
               {/* Controls */}
               <div className="flex items-center gap-2 flex-wrap sm:flex-nowrap">
+                {/* Select All Button */}
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSelectAll}
+                  className="h-10 whitespace-nowrap transition-all duration-200 hover:scale-105"
+                >
+                  {selectedTemplateIds.size === filteredAndSortedTemplates.length ? (
+                    <>
+                      <CheckSquare className="w-4 h-4 mr-2" />
+                      Deselect All
+                    </>
+                  ) : (
+                    <>
+                      <Square className="w-4 h-4 mr-2" />
+                      Select All ({filteredAndSortedTemplates.length})
+                    </>
+                  )}
+                </Button>
                 {/* Reset Filters Button */}
                 {hasActiveFilters && (
                   <Button
@@ -611,9 +667,11 @@ export default function PublishCart() {
                         showPrice={true}
                         hideVariationsShareButton={true}
                         hideVariationsEditButton={true}
+                        isSelected={selectedTemplateIds.has(template.id)}
+                        onSelect={() => handleSelectTemplate(template.id)}
                       />
                       {/* Remove from cart button */}
-                      <div className="absolute top-3 right-3 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
+                      <div className="absolute top-3 right-12 z-30 opacity-0 group-hover:opacity-100 transition-opacity">
                         <Button
                           variant="destructive"
                           size="icon"
@@ -656,12 +714,23 @@ export default function PublishCart() {
                   resolution: 'HD',
                   videoUrl: template.video_variations.video_url || undefined,
                 };
+                const isSelected = selectedTemplateIds.has(template.id);
 
                 return (
                   <div 
                     key={template.id} 
-                    className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in"
+                    className={`group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in ${isSelected ? 'ring-4 ring-primary' : ''}`}
                   >
+                    {/* Selection Checkbox */}
+                    <div 
+                      className="flex items-center cursor-pointer"
+                      onClick={() => handleSelectTemplate(template.id)}
+                    >
+                      <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'bg-muted border-muted-foreground/30'}`}>
+                        {isSelected && <span className="text-primary-foreground text-xs font-bold">✓</span>}
+                      </div>
+                    </div>
+                    
                     <div className="relative w-64 flex-shrink-0">
                       <img
                         src={video.image}
@@ -702,36 +771,48 @@ export default function PublishCart() {
             </div>
           )}
 
-          {/* Proceed to Checkout Button */}
-          <div className="mt-16 mb-12 flex justify-center">
+          {/* Floating Checkout Button */}
+          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
             <Button
               size="lg"
-              className="px-16 py-7 text-lg font-semibold shadow-xl hover:shadow-2xl transition-all hover:scale-105"
+              disabled={selectedTemplateIds.size === 0}
+              className="px-8 py-6 text-base font-semibold shadow-2xl hover:shadow-3xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed bg-primary hover:bg-primary/90 flex items-center gap-4"
               onClick={() => {
-                if (filteredAndSortedTemplates.length > 0) {
-                  // Send all published templates to checkout
-                  const templates = filteredAndSortedTemplates.map(template => {
-                    const pricing = calculateTemplatePrice(template, 1);
-                    return {
-                      id: template.id,
-                      title: template.video_variations.title,
-                      price: pricing.price,
-                      mrp: pricing.mrp,
-                      discount: pricing.discount,
-                      duration: template.video_variations.duration,
-                      orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
-                      resolution: 'HD',
-                      thumbnailUrl: template.video_variations.thumbnail_url,
-                    };
-                  });
+                if (selectedTemplateIds.size > 0) {
+                  // Send only selected templates to checkout
+                  const selectedTemplates = filteredAndSortedTemplates
+                    .filter(template => selectedTemplateIds.has(template.id))
+                    .map(template => {
+                      const pricing = calculateTemplatePrice(template, 1);
+                      return {
+                        id: template.id,
+                        title: template.video_variations.title,
+                        price: pricing.price,
+                        mrp: pricing.mrp,
+                        discount: pricing.discount,
+                        duration: template.video_variations.duration,
+                        orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
+                        resolution: 'HD',
+                        thumbnailUrl: template.video_variations.thumbnail_url,
+                      };
+                    });
                   
                   navigate('/share-cart-checkout', {
-                    state: { templates }
+                    state: { templates: selectedTemplates }
                   });
                 }
               }}
             >
-              Proceed to Checkout
+              <ShoppingCart className="h-5 w-5" />
+              <span>
+                Checkout {selectedTemplateIds.size > 0 && `(${selectedTemplateIds.size})`}
+              </span>
+              {selectedTemplateIds.size > 0 && (
+                <>
+                  <span className="text-white/60">•</span>
+                  <span className="font-bold">₹{calculateSelectedTotal()}</span>
+                </>
+              )}
             </Button>
           </div>
         </main>
