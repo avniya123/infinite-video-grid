@@ -446,12 +446,16 @@ export default function ShareCartCheckout() {
               <div className="flex items-center gap-2 mb-3">
                 <div className="h-0.5 w-8 rounded-full bg-gradient-to-r from-primary to-primary/50" />
                 <h2 className="text-base font-bold text-foreground/90 tracking-wide">Template Details</h2>
+                <Badge variant="outline" className="ml-auto text-xs">
+                  {templates.length} {templates.length === 1 ? 'item' : 'items'}
+                </Badge>
               </div>
               <div className="space-y-2">
                 {templates.map((template, index) => (
-                  <div key={template.id} className="group relative p-2.5 rounded-lg border border-border/40 bg-background/60 backdrop-blur-sm hover:shadow-sm hover:border-primary/20 transition-all duration-300">
-                    <div className="flex gap-2.5 items-start">
-                      <div className="relative w-16 h-16 rounded-md overflow-hidden flex-shrink-0 cursor-pointer group/preview"
+                  <div key={template.id} className="group relative p-3 rounded-lg border border-border/40 bg-background/60 backdrop-blur-sm hover:shadow-md hover:border-primary/20 transition-all duration-300">
+                    <div className="flex gap-3 items-center">
+                      {/* Thumbnail */}
+                      <div className="relative w-20 h-20 rounded-lg overflow-hidden flex-shrink-0 cursor-pointer group/preview"
                            onClick={() => template.videoUrl && setPreviewTemplate(template)}>
                         <img 
                           src={template.thumbnailUrl || '/placeholder.svg'} 
@@ -459,45 +463,53 @@ export default function ShareCartCheckout() {
                           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
                         />
                         {template.videoUrl && (
-                          <div className="absolute inset-0 bg-black/40 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity duration-200">
-                            <Play className="w-5 h-5 text-white" />
+                          <div className="absolute inset-0 bg-black/50 flex items-center justify-center opacity-0 group-hover/preview:opacity-100 transition-opacity duration-200">
+                            <Play className="w-6 h-6 text-white drop-shadow-lg" />
                           </div>
                         )}
                       </div>
                       
+                      {/* Template Info */}
                       <div className="flex-1 min-w-0 space-y-1.5">
-                        <h3 className="font-medium text-sm line-clamp-1 group-hover:text-primary transition-colors">
+                        <h3 className="font-semibold text-sm line-clamp-1 group-hover:text-primary transition-colors">
                           {template.title}
                         </h3>
                         <div className="flex flex-wrap items-center gap-1.5">
-                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+                          <Badge variant="secondary" className="h-5 px-2 text-[10px] bg-muted/50 text-muted-foreground border-0">
                             {template.duration}
                           </Badge>
-                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+                          <Badge variant="secondary" className="h-5 px-2 text-[10px] bg-muted/50 text-muted-foreground border-0">
                             {template.orientation}
                           </Badge>
-                          <Badge variant="secondary" className="h-5 px-1.5 text-[10px] bg-primary/10 text-primary border-primary/20">
+                          <Badge variant="secondary" className="h-5 px-2 text-[10px] bg-muted/50 text-muted-foreground border-0">
                             {template.resolution}
                           </Badge>
                         </div>
-                        <div className="flex items-start gap-2 pt-0.5">
-                          <div className="flex flex-col">
-                            <p className="text-base font-bold text-primary leading-tight">₹{template.price}</p>
-                            <span className="text-[10px] text-muted-foreground">per variation</span>
-                          </div>
-                          {template.videoUrl && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => setPreviewTemplate(template)}
-                              className="ml-auto h-6 px-2 text-[10px] hover:bg-primary/10"
-                            >
-                              <Play className="w-3 h-3 mr-0.5" />
-                              Preview
-                            </Button>
-                          )}
-                        </div>
                       </div>
+
+                      {/* Price Section */}
+                      <div className="flex flex-col items-end gap-1 flex-shrink-0">
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-xl font-bold text-primary">₹{template.price}</span>
+                          <span className="text-sm text-muted-foreground line-through">₹{template.mrp}</span>
+                        </div>
+                        <Badge variant="outline" className="text-[10px] h-5 px-1.5 bg-emerald-500/10 text-emerald-600 border-emerald-500/20">
+                          {template.discount} OFF
+                        </Badge>
+                      </div>
+
+                      {/* Remove Button */}
+                      {templates.length > 1 && (
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          onClick={() => handleRemoveTemplate(template.id)}
+                          className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-all flex-shrink-0"
+                          title="Remove template"
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      )}
                     </div>
                   </div>
                 ))}
