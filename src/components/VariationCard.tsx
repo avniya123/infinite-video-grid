@@ -1,4 +1,4 @@
-import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
@@ -27,6 +27,7 @@ interface VariationCardProps {
   mrp?: number;
   discount?: string;
   isSaved?: boolean;
+  videoId?: number;
 }
 
 export const VariationCard = ({
@@ -41,6 +42,7 @@ export const VariationCard = ({
   mrp,
   discount,
   isSaved = false,
+  videoId,
 }: VariationCardProps) => {
   return (
     <div
@@ -87,54 +89,59 @@ export const VariationCard = ({
         </div>
       </div>
 
-      <div className="flex-1 min-w-0 space-y-2">
-        <div className="space-y-1">
-          <div className="flex items-start justify-between gap-2">
+      <div className="flex-1 min-w-0 space-y-2.5">
+        {/* Title and Price */}
+        <div className="flex items-start justify-between gap-3">
+          <div className="flex-1 min-w-0">
             <h5 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
               {variation.title}
             </h5>
-            {/* Price */}
-            {price !== undefined && mrp !== undefined && (
-              <div className="flex-shrink-0 text-right">
-                <div className="text-sm font-bold text-foreground">₹ {price}</div>
-                <div className="flex items-center gap-1 mt-0.5">
-                  <span className="text-[10px] text-muted-foreground line-through">₹ {mrp}</span>
-                  {discount && (
-                    <span className="text-[10px] text-destructive font-semibold">({discount} Off)</span>
-                  )}
-                </div>
-              </div>
+            {videoId && (
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Stock Video #{videoId}
+              </p>
             )}
           </div>
           
-          {/* Metadata Pills */}
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <Badge variant="secondary" className="text-[10px] bg-muted/50 text-muted-foreground font-medium px-1.5 py-0">
-              {variation.duration}
-            </Badge>
-            {variation.aspect_ratio && (
-              <Badge variant="secondary" className="text-[10px] bg-muted/50 text-muted-foreground font-medium px-1.5 py-0">
-                {variation.aspect_ratio}
-              </Badge>
-            )}
-          </div>
+          {/* Price Section */}
+          {price !== undefined && mrp !== undefined && (
+            <div className="flex-shrink-0 text-right">
+              <div className="text-base font-bold text-foreground">₹ {price}</div>
+              <div className="flex items-center gap-1 mt-0.5">
+                <span className="text-xs text-muted-foreground line-through">₹ {mrp}</span>
+                {discount && (
+                  <span className="text-xs text-destructive font-semibold">({discount} Off)</span>
+                )}
+              </div>
+            </div>
+          )}
         </div>
         
-        {/* Platforms */}
+        {/* Duration and Aspect Ratio */}
+        <div className="flex items-center gap-2 text-xs text-muted-foreground">
+          <span className="font-medium">{variation.duration}</span>
+          {variation.aspect_ratio && (
+            <>
+              <span>•</span>
+              <span className="font-medium">{variation.aspect_ratio}</span>
+            </>
+          )}
+        </div>
+        
+        {/* Platforms with Icons and Checks */}
         {variation.platforms && variation.platforms.length > 0 && (
-          <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-[10px] text-muted-foreground/70 font-medium">Platforms:</span>
+          <div className="flex items-center gap-2 flex-wrap">
             {variation.platforms.map((platform) => {
               const PlatformIcon = getPlatformIcon(platform);
               return (
-                <Badge
+                <div
                   key={platform}
-                  variant="outline"
-                  className="text-[10px] px-1.5 py-0.5 text-muted-foreground/80 border-muted/50 font-medium flex items-center gap-1"
+                  className="flex items-center gap-1.5 px-2 py-1 rounded-md bg-primary/10 border border-primary/20"
                 >
-                  <PlatformIcon className="h-2.5 w-2.5" />
-                  {platform}
-                </Badge>
+                  <PlatformIcon className="h-3.5 w-3.5 text-primary" />
+                  <span className="text-xs font-medium text-foreground">{platform}</span>
+                  <Check className="h-3 w-3 text-emerald-500" />
+                </div>
               );
             })}
           </div>
