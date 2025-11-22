@@ -43,10 +43,21 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   
   const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
 
-  // Calculate aspect ratio based on orientation
+  // Calculate aspect ratio based on orientation or explicit aspect ratio
   const getAspectRatio = () => {
+    // If explicit aspect ratio is provided, use it
     if (video.aspectRatio) return video.aspectRatio;
     
+    // Parse aspect ratio from video metadata if available
+    // Common formats: "9:16", "16:9", "1:1", "9:21", "3:4"
+    const aspectRatioMatch = video.title.match(/(\d+):(\d+)/);
+    if (aspectRatioMatch) {
+      const width = parseInt(aspectRatioMatch[1]);
+      const height = parseInt(aspectRatioMatch[2]);
+      return width / height;
+    }
+    
+    // Fallback to orientation-based aspect ratios
     switch (video.orientation) {
       case 'Landscape':
         return 16 / 9;
@@ -164,10 +175,10 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
     >
       <AspectRatio ratio={aspectRatio}>
         <div className="relative w-full h-full">
-          {/* Selection Checkbox */}
+          {/* Selection Checkbox - Only show if onSelect is provided */}
           {onSelect && (
             <div 
-              className="absolute top-3 left-3 z-10"
+              className="absolute top-3 left-3 z-20"
               onClick={handleSelectClick}
             >
               <div className={`w-6 h-6 rounded border-2 flex items-center justify-center transition-all ${isSelected ? 'bg-primary border-primary' : 'bg-white/90 border-white backdrop-blur-sm'}`}>
@@ -229,10 +240,19 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           )}
 
-          {/* Variations Count Badge */}
-          <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-            01/{String(variationsCount + 1).padStart(2, '0')}
-          </Badge>
+          {/* Variations Count Badge - Position left if no selection checkbox */}
+          {!onSelect && (
+            <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+              01/{String(variationsCount + 1).padStart(2, '0')}
+            </Badge>
+          )}
+          
+          {/* Variations Count Badge - Position below checkbox if selection is enabled */}
+          {onSelect && (
+            <Badge className="absolute top-12 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
+              01/{String(variationsCount + 1).padStart(2, '0')}
+            </Badge>
+          )}
 
           {/* Top Right Actions */}
           <div className="absolute top-3 right-3 flex flex-col gap-2 z-10">
@@ -292,8 +312,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           </div>
 
-          {/* Bottom Overlay */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 py-4">
+          {/* Bottom Overlay - Ensure no overlap with Variations button */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 pt-4 pb-14">
             {/* Title with Tooltip */}
             <TooltipProvider delayDuration={200}>
               <Tooltip>
@@ -313,16 +333,16 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                 </TooltipContent>
               </Tooltip>
             </TooltipProvider>
-            {/* Caption */}
+            {/* Caption with Aspect Ratio */}
             <p className="text-[9px] text-gray-400 font-medium">
-              Stock Video #{video.id}
+              Stock Video #{video.id} • {video.orientation} [{Math.round(aspectRatio * 16)}:{Math.round(16)}]
             </p>
           </div>
 
-          {/* Variations Button */}
+          {/* Variations Button - Fixed position at bottom */}
           <Button
             size="sm"
-            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900 hover:bg-gray-800 dark:bg-white dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg"
+            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900/95 hover:bg-gray-800 dark:bg-white/95 dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg backdrop-blur-sm h-8 text-xs"
             onClick={(e) => {
               e.stopPropagation();
               setVariationsOpen(true);
