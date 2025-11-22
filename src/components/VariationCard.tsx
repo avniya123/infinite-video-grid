@@ -101,19 +101,17 @@ export const VariationCard = ({
         
         {/* Platforms */}
         {variation.platforms && variation.platforms.length > 0 && (
-          <div className="space-y-1">
+          <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[10px] text-muted-foreground/70 font-medium">Platforms:</span>
-            <div className="flex gap-1 flex-wrap">
-              {variation.platforms.map((platform) => (
-                <Badge
-                  key={platform}
-                  variant="outline"
-                  className="text-[10px] px-1.5 py-0 text-muted-foreground/80 border-muted/50 font-medium"
-                >
-                  {platform}
-                </Badge>
-              ))}
-            </div>
+            {variation.platforms.map((platform) => (
+              <Badge
+                key={platform}
+                variant="outline"
+                className="text-[10px] px-1.5 py-0 text-muted-foreground/80 border-muted/50 font-medium"
+              >
+                {platform}
+              </Badge>
+            ))}
           </div>
         )}
       </div>
