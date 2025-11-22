@@ -288,45 +288,49 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
             </div>
           </div>
 
-          {/* Bottom Overlay - Ensure no overlap with Variations button */}
-          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/90 via-black/60 to-transparent px-3 pt-4 pb-14">
-            {/* Title with Tooltip */}
-            <TooltipProvider delayDuration={200}>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <h3 className="text-xs font-bold text-white line-clamp-2 mb-1 leading-relaxed cursor-help">
-                    {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '').substring(0, 30)}
-                    {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '').length > 30 ? '...' : ''}
-                  </h3>
-                </TooltipTrigger>
-                <TooltipContent 
-                  className="max-w-xs bg-gray-900 text-white border-gray-700 animate-in fade-in-0 zoom-in-95 duration-200"
-                  sideOffset={5}
-                >
-                  <p className="text-sm font-medium animate-fade-in">{video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}</p>
-                  <p className="text-xs text-gray-400 mt-1.5 animate-fade-in" style={{ animationDelay: '50ms' }}>Stock Video #{video.id}</p>
-                  <p className="text-xs text-gray-400 animate-fade-in" style={{ animationDelay: '100ms' }}>Price: ₹{video.price}</p>
-                </TooltipContent>
-              </Tooltip>
-            </TooltipProvider>
-            {/* Caption with Aspect Ratio */}
-            <p className="text-[9px] text-gray-400 font-medium">
-              Stock Video #{video.id} • {aspectRatioInfo.label}
-            </p>
+          {/* Bottom Overlay - Fixed layout to prevent overlap */}
+          <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/95 via-black/70 to-transparent px-3 pt-6 pb-3">
+            <div className="flex items-start justify-between gap-2 mb-2">
+              {/* Left: Title and Caption */}
+              <div className="flex-1 min-w-0">
+                {/* Title with Tooltip */}
+                <TooltipProvider delayDuration={200}>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <h3 className="text-xs font-bold text-white line-clamp-1 mb-1 leading-tight cursor-help">
+                        {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}
+                      </h3>
+                    </TooltipTrigger>
+                    <TooltipContent 
+                      className="max-w-xs bg-gray-900 text-white border-gray-700 animate-in fade-in-0 zoom-in-95 duration-200"
+                      sideOffset={5}
+                    >
+                      <p className="text-sm font-medium animate-fade-in">{video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}</p>
+                      <p className="text-xs text-gray-400 mt-1.5 animate-fade-in" style={{ animationDelay: '50ms' }}>Stock Video #{video.id}</p>
+                      <p className="text-xs text-gray-400 animate-fade-in" style={{ animationDelay: '100ms' }}>Price: ₹{video.price}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                {/* Caption with Aspect Ratio */}
+                <p className="text-[9px] text-gray-400 font-medium leading-tight">
+                  Stock Video #{video.id} • {aspectRatioInfo.label}
+                </p>
+              </div>
+              
+              {/* Right: Variations Button */}
+              <Button
+                size="sm"
+                className="flex-shrink-0 gap-1.5 bg-gray-900/95 hover:bg-gray-800 dark:bg-white/95 dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg backdrop-blur-sm h-7 text-[10px] px-2"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setVariationsOpen(true);
+                }}
+              >
+                <List className="h-3 w-3" />
+                Variations
+              </Button>
+            </div>
           </div>
-
-          {/* Variations Button - Fixed position at bottom */}
-          <Button
-            size="sm"
-            className="absolute bottom-3 right-3 z-20 gap-1.5 bg-gray-900/95 hover:bg-gray-800 dark:bg-white/95 dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg backdrop-blur-sm h-8 text-xs"
-            onClick={(e) => {
-              e.stopPropagation();
-              setVariationsOpen(true);
-            }}
-          >
-            <List className="h-3.5 w-3.5" />
-            Variations
-          </Button>
         </div>
       </AspectRatio>
 
