@@ -337,6 +337,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                   <h3 className="text-lg font-bold text-foreground leading-tight">
                     {selectedVariation.title}
                   </h3>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    Stock Video #{video.id}
+                  </p>
                 </div>
                 
                 {/* Price Section */}
