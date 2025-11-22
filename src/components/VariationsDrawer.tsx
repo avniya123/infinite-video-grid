@@ -363,24 +363,17 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
                 {/* Variations */}
                 <div className="space-y-2">
-                  {variations.map((variation) => {
-                    const variationPricing = calculateVariationPrice(variation.duration);
-                    return (
-                      <VariationCard
-                        key={variation.id}
-                        variation={variation}
-                        videoTitle={video.title}
-                        videoImage={video.image}
-                        isCurrentlyPlaying={currentVideo?.id === variation.id}
-                        onPlay={handlePlayVariation}
-                        onEdit={hideEditButton ? undefined : handleEdit}
-                        hideShareButtons={hideShareButton}
-                        price={variationPricing.price}
-                        mrp={variationPricing.mrp}
-                        discount={variationPricing.discount}
-                      />
-                    );
-                  })}
+                  {variations.map((variation) => (
+                    <VariationCard
+                      key={variation.id}
+                      variation={variation}
+                      videoTitle={video.title}
+                      videoImage={video.image}
+                      isCurrentlyPlaying={currentVideo?.id === variation.id}
+                      onPlay={handlePlayVariation}
+                      hideShareButtons={hideShareButton}
+                    />
+                  ))}
                 </div>
               </>
             ) : (
