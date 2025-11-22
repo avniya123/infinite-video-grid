@@ -27,7 +27,6 @@ interface VariationsDrawerProps {
 export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false }: VariationsDrawerProps) => {
   const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
-  const [generatingIds, setGeneratingIds] = useState<Set<string>>(new Set());
   const [user, setUser] = useState<any>(null);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
@@ -106,15 +105,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
     createDefaultVariation();
   }, [isLoading, variations, open, video, isCreatingDefault, refetch]);
-
-  const handleThumbnailGenerated = (variationId: string, thumbnailUrl: string) => {
-    setGeneratingIds(prev => {
-      const newSet = new Set(prev);
-      newSet.delete(variationId);
-      return newSet;
-    });
-    refetch();
-  };
 
   const handlePlayVariation = (variation: any) => {
     setSelectedVariation(variation);
@@ -343,7 +333,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       videoImage={video.image}
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
-                      onThumbnailGenerated={handleThumbnailGenerated}
                       onEdit={hideEditButton ? undefined : handleEdit}
                       hideShareButtons={hideShareButton}
                     />

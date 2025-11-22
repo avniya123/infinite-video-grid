@@ -1,8 +1,6 @@
 import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
-import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
-import { UploadThumbnailButton } from "@/components/UploadThumbnailButton";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { VideoVariation } from "@/hooks/useVideoVariations";
 import { Button } from "@/components/ui/button";
@@ -23,7 +21,6 @@ interface VariationCardProps {
   videoImage: string;
   isCurrentlyPlaying: boolean;
   onPlay: (variation: VideoVariation) => void;
-  onThumbnailGenerated: (variationId: string, url: string) => void;
   onEdit?: (variationId: string) => void;
   hideShareButtons?: boolean;
 }
@@ -34,7 +31,6 @@ export const VariationCard = ({
   videoImage,
   isCurrentlyPlaying,
   onPlay,
-  onThumbnailGenerated,
   onEdit,
   hideShareButtons = false,
 }: VariationCardProps) => {
@@ -55,23 +51,6 @@ export const VariationCard = ({
           className="w-full h-full"
           lazy={true}
         />
-        
-        {!variation.thumbnail_url && (
-          <div className="absolute inset-0 bg-black/70 backdrop-blur-sm flex flex-col items-center justify-center gap-2 opacity-0 group-hover:opacity-100 transition-all duration-300 z-10">
-            <GenerateThumbnailButton
-              variationId={variation.id}
-              videoTitle={videoTitle}
-              variationTitle={variation.title}
-              aspectRatio={variation.aspect_ratio}
-              onGenerated={(url) => onThumbnailGenerated(variation.id, url)}
-            />
-            <div className="text-xs text-white/60">or</div>
-            <UploadThumbnailButton
-              variationId={variation.id}
-              onUploaded={(url) => onThumbnailGenerated(variation.id, url)}
-            />
-          </div>
-        )}
         
         {/* Play overlay */}
         <div className={`absolute inset-0 flex items-center justify-center transition-all duration-300 ${
