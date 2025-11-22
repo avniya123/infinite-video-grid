@@ -109,6 +109,49 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     fetchSavedVariations();
   }, [user, open, variations]);
 
+  // Real-time subscription for user_templates changes
+  useEffect(() => {
+    if (!user || !open) return;
+
+    const channel = supabase
+      .channel('user-templates-changes')
+      .on(
+        'postgres_changes',
+        {
+          event: 'INSERT',
+          schema: 'public',
+          table: 'user_templates',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload: any) => {
+          const newVariationId = payload.new.variation_id;
+          setSavedVariationIds(prev => new Set([...prev, newVariationId]));
+        }
+      )
+      .on(
+        'postgres_changes',
+        {
+          event: 'DELETE',
+          schema: 'public',
+          table: 'user_templates',
+          filter: `user_id=eq.${user.id}`
+        },
+        (payload: any) => {
+          const deletedVariationId = payload.old.variation_id;
+          setSavedVariationIds(prev => {
+            const newSet = new Set(prev);
+            newSet.delete(deletedVariationId);
+            return newSet;
+          });
+        }
+      )
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [user, open]);
+
   // Set first variation as default when drawer opens
   useEffect(() => {
     if (open && variations && variations.length > 0 && !isLoading) {
@@ -232,6 +275,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
           });
         
         if (error) throw error;
+        
+        // Update saved variations list in real-time
+        setSavedVariationIds(prev => new Set([...prev, targetVariationId]));
       }
       
       // Dismiss loading toast
