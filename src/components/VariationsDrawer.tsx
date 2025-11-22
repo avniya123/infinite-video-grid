@@ -258,9 +258,9 @@ export const VariationsDrawer = ({
   };
 
   const handleEdit = async (variationId?: string) => {
+    // For videos page, enable inline title editing
     if (pageContext === 'videos') {
-      // For videos page, enable inline title editing
-      const targetVariationId = variationId || (variations && variations.length > 0 ? variations[0].id : null);
+      const targetVariationId = variationId || selectedVariation?.id;
       if (!targetVariationId) {
         toast.error('No variation available to edit');
         return;
@@ -274,23 +274,21 @@ export const VariationsDrawer = ({
       return;
     }
 
-    // For other pages, proceed with the existing "save to templates" flow
+    // For my-templates page, navigate to template editor
     if (!user) {
-      toast.error('Please sign in to edit videos');
+      toast.error('Please sign in to edit templates');
       onRequestAuth?.();
       return;
     }
     
-    // Use provided variationId or the first variation's ID
-    const targetVariationId = variationId || (variations && variations.length > 0 ? variations[0].id : null);
+    const targetVariationId = variationId || selectedVariation?.id;
     
     if (!targetVariationId) {
       toast.error('No variation available to edit');
       return;
     }
     
-    // Show loading toast
-    const loadingToast = toast.loading('Saving to My Templates...');
+    const loadingToast = toast.loading('Opening editor...');
     
     try {
       // Check if template already exists
@@ -313,20 +311,17 @@ export const VariationsDrawer = ({
         
         if (error) throw error;
         
-        // Update saved variations list in real-time
         setSavedVariationIds(prev => new Set([...prev, targetVariationId]));
       }
       
-      // Dismiss loading toast
       toast.dismiss(loadingToast);
-      toast.success('Template saved! Opening editor...');
       
-      // Navigate to template editor with referrer parameter
+      // Navigate to template editor
       navigate(`/template-editor/${targetVariationId}?from=${pageContext}`);
     } catch (error: any) {
       toast.dismiss(loadingToast);
-      toast.error('Failed to save template');
-      console.error('Error saving template:', error);
+      toast.error('Failed to open editor');
+      console.error('Error opening editor:', error);
     }
   };
 
