@@ -4,7 +4,7 @@ import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
-import { ShoppingCart, Edit, Play, Bookmark, Search, Check } from "lucide-react";
+import { ShoppingCart, Edit, Play, Bookmark, Search } from "lucide-react";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -15,7 +15,6 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
-import { Checkbox } from "@/components/ui/checkbox";
 
 // Price calculation based on duration (seconds)
 const calculateVariationPrice = (duration: string, basePricePerSecond: number = 10) => {
@@ -65,7 +64,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
   const [savedVariationIds, setSavedVariationIds] = useState<Set<string>>(new Set());
   const [filterText, setFilterText] = useState("");
-  const [selectedVariationIds, setSelectedVariationIds] = useState<Set<string>>(new Set());
   
   const {
     videoRef,
@@ -297,57 +295,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     }
   };
 
-  const handleAddToPublish = (variation: any) => {
-    if (!user) {
-      toast.error('Please sign in to add to publish cart');
-      onRequestAuth?.();
-      return;
-    }
-    toast.success(`${variation.title} added to publish cart`);
-    // TODO: Implement add to cart logic
-  };
-
-  const handleSelectionChange = (variationId: string, selected: boolean) => {
-    setSelectedVariationIds(prev => {
-      const newSet = new Set(prev);
-      if (selected) {
-        newSet.add(variationId);
-      } else {
-        newSet.delete(variationId);
-      }
-      return newSet;
-    });
-  };
-
-  const handleSelectAll = (checked: boolean) => {
-    if (checked) {
-      const filteredVariations = variations?.filter(v => 
-        v.title.toLowerCase().includes(filterText.toLowerCase()) ||
-        v.aspect_ratio.toLowerCase().includes(filterText.toLowerCase()) ||
-        (v.platforms || []).some(p => p.toLowerCase().includes(filterText.toLowerCase()))
-      ) || [];
-      setSelectedVariationIds(new Set(filteredVariations.map(v => v.id)));
-    } else {
-      setSelectedVariationIds(new Set());
-    }
-  };
-
-  const handleCheckoutSelected = () => {
-    if (!user) {
-      toast.error('Please sign in to proceed');
-      onRequestAuth?.();
-      return;
-    }
-
-    if (selectedVariationIds.size === 0) {
-      toast.error('Please select at least one variation');
-      return;
-    }
-
-    toast.success(`Proceeding to checkout with ${selectedVariationIds.size} variation(s)`);
-    // TODO: Navigate to checkout with selected variations
-  };
-
   // Don't render if no video
   if (!video) return null;
 
@@ -491,9 +438,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
                 {/* Variations Header */}
                 <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-3">
+                  <p className="text-sm font-semibold text-muted-foreground">
                     {(() => {
-                      const filteredVariations = variations.filter((variation) => {
+                      const filtered = variations.filter((variation) => {
                         if (!filterText) return true;
                         const searchLower = filterText.toLowerCase();
                         return (
@@ -502,40 +449,19 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                           variation.platforms?.some((p) => p.toLowerCase().includes(searchLower))
                         );
                       });
-                      const allSelected = filteredVariations.length > 0 && 
-                        filteredVariations.every(v => selectedVariationIds.has(v.id));
-                      
-                      return (
-                        <>
-                          <Checkbox
-                            checked={allSelected}
-                            onCheckedChange={handleSelectAll}
-                            className="h-5 w-5"
-                          />
-                          <p className="text-sm font-semibold text-muted-foreground">
-                            {`${filteredVariations.length} ${filteredVariations.length === 1 ? 'variation' : 'variations'} ${filterText ? 'found' : 'available'}`}
-                          </p>
-                        </>
-                      );
+                      return `${filtered.length} ${filtered.length === 1 ? 'variation' : 'variations'} ${filterText ? 'found' : 'available'}`;
                     })()}
-                  </div>
+                  </p>
                   <div className="flex items-center gap-2">
-                    {selectedVariationIds.size > 0 && (
-                      <Button
-                        size="sm"
-                        onClick={handleCheckoutSelected}
-                        className="h-8 gap-1.5"
-                      >
-                        <ShoppingCart className="h-3.5 w-3.5" />
-                        Checkout ({selectedVariationIds.size})
-                      </Button>
-                    )}
                     {savedVariationIds.size > 0 && (
                       <Badge className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-medium gap-1">
                         <Bookmark className="h-3 w-3 fill-white" />
                         {savedVariationIds.size} Saved
                       </Badge>
                     )}
+                    <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground font-medium">
+                      {variations.filter(v => v.thumbnail_url).length} / {variations.length} thumbnails
+                    </Badge>
                   </div>
                 </div>
 
@@ -568,9 +494,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
                   return filteredVariations.map((variation) => {
                   const pricing = calculateVariationPrice(variation.duration);
-                  const isSaved = savedVariationIds.has(variation.id);
-                  const isSelected = selectedVariationIds.has(variation.id);
-                  
                   return (
                     <VariationCard
                       key={variation.id}
@@ -580,18 +503,13 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
                       onEdit={hideEditButton ? undefined : handleEdit}
-                      onAddToPublish={handleAddToPublish}
                       hideShareButtons={hideShareButton}
-                      isSaved={isSaved}
+                      isSaved={savedVariationIds.has(variation.id)}
                       price={pricing.price}
                       mrp={pricing.mrp}
                       discount={pricing.discount}
                       videoId={video.id}
                       hidePrice={true}
-                      showCheckbox={true}
-                      isSelected={isSelected}
-                      onSelectionChange={handleSelectionChange}
-                      showActions={true}
                     />
                   );
                 })})()}
