@@ -23,6 +23,9 @@ interface VariationCardProps {
   onPlay: (variation: VideoVariation) => void;
   onEdit?: (variationId: string) => void;
   hideShareButtons?: boolean;
+  price?: number;
+  mrp?: number;
+  discount?: string;
 }
 
 export const VariationCard = ({
@@ -33,6 +36,9 @@ export const VariationCard = ({
   onPlay,
   onEdit,
   hideShareButtons = false,
+  price,
+  mrp,
+  discount,
 }: VariationCardProps) => {
   return (
     <div
@@ -71,9 +77,23 @@ export const VariationCard = ({
 
       <div className="flex-1 min-w-0 space-y-2">
         <div className="space-y-1">
-          <h5 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
-            {variation.title}
-          </h5>
+          <div className="flex items-start justify-between gap-2">
+            <h5 className="font-semibold text-sm text-foreground leading-tight line-clamp-1">
+              {variation.title}
+            </h5>
+            {/* Price */}
+            {price !== undefined && mrp !== undefined && (
+              <div className="flex-shrink-0 text-right">
+                <div className="text-sm font-bold text-foreground">₹ {price}</div>
+                <div className="flex items-center gap-1 mt-0.5">
+                  <span className="text-[10px] text-muted-foreground line-through">₹ {mrp}</span>
+                  {discount && (
+                    <span className="text-[10px] text-destructive font-semibold">({discount} Off)</span>
+                  )}
+                </div>
+              </div>
+            )}
+          </div>
           
           {/* Metadata Pills */}
           <div className="flex items-center gap-1.5 flex-wrap">
