@@ -360,6 +360,9 @@ const Index = () => {
                   video={video}
                   onPlay={handlePlayVideo}
                   onClick={handleVideoClick}
+                  hideVariationsCartButton={true}
+                  hideVariationsPublishCartButton={true}
+                  hideVariationsDeleteButton={true}
                 />
               </div>
             ))}
@@ -440,6 +443,9 @@ const Index = () => {
             open={!!listVariationsOpen}
             onOpenChange={(open) => !open && setListVariationsOpen(null)}
             onRequestAuth={() => setListAuthDrawerOpen(true)}
+            hideCartButton={true}
+            hidePublishCartButton={true}
+            hideDeleteButton={true}
           />
         )}
 

@@ -26,6 +26,9 @@ interface VariationCardProps {
   onPublishCart?: (variationId: string) => void;
   onDelete?: (variationId: string) => void;
   hideShareButtons?: boolean;
+  hideCartButton?: boolean;
+  hidePublishCartButton?: boolean;
+  hideDeleteButton?: boolean;
 }
 
 export const VariationCard = ({
@@ -39,6 +42,9 @@ export const VariationCard = ({
   onPublishCart,
   onDelete,
   hideShareButtons = false,
+  hideCartButton = false,
+  hidePublishCartButton = false,
+  hideDeleteButton = false,
 }: VariationCardProps) => {
   return (
     <div
@@ -119,7 +125,7 @@ export const VariationCard = ({
 
       {/* Action Buttons Row */}
       <div className="flex items-center gap-2 pt-2 border-t border-border/50">
-        {onCart && (
+        {!hideCartButton && onCart && (
           <Button
             variant="outline"
             size="sm"
@@ -133,7 +139,7 @@ export const VariationCard = ({
             Cart
           </Button>
         )}
-        {onPublishCart && (
+        {!hidePublishCartButton && onPublishCart && (
           <Button
             variant="outline"
             size="sm"
@@ -161,7 +167,7 @@ export const VariationCard = ({
             Edit
           </Button>
         )}
-        {onDelete && (
+        {!hideDeleteButton && onDelete && (
           <Button
             variant="outline"
             size="sm"

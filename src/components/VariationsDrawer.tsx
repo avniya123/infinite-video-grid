@@ -22,9 +22,22 @@ interface VariationsDrawerProps {
   onRequestAuth?: () => void;
   hideShareButton?: boolean;
   hideEditButton?: boolean;
+  hideCartButton?: boolean;
+  hidePublishCartButton?: boolean;
+  hideDeleteButton?: boolean;
 }
 
-export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false }: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ 
+  video, 
+  open, 
+  onOpenChange, 
+  onRequestAuth, 
+  hideShareButton = false, 
+  hideEditButton = false,
+  hideCartButton = false,
+  hidePublishCartButton = false,
+  hideDeleteButton = false,
+}: VariationsDrawerProps) => {
   const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [user, setUser] = useState<any>(null);
@@ -398,14 +411,17 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       videoImage={video.image}
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
-                      onCart={hideShareButton ? undefined : handleQuickCart}
-                      onPublishCart={hideEditButton ? undefined : handlePublishCart}
+                      onCart={hideCartButton ? undefined : handleQuickCart}
+                      onPublishCart={hidePublishCartButton ? undefined : handlePublishCart}
                       onEdit={hideEditButton ? undefined : handleEdit}
-                      onDelete={hideEditButton ? undefined : (variationId) => {
+                      onDelete={hideDeleteButton ? undefined : (variationId) => {
                         // TODO: Implement delete variation
                         toast.info('Delete variation functionality coming soon');
                       }}
                       hideShareButtons={hideShareButton}
+                      hideCartButton={hideCartButton}
+                      hidePublishCartButton={hidePublishCartButton}
+                      hideDeleteButton={hideDeleteButton}
                     />
                   ))}
                 </div>
