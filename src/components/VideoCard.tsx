@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, ArrowRight, Instagram, Youtube, Facebook, Video, Music2 } from 'lucide-react';
+import { Play, ArrowRight } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -11,19 +11,8 @@ import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
 import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
-import { useVideoVariations } from '@/hooks/useVideoVariations';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getVideoAspectRatio, formatAspectRatio } from '@/utils/aspectRatios';
-
-// Platform icon mapping
-const getPlatformIcon = (platform: string) => {
-  const platformLower = platform.toLowerCase();
-  if (platformLower.includes('instagram') || platformLower.includes('reels')) return Instagram;
-  if (platformLower.includes('youtube') || platformLower.includes('shorts')) return Youtube;
-  if (platformLower.includes('facebook')) return Facebook;
-  if (platformLower.includes('tiktok')) return Music2;
-  return Video; // Default icon
-};
 
 interface VideoCardProps {
   video: VideoItem;
@@ -54,16 +43,10 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
-  const { data: variations = [] } = useVideoVariations(video.id);
 
   // Get aspect ratio information using the utility system
   const aspectRatioInfo = getVideoAspectRatio(video);
   const aspectRatio = aspectRatioInfo.ratio;
-
-  // Extract unique platforms from all variations
-  const uniquePlatforms = Array.from(
-    new Set(variations.flatMap(v => v.platforms || []))
-  ).slice(0, 4); // Show max 4 platforms
 
   // Lazy loading with Intersection Observer
   useEffect(() => {
@@ -332,26 +315,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                 <p className="text-[9px] text-gray-400 font-medium leading-tight">
                   Stock Video #{video.id} • {aspectRatioInfo.label}
                 </p>
-                {/* Platform Icons */}
-                {uniquePlatforms.length > 0 && (
-                  <div className="flex items-center gap-1 mt-1.5">
-                    {uniquePlatforms.map((platform) => {
-                      const PlatformIcon = getPlatformIcon(platform);
-                      return (
-                        <div
-                          key={platform}
-                          className="w-4 h-4 rounded-full bg-white/10 backdrop-blur-sm flex items-center justify-center"
-                          title={platform}
-                        >
-                          <PlatformIcon className="h-2.5 w-2.5 text-white" />
-                        </div>
-                      );
-                    })}
-                    {variations.flatMap(v => v.platforms || []).length > 4 && (
-                      <span className="text-[8px] text-gray-400 font-medium">+{variations.flatMap(v => v.platforms || []).length - 4}</span>
-                    )}
-                  </div>
-                )}
               </div>
               
               {/* Right: View Button */}
