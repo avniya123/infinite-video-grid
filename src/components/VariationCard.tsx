@@ -119,14 +119,15 @@ export const VariationCard = ({
           )}
         </div>
         
-        {/* Duration and Aspect Ratio */}
-        <div className="flex items-center gap-2 text-xs text-muted-foreground">
-          <span className="font-medium">{variation.duration}</span>
+        {/* Duration and Aspect Ratio Badges */}
+        <div className="flex items-center gap-2 flex-wrap">
+          <Badge variant="secondary" className="text-xs bg-muted/50 text-muted-foreground font-medium">
+            {variation.duration}
+          </Badge>
           {variation.aspect_ratio && (
-            <>
-              <span>•</span>
-              <span className="font-medium">{variation.aspect_ratio}</span>
-            </>
+            <Badge variant="outline" className="text-xs text-muted-foreground border-muted font-medium">
+              {variation.aspect_ratio}
+            </Badge>
           )}
         </div>
         
@@ -150,32 +151,16 @@ export const VariationCard = ({
         )}
       </div>
 
-      {/* Action Buttons */}
-      <div className="flex items-center gap-2 flex-shrink-0">
-        {!hidePrice && onEdit && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={(e) => {
-              e.stopPropagation();
-              onEdit(variation.id);
-            }}
-            className="gap-1.5 h-8"
-          >
-            <EditIcon className="h-3.5 w-3.5" />
-            Edit
-          </Button>
-        )}
-        {!hidePrice && !hideShareButtons && (
-          <div onClick={(e) => e.stopPropagation()}>
-            <SocialShareButtons
-              title={`${videoTitle} - ${variation.title}`}
-              description={`Check out this video variation: ${variation.title}`}
-              url={window.location.href}
-            />
-          </div>
-        )}
-      </div>
+      {/* Share Button - Always visible in list items when hideShareButtons is false */}
+      {!hideShareButtons && (
+        <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
+          <SocialShareButtons
+            title={`${videoTitle} - ${variation.title}`}
+            description={`Check out this video variation: ${variation.title}`}
+            url={window.location.href}
+          />
+        </div>
+      )}
     </div>
   );
 };
