@@ -1,7 +1,7 @@
 import { VideoItem } from '@/types/video';
 import { Badge } from '@/components/ui/badge';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import { Play, List } from 'lucide-react';
+import { Play, Eye } from 'lucide-react';
 import { useState, useRef, useEffect } from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { ShareButton } from '@/components/ShareButton';
@@ -317,7 +317,7 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                 </p>
               </div>
               
-              {/* Right: Variations Button */}
+              {/* Right: View Button */}
               <Button
                 size="sm"
                 className="flex-shrink-0 gap-1.5 bg-gray-900/95 hover:bg-gray-800 dark:bg-white/95 dark:hover:bg-gray-100 text-white dark:text-gray-900 border-0 shadow-lg backdrop-blur-sm h-7 text-[10px] px-2"
@@ -326,8 +326,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                   setVariationsOpen(true);
                 }}
               >
-                <List className="h-3 w-3" />
-                Variations
+                <Eye className="h-3 w-3" />
+                View
               </Button>
             </div>
           </div>
