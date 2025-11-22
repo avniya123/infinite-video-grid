@@ -626,7 +626,7 @@ export default function PublishCart() {
           </div>
         </div>
       ) : publishedTemplates.length > 0 && (
-        <main className="max-w-7xl mx-auto px-4 pb-8">
+        <main className="max-w-7xl mx-auto px-4 pb-48">{/* Added extra bottom padding for sticky bar */}
           {/* Masonry View */}
           {viewMode === 'masonry' && (
             <div 
@@ -771,49 +771,116 @@ export default function PublishCart() {
             </div>
           )}
 
-          {/* Floating Checkout Button */}
-          <div className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 animate-fade-in">
-            <Button
-              size="lg"
-              disabled={selectedTemplateIds.size === 0}
-              className="px-8 py-6 text-base font-semibold shadow-2xl hover:shadow-3xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed bg-primary hover:bg-primary/90 flex items-center gap-4"
-              onClick={() => {
-                if (selectedTemplateIds.size > 0) {
-                  // Send only selected templates to checkout
-                  const selectedTemplates = filteredAndSortedTemplates
-                    .filter(template => selectedTemplateIds.has(template.id))
-                    .map(template => {
-                      const pricing = calculateTemplatePrice(template, 1);
-                      return {
-                        id: template.id,
-                        title: template.video_variations.title,
-                        price: pricing.price,
-                        mrp: pricing.mrp,
-                        discount: pricing.discount,
-                        duration: template.video_variations.duration,
-                        orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
-                        resolution: 'HD',
-                        thumbnailUrl: template.video_variations.thumbnail_url,
-                      };
-                    });
-                  
-                  navigate('/share-cart-checkout', {
-                    state: { templates: selectedTemplates }
-                  });
-                }
-              }}
-            >
-              <ShoppingCart className="h-5 w-5" />
-              <span>
-                Checkout {selectedTemplateIds.size > 0 && `(${selectedTemplateIds.size})`}
-              </span>
-              {selectedTemplateIds.size > 0 && (
-                <>
-                  <span className="text-white/60">•</span>
-                  <span className="font-bold">₹{calculateSelectedTotal()}</span>
-                </>
-              )}
-            </Button>
+          {/* Modern Sticky Checkout Bar */}
+          <div className="fixed bottom-0 left-0 right-0 z-50 animate-slide-in-bottom">
+            <div className="bg-gradient-to-t from-background via-background to-background/0 pt-8 pb-2">
+              <div className="max-w-7xl mx-auto px-4">
+                <div className="bg-card/95 backdrop-blur-xl border border-border rounded-2xl shadow-2xl p-6">
+                  <div className="flex items-center justify-between gap-6">
+                    {/* Left Section - Selection Info */}
+                    <div className="flex items-center gap-6">
+                      <div className="flex items-center gap-3">
+                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center transition-all ${
+                          selectedTemplateIds.size > 0 
+                            ? 'bg-primary/20 text-primary' 
+                            : 'bg-muted text-muted-foreground'
+                        }`}>
+                          <CheckSquare className="w-6 h-6" />
+                        </div>
+                        <div>
+                          <div className="text-sm text-muted-foreground">Selected Templates</div>
+                          <div className="text-2xl font-bold text-foreground">
+                            {selectedTemplateIds.size} {selectedTemplateIds.size === 1 ? 'Item' : 'Items'}
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {selectedTemplateIds.size > 0 && (
+                        <>
+                          <div className="h-12 w-px bg-border" />
+                          
+                          {/* Price Breakdown */}
+                          <div className="flex items-center gap-6">
+                            <div>
+                              <div className="text-sm text-muted-foreground">Total MRP</div>
+                              <div className="text-lg font-semibold text-muted-foreground line-through">
+                                ₹{filteredAndSortedTemplates
+                                  .filter(template => selectedTemplateIds.has(template.id))
+                                  .reduce((total, template) => {
+                                    const pricing = calculateTemplatePrice(template, 1);
+                                    return total + pricing.mrp;
+                                  }, 0)}
+                              </div>
+                            </div>
+                            
+                            <div>
+                              <div className="text-sm text-muted-foreground">You Save</div>
+                              <div className="text-lg font-semibold text-green-600">
+                                ₹{filteredAndSortedTemplates
+                                  .filter(template => selectedTemplateIds.has(template.id))
+                                  .reduce((total, template) => {
+                                    const pricing = calculateTemplatePrice(template, 1);
+                                    return total + (pricing.mrp - pricing.price);
+                                  }, 0)}
+                              </div>
+                            </div>
+                          </div>
+                        </>
+                      )}
+                    </div>
+
+                    {/* Right Section - Total & Checkout Button */}
+                    <div className="flex items-center gap-6">
+                      {selectedTemplateIds.size > 0 && (
+                        <>
+                          <div>
+                            <div className="text-sm text-muted-foreground text-right">Total Amount</div>
+                            <div className="text-3xl font-bold text-primary">
+                              ₹{calculateSelectedTotal()}
+                            </div>
+                          </div>
+                          
+                          <div className="h-12 w-px bg-border" />
+                        </>
+                      )}
+                      
+                      <Button
+                        size="lg"
+                        disabled={selectedTemplateIds.size === 0}
+                        className="px-8 py-6 text-lg font-semibold shadow-lg hover:shadow-xl transition-all hover:scale-105 disabled:opacity-50 disabled:cursor-not-allowed bg-primary hover:bg-primary/90 min-w-[200px] rounded-xl"
+                        onClick={() => {
+                          if (selectedTemplateIds.size > 0) {
+                            const selectedTemplates = filteredAndSortedTemplates
+                              .filter(template => selectedTemplateIds.has(template.id))
+                              .map(template => {
+                                const pricing = calculateTemplatePrice(template, 1);
+                                return {
+                                  id: template.id,
+                                  title: template.video_variations.title,
+                                  price: pricing.price,
+                                  mrp: pricing.mrp,
+                                  discount: pricing.discount,
+                                  duration: template.video_variations.duration,
+                                  orientation: template.video_variations.aspect_ratio === '16:9' ? 'Landscape' : 'Portrait',
+                                  resolution: 'HD',
+                                  thumbnailUrl: template.video_variations.thumbnail_url,
+                                };
+                              });
+                            
+                            navigate('/share-cart-checkout', {
+                              state: { templates: selectedTemplates }
+                            });
+                          }
+                        }}
+                      >
+                        <ShoppingCart className="h-5 w-5" />
+                        <span>Proceed to Checkout</span>
+                      </Button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         </main>
       )}
