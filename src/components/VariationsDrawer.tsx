@@ -54,9 +54,12 @@ interface VariationsDrawerProps {
   onRequestAuth?: () => void;
   hideShareButton?: boolean;
   hideEditButton?: boolean;
+  onAddToCart?: (variationId: string) => void;
+  showCartButton?: boolean;
+  publishedVariationIds?: Set<string>;
 }
 
-export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false }: VariationsDrawerProps) => {
+export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hideShareButton = false, hideEditButton = false, onAddToCart, showCartButton = false, publishedVariationIds }: VariationsDrawerProps) => {
   const navigate = useNavigate();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [user, setUser] = useState<any>(null);
@@ -563,6 +566,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
                   return filteredVariations.map((variation) => {
                   const pricing = calculateVariationPrice(variation.duration);
+                  const isInCart = publishedVariationIds?.has(variation.id) || false;
                   return (
                     <VariationCard
                       key={variation.id}
@@ -572,6 +576,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
                       onEdit={hideEditButton ? undefined : handleEdit}
+                      onAddToCart={showCartButton ? onAddToCart : undefined}
                       hideShareButtons={hideShareButton}
                       isSaved={savedVariationIds.has(variation.id)}
                       price={pricing.price}
@@ -579,6 +584,8 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       discount={pricing.discount}
                       videoId={video.id}
                       hidePrice={true}
+                      showCartButton={showCartButton}
+                      isInCart={isInCart}
                     />
                   );
                 })})()}

@@ -1,4 +1,4 @@
-import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2, Bookmark, Check, ShoppingCart } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
@@ -22,6 +22,7 @@ interface VariationCardProps {
   isCurrentlyPlaying: boolean;
   onPlay: (variation: VideoVariation) => void;
   onEdit?: (variationId: string) => void;
+  onAddToCart?: (variationId: string) => void;
   hideShareButtons?: boolean;
   price?: number;
   mrp?: number;
@@ -29,6 +30,8 @@ interface VariationCardProps {
   isSaved?: boolean;
   videoId?: number;
   hidePrice?: boolean;
+  showCartButton?: boolean;
+  isInCart?: boolean;
 }
 
 export const VariationCard = ({
@@ -38,6 +41,7 @@ export const VariationCard = ({
   isCurrentlyPlaying,
   onPlay,
   onEdit,
+  onAddToCart,
   hideShareButtons = false,
   price,
   mrp,
@@ -45,6 +49,8 @@ export const VariationCard = ({
   isSaved = false,
   videoId,
   hidePrice = false,
+  showCartButton = false,
+  isInCart = false,
 }: VariationCardProps) => {
   return (
     <div
@@ -151,7 +157,7 @@ export const VariationCard = ({
         )}
       </div>
 
-      {/* Action Buttons - Share and Edit */}
+      {/* Action Buttons - Share, Cart, and Edit */}
       <div className="flex-shrink-0 flex flex-col gap-2" onClick={(e) => e.stopPropagation()}>
         {!hideShareButtons && (
           <SocialShareButtons
@@ -159,6 +165,25 @@ export const VariationCard = ({
             description={`Check out this video variation: ${variation.title}`}
             url={window.location.href}
           />
+        )}
+        {showCartButton && onAddToCart && (
+          <Button
+            size="sm"
+            variant={isInCart ? "secondary" : "default"}
+            onClick={(e) => {
+              e.stopPropagation();
+              onAddToCart(variation.id);
+            }}
+            className={`gap-1.5 h-8 px-3 ${
+              isInCart 
+                ? 'bg-emerald-500 hover:bg-emerald-600 text-white' 
+                : 'bg-primary hover:bg-primary/90'
+            }`}
+            disabled={isInCart}
+          >
+            <ShoppingCart className="h-3.5 w-3.5" />
+            <span className="text-xs">{isInCart ? 'In Cart' : 'Add to Cart'}</span>
+          </Button>
         )}
         {onEdit && (
           <Button
