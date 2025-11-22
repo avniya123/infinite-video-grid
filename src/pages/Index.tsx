@@ -360,7 +360,6 @@ const Index = () => {
                   video={video}
                   onPlay={handlePlayVideo}
                   onClick={handleVideoClick}
-                  hideVariationsEditButton={true}
                   hideVariationsCartButton={true}
                   hideVariationsPublishCartButton={true}
                   hideVariationsDeleteButton={true}
@@ -444,7 +443,6 @@ const Index = () => {
             open={!!listVariationsOpen}
             onOpenChange={(open) => !open && setListVariationsOpen(null)}
             onRequestAuth={() => setListAuthDrawerOpen(true)}
-            hideEditButton={true}
             hideCartButton={true}
             hidePublishCartButton={true}
             hideDeleteButton={true}
