@@ -78,8 +78,6 @@ export const VariationsDrawer = ({
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
   const [savedVariationIds, setSavedVariationIds] = useState<Set<string>>(new Set());
   const [filterText, setFilterText] = useState("");
-  const [editingVariationId, setEditingVariationId] = useState<string | null>(null);
-  const [editedTitle, setEditedTitle] = useState("");
   const [aspectRatioPreviewOpen, setAspectRatioPreviewOpen] = useState(false);
   const [previewingVariation, setPreviewingVariation] = useState<any>(null);
   
@@ -258,29 +256,14 @@ export const VariationsDrawer = ({
   };
 
   const handleEdit = async (variationId?: string) => {
-    // For videos page, enable inline title editing
-    if (pageContext === 'videos') {
-      const targetVariationId = variationId || selectedVariation?.id;
-      if (!targetVariationId) {
-        toast.error('No variation available to edit');
-        return;
-      }
-      
-      const variation = variations?.find(v => v.id === targetVariationId);
-      if (variation) {
-        setEditingVariationId(targetVariationId);
-        setEditedTitle(variation.title);
-      }
-      return;
-    }
-
-    // For my-templates page, navigate to template editor
+    // Require authentication
     if (!user) {
       toast.error('Please sign in to edit templates');
       onRequestAuth?.();
       return;
     }
     
+    // Get the target variation ID
     const targetVariationId = variationId || selectedVariation?.id;
     
     if (!targetVariationId) {
@@ -291,81 +274,46 @@ export const VariationsDrawer = ({
     const loadingToast = toast.loading('Opening editor...');
     
     try {
-      // Check if template already exists
-      const { data: existingTemplate } = await supabase
-        .from('user_templates')
-        .select('id')
-        .eq('user_id', user.id)
-        .eq('variation_id', targetVariationId)
-        .single();
-      
-      // Only create if it doesn't exist
-      if (!existingTemplate) {
-        const { error } = await supabase
+      // For videos page, ensure the variation is saved to user_templates before navigating
+      if (pageContext === 'videos') {
+        const { data: existingTemplate } = await supabase
           .from('user_templates')
-          .insert({
-            user_id: user.id,
-            variation_id: targetVariationId,
-            published: false
-          });
+          .select('id')
+          .eq('user_id', user.id)
+          .eq('variation_id', targetVariationId)
+          .maybeSingle();
         
-        if (error) throw error;
-        
-        setSavedVariationIds(prev => new Set([...prev, targetVariationId]));
+        // Create template entry if it doesn't exist
+        if (!existingTemplate) {
+          const variation = variations?.find(v => v.id === targetVariationId);
+          
+          const { error } = await supabase
+            .from('user_templates')
+            .insert({
+              user_id: user.id,
+              variation_id: targetVariationId,
+              custom_title: variation?.title || 'Untitled Template',
+              published: false
+            });
+          
+          if (error) throw error;
+          
+          // Update saved variations state
+          setSavedVariationIds(prev => new Set([...prev, targetVariationId]));
+        }
       }
       
       toast.dismiss(loadingToast);
       
-      // Navigate to template editor
+      // Navigate to template editor with referrer context
       navigate(`/template-editor/${targetVariationId}?from=${pageContext}`);
     } catch (error: any) {
       toast.dismiss(loadingToast);
-      toast.error('Failed to open editor');
       console.error('Error opening editor:', error);
+      toast.error(error.message || 'Failed to open editor');
     }
   };
 
-  const handleSaveTitle = async () => {
-    if (!editingVariationId || !editedTitle.trim()) return;
-    
-    const loadingToast = toast.loading('Updating title...');
-    
-    try {
-      const { error } = await supabase
-        .from('video_variations')
-        .update({ title: editedTitle.trim() })
-        .eq('id', editingVariationId);
-      
-      if (error) throw error;
-      
-      // Refetch variations to show updated title
-      await refetch();
-      
-      // Invalidate first variation query to update video cards immediately
-      if (video?.id) {
-        queryClient.invalidateQueries({ queryKey: ['first-variation', video.id] });
-      }
-      
-      // Update selected variation if it's the one being edited
-      if (selectedVariation?.id === editingVariationId) {
-        setSelectedVariation({ ...selectedVariation, title: editedTitle.trim() });
-      }
-      
-      toast.dismiss(loadingToast);
-      toast.success('Title updated successfully');
-      setEditingVariationId(null);
-      setEditedTitle('');
-    } catch (error: any) {
-      toast.dismiss(loadingToast);
-      toast.error('Failed to update title');
-      console.error('Error updating title:', error);
-    }
-  };
-
-  const handleCancelEdit = () => {
-    setEditingVariationId(null);
-    setEditedTitle('');
-  };
 
   const handlePreviewAspectRatio = (variation: any) => {
     setPreviewingVariation(variation);
@@ -708,11 +656,6 @@ export const VariationsDrawer = ({
                       videoId={video.id}
                       hidePrice={true}
                       pageContext={pageContext}
-                      isEditing={editingVariationId === variation.id}
-                      editedTitle={editingVariationId === variation.id ? editedTitle : undefined}
-                      onTitleChange={setEditedTitle}
-                      onSaveTitle={handleSaveTitle}
-                      onCancelEdit={handleCancelEdit}
                       onPreviewAspectRatio={handlePreviewAspectRatio}
                     />
                   );
