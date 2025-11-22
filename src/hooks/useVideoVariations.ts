@@ -21,6 +21,8 @@ export const useVideoVariations = (videoId: number) => {
         .from('video_variations')
         .select('*')
         .eq('video_id', videoId)
+        .not('video_url', 'is', null)
+        .neq('video_url', '')
         .order('created_at', { ascending: true });
 
       if (error) {
