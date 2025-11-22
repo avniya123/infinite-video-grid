@@ -371,6 +371,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       videoImage={video.image}
                       isCurrentlyPlaying={currentVideo?.id === variation.id}
                       onPlay={handlePlayVariation}
+                      onEdit={hideEditButton ? undefined : handleEdit}
                       hideShareButtons={hideShareButton}
                     />
                   ))}
