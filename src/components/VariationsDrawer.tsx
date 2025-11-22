@@ -4,11 +4,11 @@ import { DrawerCloseButton } from '@/components/DrawerCloseButton';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { VideoItem } from "@/types/video";
-import { ShoppingCart, Edit, Play, Bookmark, Filter, X } from "lucide-react";
+import { ShoppingCart, Edit, Play, Bookmark } from "lucide-react";
 import { useVideoVariations } from "@/hooks/useVideoVariations";
 import { useVideoPlayer } from "@/hooks/useVideoPlayer";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useState, useEffect, useMemo } from "react";
+import { useState, useEffect } from "react";
 import { VideoPlayer } from "@/components/VideoPlayer";
 import { VariationCard } from "@/components/VariationCard";
 import { supabase } from "@/integrations/supabase/client";
@@ -62,8 +62,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
   const [isCreatingDefault, setIsCreatingDefault] = useState(false);
   const [savedVariationIds, setSavedVariationIds] = useState<Set<string>>(new Set());
-  const [selectedPlatforms, setSelectedPlatforms] = useState<Set<string>>(new Set());
-  const [selectedAspectRatios, setSelectedAspectRatios] = useState<Set<string>>(new Set());
   
   const {
     videoRef,
@@ -295,79 +293,6 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
     }
   };
 
-  // Get unique platforms and aspect ratios from variations
-  const { availablePlatforms, availableAspectRatios } = useMemo(() => {
-    if (!variations) return { availablePlatforms: [], availableAspectRatios: [] };
-    
-    const platformsSet = new Set<string>();
-    const aspectRatiosSet = new Set<string>();
-    
-    variations.forEach(v => {
-      if (v.platforms) {
-        v.platforms.forEach(p => platformsSet.add(p));
-      }
-      if (v.aspect_ratio) {
-        aspectRatiosSet.add(v.aspect_ratio);
-      }
-    });
-    
-    return {
-      availablePlatforms: Array.from(platformsSet),
-      availableAspectRatios: Array.from(aspectRatiosSet)
-    };
-  }, [variations]);
-
-  // Filter variations based on selected filters
-  const filteredVariations = useMemo(() => {
-    if (!variations) return [];
-    
-    return variations.filter(variation => {
-      // Platform filter
-      if (selectedPlatforms.size > 0) {
-        const hasPlatform = variation.platforms?.some(p => selectedPlatforms.has(p));
-        if (!hasPlatform) return false;
-      }
-      
-      // Aspect ratio filter
-      if (selectedAspectRatios.size > 0) {
-        if (!selectedAspectRatios.has(variation.aspect_ratio)) return false;
-      }
-      
-      return true;
-    });
-  }, [variations, selectedPlatforms, selectedAspectRatios]);
-
-  const togglePlatform = (platform: string) => {
-    setSelectedPlatforms(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(platform)) {
-        newSet.delete(platform);
-      } else {
-        newSet.add(platform);
-      }
-      return newSet;
-    });
-  };
-
-  const toggleAspectRatio = (ratio: string) => {
-    setSelectedAspectRatios(prev => {
-      const newSet = new Set(prev);
-      if (newSet.has(ratio)) {
-        newSet.delete(ratio);
-      } else {
-        newSet.add(ratio);
-      }
-      return newSet;
-    });
-  };
-
-  const clearFilters = () => {
-    setSelectedPlatforms(new Set());
-    setSelectedAspectRatios(new Set());
-  };
-
-  const hasActiveFilters = selectedPlatforms.size > 0 || selectedAspectRatios.size > 0;
-
   // Don't render if no video
   if (!video) return null;
 
@@ -470,75 +395,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
         {/* Scrollable Variations List */}
         <div className="flex-1 overflow-y-auto px-6 py-5">
-          <div className="space-y-4">
-            {/* Filters Section */}
-            {!isLoading && !isCreatingDefault && variations && variations.length > 0 && (
-              <div className="space-y-3">
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Filter className="h-4 w-4 text-muted-foreground" />
-                    <span className="text-sm font-semibold text-foreground">Filters</span>
-                    {hasActiveFilters && (
-                      <Badge variant="secondary" className="text-xs">
-                        {selectedPlatforms.size + selectedAspectRatios.size}
-                      </Badge>
-                    )}
-                  </div>
-                  {hasActiveFilters && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={clearFilters}
-                      className="h-7 text-xs gap-1"
-                    >
-                      <X className="h-3 w-3" />
-                      Clear
-                    </Button>
-                  )}
-                </div>
-
-                {/* Platform Filters */}
-                {availablePlatforms.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">Platforms</p>
-                    <div className="flex flex-wrap gap-2">
-                      {availablePlatforms.map(platform => (
-                        <Badge
-                          key={platform}
-                          variant={selectedPlatforms.has(platform) ? "default" : "outline"}
-                          className="cursor-pointer transition-all hover:scale-105"
-                          onClick={() => togglePlatform(platform)}
-                        >
-                          {platform}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                {/* Aspect Ratio Filters */}
-                {availableAspectRatios.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-medium text-muted-foreground">Aspect Ratio</p>
-                    <div className="flex flex-wrap gap-2">
-                      {availableAspectRatios.map(ratio => (
-                        <Badge
-                          key={ratio}
-                          variant={selectedAspectRatios.has(ratio) ? "default" : "outline"}
-                          className="cursor-pointer transition-all hover:scale-105"
-                          onClick={() => toggleAspectRatio(ratio)}
-                        >
-                          {ratio}
-                        </Badge>
-                      ))}
-                    </div>
-                  </div>
-                )}
-
-                <div className="border-t border-border/50 pt-3" />
-              </div>
-            )}
-
+          <div className="space-y-3">
             {isLoading || isCreatingDefault ? (
               <>
                 <div className="flex items-center justify-between py-2">
@@ -568,7 +425,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       Stock Video #{video.id}
                     </Badge>
                     <p className="text-sm font-semibold text-muted-foreground">
-                      {hasActiveFilters ? `${filteredVariations.length} / ${variations.length}` : variations.length} {variations.length === 1 ? 'variation' : 'variations'}
+                      {variations.length} {variations.length === 1 ? 'variation' : 'variations'} available
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
@@ -586,39 +443,26 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
 
                 {/* Variations */}
                 <div className="space-y-2">
-                  {filteredVariations.length > 0 ? (
-                    filteredVariations.map((variation) => {
-                      const pricing = calculateVariationPrice(variation.duration);
-                      return (
-                        <VariationCard
-                          key={variation.id}
-                          variation={variation}
-                          videoTitle={video.title}
-                          videoImage={video.image}
-                          isCurrentlyPlaying={currentVideo?.id === variation.id}
-                          onPlay={handlePlayVariation}
-                          onEdit={hideEditButton ? undefined : handleEdit}
-                          hideShareButtons={hideShareButton}
-                          isSaved={savedVariationIds.has(variation.id)}
-                          price={pricing.price}
-                          mrp={pricing.mrp}
-                          discount={pricing.discount}
-                          videoId={video.id}
-                        />
-                      );
-                    })
-                  ) : (
-                    <div className="text-center py-8 px-4">
-                      <div className="w-12 h-12 mx-auto mb-3 rounded-full bg-muted/50 flex items-center justify-center">
-                        <Filter className="h-6 w-6 text-muted-foreground" />
-                      </div>
-                      <p className="text-sm font-medium text-foreground mb-1">No variations match your filters</p>
-                      <p className="text-xs text-muted-foreground mb-3">Try adjusting your filter selection</p>
-                      <Button variant="outline" size="sm" onClick={clearFilters}>
-                        Clear Filters
-                      </Button>
-                    </div>
-                  )}
+                {variations.map((variation) => {
+                  const pricing = calculateVariationPrice(variation.duration);
+                  return (
+                    <VariationCard
+                      key={variation.id}
+                      variation={variation}
+                      videoTitle={video.title}
+                      videoImage={video.image}
+                      isCurrentlyPlaying={currentVideo?.id === variation.id}
+                      onPlay={handlePlayVariation}
+                      onEdit={hideEditButton ? undefined : handleEdit}
+                      hideShareButtons={hideShareButton}
+                      isSaved={savedVariationIds.has(variation.id)}
+                      price={pricing.price}
+                      mrp={pricing.mrp}
+                      discount={pricing.discount}
+                      videoId={video.id}
+                    />
+                  );
+                })}
                 </div>
               </>
             ) : (
