@@ -24,12 +24,9 @@ interface VideoCardProps {
   showPrice?: boolean;
   hideVariationsShareButton?: boolean;
   hideVariationsEditButton?: boolean;
-  onAddToCart?: (variationId: string) => void;
-  showCartButton?: boolean;
-  publishedVariationIds?: Set<string>;
 }
 
-export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showPrice = true, hideVariationsShareButton = false, hideVariationsEditButton = false, onAddToCart, showCartButton = false, publishedVariationIds }: VideoCardProps) {
+export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect, showShareButton = true, showPrice = true, hideVariationsShareButton = false, hideVariationsEditButton = false }: VideoCardProps) {
   const [imageLoaded, setImageLoaded] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
   const [showVideo, setShowVideo] = useState(false);
@@ -345,9 +342,6 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
         onRequestAuth={() => setAuthDrawerOpen(true)}
         hideShareButton={hideVariationsShareButton}
         hideEditButton={hideVariationsEditButton}
-        onAddToCart={onAddToCart}
-        showCartButton={showCartButton}
-        publishedVariationIds={publishedVariationIds}
       />
 
       <VideoPlayerDrawer

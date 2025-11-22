@@ -201,74 +201,6 @@ export default function MyTemplates() {
     }
   };
 
-  const handleAddVariationToCart = async (variationId: string) => {
-    if (!user) {
-      toast.error('Please sign in to add to publish cart');
-      return;
-    }
-
-    // Check if template already exists for this variation
-    const existingTemplate = templates.find(t => t.variation_id === variationId);
-    
-    if (existingTemplate) {
-      // Update existing template to be published
-      await handleAddToPublishCart(existingTemplate.id);
-      return;
-    }
-
-    // Create new template and mark as published
-    const previousTemplates = [...templates];
-    toast.success('Adding variation to publish cart...', { duration: 1000 });
-    
-    try {
-      const { data, error } = await supabase
-        .from('user_templates')
-        .insert({
-          user_id: user.id,
-          variation_id: variationId,
-          published: true,
-          published_at: new Date().toISOString()
-        })
-        .select(`
-          id,
-          variation_id,
-          custom_title,
-          notes,
-          created_at,
-          published,
-          published_at,
-          video_variations (
-            id,
-            title,
-            thumbnail_url,
-            video_url,
-            duration,
-            aspect_ratio,
-            platforms,
-            video_id
-          )
-        `)
-        .single();
-
-      if (error) throw error;
-
-      // Add to templates list
-      if (data) {
-        setTemplates([data as UserTemplate, ...previousTemplates]);
-        toast.success('Variation added to publish cart', {
-          duration: 4000,
-          action: {
-            label: 'View Cart',
-            onClick: () => navigate('/publish-cart')
-          }
-        });
-      }
-    } catch (error: any) {
-      toast.error('Failed to add variation to publish cart');
-      console.error('Error adding variation to cart:', error);
-    }
-  };
-
   const handleRemoveFromPublishCart = async (templateId: string) => {
     // Optimistic update
     const previousTemplates = [...templates];
@@ -451,11 +383,6 @@ export default function MyTemplates() {
   // Calculate publish cart count
   const publishCartCount = useMemo(() => {
     return templates.filter(t => t.published).length;
-  }, [templates]);
-
-  // Get set of published variation IDs
-  const publishedVariationIds = useMemo(() => {
-    return new Set(templates.filter(t => t.published).map(t => t.variation_id));
   }, [templates]);
 
   if (loading) {
@@ -766,9 +693,6 @@ export default function MyTemplates() {
                         video={video}
                         showShareButton={false}
                         hideVariationsShareButton={true}
-                        onAddToCart={handleAddVariationToCart}
-                        showCartButton={true}
-                        publishedVariationIds={publishedVariationIds}
                       />
                       
                       {/* Publish Card Badge - Top Center */}
