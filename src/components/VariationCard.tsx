@@ -111,15 +111,6 @@ export const VariationCard = ({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {!hideShareButtons && (
-          <div onClick={(e) => e.stopPropagation()}>
-            <SocialShareButtons
-              title={`${videoTitle} - ${variation.title}`}
-              description={`Check out this video variation: ${variation.title}`}
-              url={window.location.href}
-            />
-          </div>
-        )}
         {onEdit && (
           <Button
             variant="outline"
@@ -133,6 +124,15 @@ export const VariationCard = ({
             <EditIcon className="h-3.5 w-3.5" />
             Edit
           </Button>
+        )}
+        {!hideShareButtons && (
+          <div onClick={(e) => e.stopPropagation()}>
+            <SocialShareButtons
+              title={`${videoTitle} - ${variation.title}`}
+              description={`Check out this video variation: ${variation.title}`}
+              url={window.location.href}
+            />
+          </div>
         )}
       </div>
     </div>
