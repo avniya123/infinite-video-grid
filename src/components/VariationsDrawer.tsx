@@ -423,14 +423,9 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
               <>
                 {/* Variations Header */}
                 <div className="flex items-center justify-between py-2">
-                  <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs font-semibold">
-                      Stock Video #{video.id}
-                    </Badge>
-                    <p className="text-sm font-semibold text-muted-foreground">
-                      {variations.length} {variations.length === 1 ? 'variation' : 'variations'} available
-                    </p>
-                  </div>
+                  <p className="text-sm font-semibold text-muted-foreground">
+                    {variations.length} {variations.length === 1 ? 'variation' : 'variations'} available
+                  </p>
                   <div className="flex items-center gap-2">
                     {savedVariationIds.size > 0 && (
                       <Badge className="text-xs bg-emerald-500 hover:bg-emerald-600 text-white font-medium gap-1">
