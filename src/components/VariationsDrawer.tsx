@@ -15,6 +15,7 @@ import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
+import { useQueryClient } from "@tanstack/react-query";
 
 // Price calculation based on duration (seconds)
 const calculateVariationPrice = (duration: string, basePricePerSecond: number = 10) => {
@@ -69,6 +70,7 @@ export const VariationsDrawer = ({
   onVariationAddedToCart 
 }: VariationsDrawerProps) => {
   const navigate = useNavigate();
+  const queryClient = useQueryClient();
   const { data: variations, isLoading, refetch } = useVideoVariations(video?.id || 0);
   const [user, setUser] = useState<any>(null);
   const [selectedVariation, setSelectedVariation] = useState<any>(null);
@@ -340,6 +342,11 @@ export const VariationsDrawer = ({
       
       // Refetch variations to show updated title
       await refetch();
+      
+      // Invalidate first variation query to update video cards immediately
+      if (video?.id) {
+        queryClient.invalidateQueries({ queryKey: ['first-variation', video.id] });
+      }
       
       // Update selected variation if it's the one being edited
       if (selectedVariation?.id === editingVariationId) {

@@ -11,6 +11,7 @@ import { VideoPlayerDrawer } from '@/components/VideoPlayerDrawer';
 import { ProgressiveImage } from '@/components/ProgressiveImage';
 import { AuthDrawer } from '@/components/AuthDrawer';
 import { useVideoVariationsCount } from '@/hooks/useVideoVariationsCount';
+import { useFirstVariation } from '@/hooks/useFirstVariation';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { getVideoAspectRatio, formatAspectRatio } from '@/utils/aspectRatios';
 
@@ -41,6 +42,11 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   const hoverTimerRef = useRef<NodeJS.Timeout | null>(null);
   
   const { data: variationsCount = 0 } = useVideoVariationsCount(video.id);
+  const { data: firstVariation } = useFirstVariation(video.id);
+
+  // Use first variation's data if available, otherwise fallback to video data
+  const displayTitle = firstVariation?.title || video.title;
+  const displayThumbnail = firstVariation?.thumbnail_url || video.image;
 
   // Get aspect ratio information using the utility system
   const aspectRatioInfo = getVideoAspectRatio(video);
@@ -163,8 +169,8 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
           {/* Progressive Image with Blur-up and Lazy Loading */}
           <ProgressiveImage
-            src={video.image}
-            alt={video.title}
+            src={displayThumbnail}
+            alt={displayTitle}
             className={`w-full h-full transition-opacity duration-300 ease-out ${videoReady ? 'opacity-0' : 'opacity-100'}`}
             onLoad={() => setImageLoaded(true)}
             lazy={true}
@@ -296,14 +302,14 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <h3 className="text-xs font-bold text-white line-clamp-1 mb-1 leading-tight cursor-help">
-                        {video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}
+                        {displayTitle.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}
                       </h3>
                     </TooltipTrigger>
                     <TooltipContent 
                       className="max-w-xs bg-gray-900 text-white border-gray-700 animate-in fade-in-0 zoom-in-95 duration-200"
                       sideOffset={5}
                     >
-                      <p className="text-sm font-medium animate-fade-in">{video.title.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}</p>
+                      <p className="text-sm font-medium animate-fade-in">{displayTitle.replace(/\s*-\s*Stock Video #\d+.*$/i, '')}</p>
                       <p className="text-xs text-gray-400 mt-1.5 animate-fade-in" style={{ animationDelay: '50ms' }}>Stock Video #{video.id}</p>
                       <p className="text-xs text-gray-400 animate-fade-in" style={{ animationDelay: '100ms' }}>Price: ₹{video.price}</p>
                     </TooltipContent>
