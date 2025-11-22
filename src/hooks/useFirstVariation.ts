@@ -7,7 +7,7 @@ export const useFirstVariation = (videoId: number) => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('video_variations')
-        .select('id, title, thumbnail_url, video_url')
+        .select('id, title, thumbnail_url, video_url, aspect_ratio, duration')
         .eq('video_id', videoId)
         .not('video_url', 'is', null)
         .neq('video_url', '')

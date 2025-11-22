@@ -47,10 +47,29 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
   // Use first variation's data if available, otherwise fallback to video data
   const displayTitle = firstVariation?.title || video.title;
   const displayThumbnail = firstVariation?.thumbnail_url || video.image;
+  const displayVideoUrl = firstVariation?.video_url || video.videoUrl;
+  const displayAspectRatio = firstVariation?.aspect_ratio || video.orientation;
+  const displayDuration = firstVariation?.duration || video.duration;
 
-  // Get aspect ratio information using the utility system
-  const aspectRatioInfo = getVideoAspectRatio(video);
-  const aspectRatio = aspectRatioInfo.ratio;
+  // Parse aspect ratio to get numeric value for AspectRatio component
+  const parseAspectRatio = (ar: string): number => {
+    if (ar.includes(':')) {
+      const [w, h] = ar.split(':').map(Number);
+      return w / h;
+    }
+    // Fallback based on orientation
+    if (ar === '16:9' || ar.toLowerCase().includes('landscape')) return 16/9;
+    if (ar === '9:16' || ar.toLowerCase().includes('portrait')) return 9/16;
+    if (ar === '1:1' || ar.toLowerCase().includes('square')) return 1;
+    return 16/9; // Default
+  };
+
+  const aspectRatio = parseAspectRatio(displayAspectRatio);
+  
+  // Create aspect ratio label for display
+  const aspectRatioLabel = displayAspectRatio.includes(':') ? displayAspectRatio : 
+    (displayAspectRatio === 'Landscape' ? '16:9' : 
+     displayAspectRatio === 'Portrait' ? '9:16' : '1:1');
 
   // Lazy loading with Intersection Observer
   useEffect(() => {
@@ -84,11 +103,11 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
 
   // Preload video metadata when in view for instant playback
   useEffect(() => {
-    if (isInView && videoRef.current && video.videoUrl) {
+    if (isInView && videoRef.current && displayVideoUrl) {
       // Preload just the metadata for faster startup
       videoRef.current.load();
     }
-  }, [isInView, video.videoUrl]);
+  }, [isInView, displayVideoUrl]);
 
   const handlePlayClick = (e: React.MouseEvent) => {
     e.stopPropagation();
@@ -182,10 +201,10 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           )}
 
           {/* Video Preview on Hover - Only load when in view */}
-          {isInView && (
+          {isInView && displayVideoUrl && (
             <video
               ref={videoRef}
-              src={video.videoUrl}
+              src={displayVideoUrl}
               className={`w-full h-full object-cover absolute inset-0 transition-opacity duration-200 ease-out ${videoReady ? 'opacity-100' : 'opacity-0 pointer-events-none'}`}
               style={{
                 objectFit: 'cover',
@@ -315,9 +334,9 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                {/* Caption with Aspect Ratio */}
+                {/* Caption with Aspect Ratio and Duration */}
                 <p className="text-[9px] text-gray-400 font-medium leading-tight">
-                  Stock Video #{video.id} • {aspectRatioInfo.label}
+                  Stock Video #{video.id} • {aspectRatioLabel} • {displayDuration}
                 </p>
               </div>
               
