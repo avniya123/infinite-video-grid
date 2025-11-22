@@ -38,6 +38,7 @@ interface VariationCardProps {
   onTitleChange?: (title: string) => void;
   onSaveTitle?: () => void;
   onCancelEdit?: () => void;
+  onPreviewAspectRatio?: (variation: VideoVariation) => void;
 }
 
 export const VariationCard = ({
@@ -62,6 +63,7 @@ export const VariationCard = ({
   onTitleChange,
   onSaveTitle,
   onCancelEdit,
+  onPreviewAspectRatio,
 }: VariationCardProps) => {
   return (
     <div
@@ -173,7 +175,15 @@ export const VariationCard = ({
             {variation.duration}
           </Badge>
           {variation.aspect_ratio && (
-            <Badge variant="outline" className="text-xs text-muted-foreground border-muted font-medium">
+            <Badge 
+              variant="outline" 
+              className="text-xs text-muted-foreground border-muted font-medium cursor-pointer hover:bg-accent transition-colors"
+              onClick={(e) => {
+                e.stopPropagation();
+                onPreviewAspectRatio?.(variation);
+              }}
+              title="Click to preview in different aspect ratios"
+            >
               {variation.aspect_ratio}
             </Badge>
           )}

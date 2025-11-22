@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import { useNavigate } from "react-router-dom";
 import { Input } from "@/components/ui/input";
 import { useQueryClient } from "@tanstack/react-query";
+import { AspectRatioPreview } from "@/components/AspectRatioPreview";
 
 // Price calculation based on duration (seconds)
 const calculateVariationPrice = (duration: string, basePricePerSecond: number = 10) => {
@@ -79,6 +80,8 @@ export const VariationsDrawer = ({
   const [filterText, setFilterText] = useState("");
   const [editingVariationId, setEditingVariationId] = useState<string | null>(null);
   const [editedTitle, setEditedTitle] = useState("");
+  const [aspectRatioPreviewOpen, setAspectRatioPreviewOpen] = useState(false);
+  const [previewingVariation, setPreviewingVariation] = useState<any>(null);
   
   const {
     videoRef,
@@ -367,6 +370,42 @@ export const VariationsDrawer = ({
   const handleCancelEdit = () => {
     setEditingVariationId(null);
     setEditedTitle('');
+  };
+
+  const handlePreviewAspectRatio = (variation: any) => {
+    setPreviewingVariation(variation);
+    setAspectRatioPreviewOpen(true);
+  };
+
+  const handleAspectRatioSelect = async (newRatio: string) => {
+    if (!previewingVariation) return;
+
+    const loadingToast = toast.loading('Updating aspect ratio...');
+
+    try {
+      const { error } = await supabase
+        .from('video_variations')
+        .update({ aspect_ratio: newRatio })
+        .eq('id', previewingVariation.id);
+
+      if (error) throw error;
+
+      // Refetch variations
+      await refetch();
+
+      // Invalidate first variation query
+      if (video?.id) {
+        queryClient.invalidateQueries({ queryKey: ['first-variation', video.id] });
+      }
+
+      toast.dismiss(loadingToast);
+      toast.success('Aspect ratio updated successfully');
+      setAspectRatioPreviewOpen(false);
+    } catch (error: any) {
+      toast.dismiss(loadingToast);
+      toast.error('Failed to update aspect ratio');
+      console.error('Error updating aspect ratio:', error);
+    }
   };
 
   const handleDeleteVariation = async (variationId: string) => {
@@ -679,6 +718,7 @@ export const VariationsDrawer = ({
                       onTitleChange={setEditedTitle}
                       onSaveTitle={handleSaveTitle}
                       onCancelEdit={handleCancelEdit}
+                      onPreviewAspectRatio={handlePreviewAspectRatio}
                     />
                   );
                 })})()}
@@ -698,6 +738,15 @@ export const VariationsDrawer = ({
           </div>
         </div>
       </SheetContent>
+
+      <AspectRatioPreview
+        videoUrl={previewingVariation?.video_url || ''}
+        thumbnailUrl={previewingVariation?.thumbnail_url || video?.image}
+        currentAspectRatio={previewingVariation?.aspect_ratio || '16:9'}
+        open={aspectRatioPreviewOpen}
+        onOpenChange={setAspectRatioPreviewOpen}
+        onSelect={handleAspectRatioSelect}
+      />
     </Sheet>
   );
 };
