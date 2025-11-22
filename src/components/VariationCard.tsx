@@ -28,6 +28,7 @@ interface VariationCardProps {
   discount?: string;
   isSaved?: boolean;
   videoId?: number;
+  hidePrice?: boolean;
 }
 
 export const VariationCard = ({
@@ -43,6 +44,7 @@ export const VariationCard = ({
   discount,
   isSaved = false,
   videoId,
+  hidePrice = false,
 }: VariationCardProps) => {
   return (
     <div
@@ -104,7 +106,7 @@ export const VariationCard = ({
           </div>
           
           {/* Price Section */}
-          {price !== undefined && mrp !== undefined && (
+          {!hidePrice && price !== undefined && mrp !== undefined && (
             <div className="flex-shrink-0 text-right">
               <div className="text-base font-bold text-foreground">₹ {price}</div>
               <div className="flex items-center gap-1 mt-0.5">
@@ -150,7 +152,7 @@ export const VariationCard = ({
 
       {/* Action Buttons */}
       <div className="flex items-center gap-2 flex-shrink-0">
-        {onEdit && (
+        {!hidePrice && onEdit && (
           <Button
             variant="outline"
             size="sm"
@@ -164,7 +166,7 @@ export const VariationCard = ({
             Edit
           </Button>
         )}
-        {!hideShareButtons && (
+        {!hidePrice && !hideShareButtons && (
           <div onClick={(e) => e.stopPropagation()}>
             <SocialShareButtons
               title={`${videoTitle} - ${variation.title}`}
