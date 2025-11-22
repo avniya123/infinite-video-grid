@@ -1,4 +1,4 @@
-import { Play, Volume2, Edit as EditIcon } from "lucide-react";
+import { Play, Volume2, Edit as EditIcon, Instagram, Youtube, Facebook, Video, Music2 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { ProgressiveImage } from "@/components/ProgressiveImage";
 import { GenerateThumbnailButton } from "@/components/GenerateThumbnailButton";
@@ -6,6 +6,16 @@ import { UploadThumbnailButton } from "@/components/UploadThumbnailButton";
 import { SocialShareButtons } from "@/components/SocialShareButtons";
 import { VideoVariation } from "@/hooks/useVideoVariations";
 import { Button } from "@/components/ui/button";
+
+// Platform icon mapping
+const getPlatformIcon = (platform: string) => {
+  const platformLower = platform.toLowerCase();
+  if (platformLower.includes('instagram') || platformLower.includes('reels')) return Instagram;
+  if (platformLower.includes('youtube') || platformLower.includes('shorts')) return Youtube;
+  if (platformLower.includes('facebook')) return Facebook;
+  if (platformLower.includes('tiktok')) return Music2;
+  return Video; // Default icon
+};
 
 interface VariationCardProps {
   variation: VideoVariation;
@@ -103,15 +113,19 @@ export const VariationCard = ({
         {variation.platforms && variation.platforms.length > 0 && (
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-[10px] text-muted-foreground/70 font-medium">Platforms:</span>
-            {variation.platforms.map((platform) => (
-              <Badge
-                key={platform}
-                variant="outline"
-                className="text-[10px] px-1.5 py-0 text-muted-foreground/80 border-muted/50 font-medium"
-              >
-                {platform}
-              </Badge>
-            ))}
+            {variation.platforms.map((platform) => {
+              const PlatformIcon = getPlatformIcon(platform);
+              return (
+                <Badge
+                  key={platform}
+                  variant="outline"
+                  className="text-[10px] px-1.5 py-0.5 text-muted-foreground/80 border-muted/50 font-medium flex items-center gap-1"
+                >
+                  <PlatformIcon className="h-2.5 w-2.5" />
+                  {platform}
+                </Badge>
+              );
+            })}
           </div>
         )}
       </div>
