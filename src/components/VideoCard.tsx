@@ -217,16 +217,16 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
           )}
 
           {/* Variations Count Badge - Position left if no selection checkbox */}
-          {!onSelect && (
+          {!onSelect && variationsCount > 0 && (
             <Badge className="absolute top-3 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-              01/{String(variationsCount).padStart(2, '0')}
+              {variationsCount} {variationsCount === 1 ? 'variation' : 'variations'}
             </Badge>
           )}
           
           {/* Variations Count Badge - Position below checkbox if selection is enabled */}
-          {onSelect && (
+          {onSelect && variationsCount > 0 && (
             <Badge className="absolute top-12 left-3 bg-white/95 dark:bg-gray-800/95 text-gray-800 dark:text-white font-semibold text-[10px] px-2 py-1 shadow-lg z-10 border border-gray-200 dark:border-gray-700">
-              01/{String(variationsCount).padStart(2, '0')}
+              {variationsCount} {variationsCount === 1 ? 'variation' : 'variations'}
             </Badge>
           )}
 
