@@ -167,38 +167,39 @@ export default function ProfileDrawer({ open, onOpenChange, onProfileUpdate }: P
     setLocationData(null);
     
     try {
-      const { data, error } = await supabase.functions.invoke('lookup-pincode', {
+      const result = await supabase.functions.invoke('lookup-pincode', {
         body: { pincode, countryCode: selectedCountry }
       }).catch(err => {
-        // Catch network/invocation errors
         console.error('Function invoke error:', err);
-        return { data: null, error: { message: 'Network error' } };
+        return { data: null, error: err };
       });
 
-      if (error) {
-        const errorMsg = error.message?.toLowerCase() || '';
-        if (errorMsg.includes('pincode not found') || errorMsg.includes('404')) {
-          setLocationError(`Pincode not found for ${selectedCountry}. Please check the pincode and country.`);
-        } else {
-          setLocationError('Unable to verify pincode. Please continue with manual entry.');
-        }
+      // Handle 404 or not found cases gracefully
+      if (result.error) {
+        console.log('Pincode lookup error:', result.error);
+        setLocationError('Pincode not found. You can continue with manual entry.');
+        setLocationLoading(false);
         return;
       }
 
-      if (data?.error) {
-        setLocationError(`Pincode not found for ${selectedCountry}. Please check the pincode and country.`);
+      // Check if the response has an error property (404 from edge function)
+      if (result.data?.error) {
+        console.log('Pincode not found in database');
+        setLocationError('Pincode not found. You can continue with manual entry.');
+        setLocationLoading(false);
         return;
       }
 
-      if (data?.city && data?.state && data?.country) {
-        setLocationData(data);
+      // Success case
+      if (result.data?.city && result.data?.state && result.data?.country) {
+        setLocationData(result.data);
         setLocationError('');
       } else {
-        setLocationError('Unable to verify pincode. Please continue with manual entry.');
+        setLocationError('Unable to verify pincode. You can continue with manual entry.');
       }
     } catch (error: any) {
-      console.error('Error looking up pincode:', error);
-      setLocationError('Unable to verify pincode. Please continue with manual entry.');
+      console.error('Unexpected error in pincode lookup:', error);
+      setLocationError('Unable to verify pincode. You can continue with manual entry.');
     } finally {
       setLocationLoading(false);
     }
