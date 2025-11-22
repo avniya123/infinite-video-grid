@@ -105,9 +105,15 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
   }, [isLoading, variations, open, video, isCreatingDefault, refetch]);
 
   const handlePlayVariation = (variation: any) => {
+    // Only play variations with valid video_url (already filtered by useVideoVariations)
+    if (!variation.video_url) {
+      toast.error('Video not available for this variation');
+      return;
+    }
+    
     setSelectedVariation(variation);
     playVideo({
-      url: variation.video_url || video.videoUrl || '',
+      url: variation.video_url,
       title: `${video.title} - ${variation.title}`,
       thumbnail: variation.thumbnail_url || video.image,
       id: variation.id
