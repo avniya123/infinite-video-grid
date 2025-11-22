@@ -158,7 +158,7 @@ export const VariationCard = ({
       </div>
 
       {/* Context-Aware Action Buttons */}
-      {!hideShareButtons && pageContext === 'videos' && onEdit && (
+      {pageContext === 'videos' && onEdit && (
         <div className="flex-shrink-0" onClick={(e) => e.stopPropagation()}>
           <Button
             size="sm"
