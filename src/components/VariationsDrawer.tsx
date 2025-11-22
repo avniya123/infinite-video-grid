@@ -425,7 +425,7 @@ export const VariationsDrawer = ({ video, open, onOpenChange, onRequestAuth, hid
                       Stock Video #{video.id}
                     </Badge>
                     <p className="text-sm font-semibold text-muted-foreground">
-                      {String(variations.length).padStart(2, '0')}/{String(variations.length).padStart(2, '0')} variations available
+                      {variations.length} {variations.length === 1 ? 'variation' : 'variations'} available
                     </p>
                   </div>
                   <div className="flex items-center gap-2">
