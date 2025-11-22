@@ -360,6 +360,8 @@ const Index = () => {
                   video={video}
                   onPlay={handlePlayVideo}
                   onClick={handleVideoClick}
+                  hideVariationsShareButton={false}
+                  hideVariationsEditButton={false}
                 />
               </div>
             ))}
@@ -440,6 +442,8 @@ const Index = () => {
             open={!!listVariationsOpen}
             onOpenChange={(open) => !open && setListVariationsOpen(null)}
             onRequestAuth={() => setListAuthDrawerOpen(true)}
+            hideShareButton={false}
+            hideEditButton={false}
           />
         )}
 
