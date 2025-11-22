@@ -14,7 +14,6 @@ import { toast } from 'sonner';
 import { Loader2, ArrowLeft, Trash2, Edit, FileVideo, X, Search, Columns3, List, ShoppingCart } from 'lucide-react';
 import { FilterDrawer } from '@/components/FilterDrawer';
 import { FilterChips } from '@/components/FilterChips';
-import { VariationsDrawer } from '@/components/VariationsDrawer';
 import type { User as SupabaseUser } from '@supabase/supabase-js';
 import type { VideoItem } from '@/types/video';
 
@@ -78,10 +77,6 @@ export default function MyTemplates() {
   const [selectedDurations, setSelectedDurations] = useState<string[]>([]);
   const [selectedMainCategory, setSelectedMainCategory] = useState<string | null>(null);
   const [selectedSubcategory, setSelectedSubcategory] = useState<string | null>(null);
-  
-  // Variations drawer state
-  const [selectedVideoForVariations, setSelectedVideoForVariations] = useState<VideoItem | null>(null);
-  const [isVariationsDrawerOpen, setIsVariationsDrawerOpen] = useState(false);
 
   useEffect(() => {
     checkUser();
@@ -320,11 +315,6 @@ export default function MyTemplates() {
 
   const hasActiveFilters = Boolean(searchQuery || selectedAspectRatios.length > 0 || 
     selectedDurations.length > 0 || selectedMainCategory || selectedSubcategory || publishFilter !== 'all');
-
-  const handleOpenVariations = (video: VideoItem) => {
-    setSelectedVideoForVariations(video);
-    setIsVariationsDrawerOpen(true);
-  };
 
   // Filter and sort templates
   const filteredAndSortedTemplates = useMemo(() => {
@@ -697,13 +687,11 @@ export default function MyTemplates() {
                     style={{ animationDelay: `${index * 0.05}s` }}
                   >
                     <div className="relative group mb-5">
-                      <div onClick={() => handleOpenVariations(video)} className="cursor-pointer">
-                        <VideoCard
-                          video={video}
-                          showShareButton={false}
-                          hideVariationsShareButton={true}
-                        />
-                      </div>
+                      <VideoCard
+                        video={video}
+                        showShareButton={false}
+                        hideVariationsShareButton={true}
+                      />
                       
                       {/* Publish Card Badge - Top Center */}
                       {template.published && (
@@ -801,7 +789,7 @@ export default function MyTemplates() {
                     key={template.id} 
                     className="group flex gap-4 bg-card p-4 rounded-lg shadow-[var(--shadow-card)] hover:shadow-[var(--shadow-card-hover)] transition-all duration-300 animate-fade-in"
                   >
-                    <div className="relative w-64 flex-shrink-0 cursor-pointer" onClick={() => handleOpenVariations(video)}>
+                    <div className="relative w-64 flex-shrink-0">
                       <img
                         src={video.image}
                         alt={video.title}
@@ -888,15 +876,6 @@ export default function MyTemplates() {
           )}
         </main>
       )}
-
-      {/* Variations Drawer */}
-      <VariationsDrawer
-        video={selectedVideoForVariations}
-        open={isVariationsDrawerOpen}
-        onOpenChange={setIsVariationsDrawerOpen}
-        hideShareButton={true}
-        hideEditButton={false}
-      />
 
     </div>
   );
