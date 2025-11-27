@@ -349,9 +349,16 @@ export function VideoCard({ video, onPlay, onClick, isSelected = false, onSelect
                   </Tooltip>
                 </TooltipProvider>
                 {/* Caption with Aspect Ratio and Duration */}
-                <p className="text-[9px] text-gray-400 font-medium leading-tight">
-                  Stock Video #{video.id} • {aspectRatioLabel} • {displayDuration}
-                </p>
+                <div className="space-y-0.5">
+                  <p className="text-[9px] text-gray-400 font-medium leading-tight">
+                    Stock Video #{video.id} • {aspectRatioLabel} • {displayDuration}
+                  </p>
+                  {(video.mainCategory || video.subcategory) && (
+                    <p className="text-[9px] text-gray-400 font-medium leading-tight">
+                      {video.mainCategory}{video.subcategory && ` • ${video.subcategory}`}
+                    </p>
+                  )}
+                </div>
               </div>
               
               {/* Right: View Button */}

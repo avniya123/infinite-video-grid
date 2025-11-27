@@ -47,6 +47,15 @@ export const VideoListView = ({ videos, onPlayVideo, onViewVariations, onAuthReq
           <div className="flex-1 space-y-3">
             <div>
               <h3 className="font-semibold text-lg mb-1">{video.title}</h3>
+              <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground mb-1">
+                <span>Stock Video #{video.id}</span>
+                {(video.mainCategory || video.subcategory) && (
+                  <>
+                    <span>•</span>
+                    <span>{video.mainCategory}{video.subcategory && ` • ${video.subcategory}`}</span>
+                  </>
+                )}
+              </div>
               <div className="flex flex-wrap items-center gap-2 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <Clock className="h-3 w-3" />
